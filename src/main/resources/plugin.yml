@@ -1,0 +1,12 @@
+name: ${name}
+main: ${main}
+version: ${version}
+author: ${author}
+api-version: 1.17
+
+softdepend:
+  - PlaceholderAPI
+  - MCKotlin-Paper
+
+libraries:
+  - org.jetbrains.kotlin:kotlin-stdlib:2.0.0

@@ -1,0 +1,26 @@
+[versions]
+
+paperweight = "1.7.1"
+kotlin = "2.0.0"
+updateVersions = "0.51.0"
+shadow = "8.1.8"
+paperApi = "1.20.4-R0.1-SNAPSHOT"
+placeholderapi = "2.11.6"
+ktgui = "2.4.2-alpha"
+runPaper = "2.2.4"
+
+[libraries]
+
+kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
+kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
+paper-api = { module = "io.papermc.paper:paper-api", version.ref = "paperApi" }
+placeholder-api = { module = "me.clip:placeholderapi", version.ref = "placeholderapi" }
+ktgui = { module = "com.mattmx:ktgui", version.ref = "ktgui" }
+
+[plugins]
+
+kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+updateDeps = { id = "com.github.ben-manes.versions", version.ref = "updateVersions" }
+shadow = { id = "io.github.goooler.shadow", version.ref = "shadow" }
+paperweight = { id = "io.papermc.paperweight.userdev", version.ref = "paperweight" }
+runPaper = { id = "xyz.jpenilla.run-paper", version.ref = "runPaper" }

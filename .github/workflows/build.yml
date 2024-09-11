@@ -1,0 +1,26 @@
+# Will simply build your gradle project.
+name: Build Gradle Project
+
+# This action will run every time you push to the "dev" branch.
+on:
+  push:
+    branches:
+    - "dev"
+
+jobs:
+  build-project:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 17
+      - name: Checkout project sources
+        uses: actions/checkout@v3
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+      - name: Run build with Gradle Wrapper
+        run: ./gradlew build
