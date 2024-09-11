@@ -1,6 +1,8 @@
 package com.mattmx.nametags;
 
 import com.mattmx.nametags.entity.NameTagEntity;
+import com.mattmx.nametags.entity.trait.RefreshTrait;
+import com.mattmx.nametags.event.NameTagEntityCreateEvent;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerChangedWorldEvent;

@@ -3,13 +3,11 @@ package com.mattmx.nametags;
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.util.Vector3f;
 import com.mattmx.nametags.entity.NameTagEntityManager;
-import com.mattmx.nametags.entity.TestImplTrait;
 import me.tofaa.entitylib.APIConfig;
 import me.tofaa.entitylib.EntityLib;
 import me.tofaa.entitylib.meta.display.AbstractDisplayMeta;
 import me.tofaa.entitylib.spigot.SpigotEntityLibPlatform;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -54,9 +52,6 @@ public class NameTags extends JavaPlugin {
             .registerListener(packetListener);
 
         Bukkit.getPluginManager().registerEvents(eventsListener, this);
-
-        // DEBUG
-        Bukkit.getPluginManager().registerEvents(new TestImplTrait(), this);
     }
 
     public @NotNull NameTagEntityManager getEntityManager() {

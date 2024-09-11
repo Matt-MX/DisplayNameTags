@@ -46,6 +46,10 @@ public class TraitHolder {
         return null;
     }
 
+    public <T extends Trait> boolean hasTrait(@NotNull Class<T> traitClazz) {
+        return map.containsKey(traitClazz);
+    }
+
     public void destroy() {
         for (Trait trait : map.values()) {
             trait.onDestroy();

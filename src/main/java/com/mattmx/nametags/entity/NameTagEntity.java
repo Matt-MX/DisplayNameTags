@@ -12,6 +12,7 @@ import me.tofaa.entitylib.meta.display.TextDisplayMeta;
 import me.tofaa.entitylib.wrapper.WrapperEntity;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.TextDisplay;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
@@ -50,6 +51,10 @@ public class NameTagEntity {
 
     public void modify(Consumer<TextDisplayMeta> consumer) {
         this.passenger.consumeEntityMeta(TextDisplayMeta.class, consumer);
+    }
+
+    public @NotNull TextDisplayMeta getMeta() {
+        return this.passenger.getEntityMeta(TextDisplayMeta.class);
     }
 
     public void sendPassengerPacket(Player target) {
