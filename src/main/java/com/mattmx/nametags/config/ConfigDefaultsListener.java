@@ -33,7 +33,7 @@ public class ConfigDefaultsListener implements Listener {
             .getOrAddTrait(RefreshTrait.class, () ->
                 RefreshTrait.ofSeconds(
                     NameTags.getInstance(),
-                    2L,
+                    1L,
                     (entity) -> {
                         TextDisplayMetaConfiguration.applyMeta(section(), entity.getMeta());
                         TextDisplayMetaConfiguration.applyTextMeta(section(), entity.getMeta(), player, player);
