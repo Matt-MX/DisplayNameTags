@@ -2,9 +2,9 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 
 plugins {
+    id("java")
     alias(libs.plugins.runPaper)
     alias(libs.plugins.paperweight) apply true
-    alias(libs.plugins.kotlinJvm) apply true
     alias(libs.plugins.shadow) apply true
 
     `maven-publish`
@@ -23,13 +23,16 @@ repositories {
     maven("https://repo.dmulloy2.net/repository/public/")
     maven("https://jitpack.io")
     maven("https://repo.extendedclip.com/content/repositories/placeholderapi/")
+    maven("https://repo.codemc.io/repository/maven-releases/")
+    maven("https://maven.evokegames.gg/snapshots")
 }
 
 dependencies {
     paperweight.paperDevBundle(libs.versions.paperApi.get())
 
-    compileOnly(libs.ktgui)
     compileOnly(libs.placeholder.api)
+    compileOnly(libs.packet.events)
+    implementation(libs.entity.lib)
 }
 
 tasks {
@@ -82,9 +85,9 @@ java {
     withSourcesJar()
 }
 
-kotlin {
-    jvmToolchain(17)
-}
+//kotlin {
+//    jvmToolchain(21)
+//}
 
 sourceSets["main"].resources.srcDir("src/resources/")
 

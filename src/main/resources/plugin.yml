@@ -4,9 +4,8 @@ version: ${version}
 author: ${author}
 api-version: 1.17
 
+depend:
+  - packetevents
+
 softdepend:
   - PlaceholderAPI
-  - MCKotlin-Paper
-
-libraries:
-  - org.jetbrains.kotlin:kotlin-stdlib:2.0.0
