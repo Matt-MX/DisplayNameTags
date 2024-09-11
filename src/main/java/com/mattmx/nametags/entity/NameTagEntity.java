@@ -6,6 +6,7 @@ import com.github.retrooper.packetevents.protocol.world.Location;
 import com.github.retrooper.packetevents.wrapper.PacketWrapper;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSetPassengers;
 import com.mattmx.nametags.NameTags;
+import com.mattmx.nametags.entity.trait.TraitHolder;
 import io.github.retrooper.packetevents.util.SpigotConversionUtil;
 import me.tofaa.entitylib.meta.display.TextDisplayMeta;
 import me.tofaa.entitylib.wrapper.WrapperEntity;
@@ -13,18 +14,16 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class NameTagEntity {
+    private final @NotNull TraitHolder traits = new TraitHolder(this);
     private final @NotNull Entity bukkitEntity;
     private final @NotNull WrapperEntity passenger;
 
-    public NameTagEntity(@NotNull Entity entity, @NotNull BiConsumer<Entity, TextDisplayMeta> defaults) {
+    public NameTagEntity(@NotNull Entity entity) {
         this.bukkitEntity = entity;
         this.passenger = new WrapperEntity(EntityTypes.TEXT_DISPLAY);
-
-        this.passenger.consumeEntityMeta(TextDisplayMeta.class, (meta) -> defaults.accept(entity, meta));
 
         initialize();
     }
@@ -43,6 +42,10 @@ public class NameTagEntity {
             }
 
         }
+    }
+
+    public @NotNull TraitHolder getTraits() {
+        return traits;
     }
 
     public void modify(Consumer<TextDisplayMeta> consumer) {
@@ -80,5 +83,10 @@ public class NameTagEntity {
         this.passenger.setLocation(location);
 
         return location;
+    }
+
+    public void destroy() {
+        this.passenger.despawn();
+        this.getTraits().destroy();
     }
 }

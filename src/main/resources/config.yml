@@ -1,5 +1,5 @@
 # Should the player see their own tag?
-show-self: true
+show-self: false
 
 shift:
   # Should we modify the opacity of the tag's background when the player shifts?

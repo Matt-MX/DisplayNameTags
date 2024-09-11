@@ -1,8 +1,6 @@
 package com.mattmx.nametags;
 
-import com.github.retrooper.packetevents.protocol.world.Location;
 import com.mattmx.nametags.entity.NameTagEntity;
-import io.github.retrooper.packetevents.util.SpigotConversionUtil;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
@@ -14,7 +12,7 @@ public class EventsListener implements Listener {
 
     @EventHandler
     public void onPlayerJoin(@NotNull PlayerJoinEvent event) {
-        NameTagEntity nameTagEntity = NameTags.getInstance()
+        NameTags.getInstance()
             .getEntityManager()
             .getOrCreateNameTagEntity(event.getPlayer());
     }
@@ -27,11 +25,11 @@ public class EventsListener implements Listener {
 
         if (entity == null) return;
 
-        entity.getPassenger().despawn();
+        entity.destroy();
     }
 
     @EventHandler
-    public void onChangeWorld(@NotNull PlayerChangedWorldEvent event) {
+    public void onPlayerChangeWorld(@NotNull PlayerChangedWorldEvent event) {
         NameTagEntity nameTagEntity = NameTags.getInstance()
             .getEntityManager()
             .getNameTagEntity(event.getPlayer());
@@ -39,5 +37,11 @@ public class EventsListener implements Listener {
         if (nameTagEntity == null) return;
 
         nameTagEntity.updateLocation();
+
+        if (NameTags.getInstance().getConfig().getBoolean("show-self", false)) {
+            nameTagEntity.getPassenger().removeViewer(nameTagEntity.getBukkitEntity().getUniqueId());
+            nameTagEntity.getPassenger().addViewer(nameTagEntity.getBukkitEntity().getUniqueId());
+            nameTagEntity.sendPassengerPacket(event.getPlayer());
+        }
     }
 }

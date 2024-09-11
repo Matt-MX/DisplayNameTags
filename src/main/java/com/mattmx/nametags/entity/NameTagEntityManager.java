@@ -1,8 +1,10 @@
 package com.mattmx.nametags.entity;
 
 import com.github.retrooper.packetevents.util.Vector3f;
+import com.mattmx.nametags.event.NameTagEntityCreateEvent;
 import me.tofaa.entitylib.meta.display.AbstractDisplayMeta;
 import me.tofaa.entitylib.meta.display.TextDisplayMeta;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -22,7 +24,15 @@ public class NameTagEntityManager {
     };
 
     public @NotNull NameTagEntity getOrCreateNameTagEntity(@NotNull Entity entity) {
-        return entityMap.computeIfAbsent(entity.getUniqueId(), (k) -> new NameTagEntity(entity, defaultProvider));
+        return entityMap.computeIfAbsent(entity.getUniqueId(), (k) -> {
+            NameTagEntity newEntity = new NameTagEntity(entity);
+
+            newEntity.getPassenger().consumeEntityMeta(TextDisplayMeta.class, (meta) -> defaultProvider.accept(entity, meta));
+
+            Bukkit.getPluginManager().callEvent(new NameTagEntityCreateEvent(newEntity));
+
+            return newEntity;
+        });
     }
 
     public @Nullable NameTagEntity removeEntity(@NotNull Entity entity) {
