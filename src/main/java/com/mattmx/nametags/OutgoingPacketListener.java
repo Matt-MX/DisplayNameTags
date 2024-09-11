@@ -10,9 +10,9 @@ import org.jetbrains.annotations.NotNull;
 
 public class OutgoingPacketListener extends PacketListenerAbstract {
 
-    private NameTags plugin;
+    private final @NotNull NameTags plugin;
 
-    public OutgoingPacketListener(NameTags plugin) {
+    public OutgoingPacketListener(@NotNull NameTags plugin) {
         this.plugin = plugin;
     }
 

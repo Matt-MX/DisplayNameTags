@@ -2,42 +2,54 @@ package com.mattmx.nametags.entity;
 
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.protocol.entity.type.EntityTypes;
-import com.github.retrooper.packetevents.util.Vector3f;
+import com.github.retrooper.packetevents.protocol.world.Location;
 import com.github.retrooper.packetevents.wrapper.PacketWrapper;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSetPassengers;
+import com.mattmx.nametags.NameTags;
 import io.github.retrooper.packetevents.util.SpigotConversionUtil;
-import me.tofaa.entitylib.meta.display.AbstractDisplayMeta;
 import me.tofaa.entitylib.meta.display.TextDisplayMeta;
 import me.tofaa.entitylib.wrapper.WrapperEntity;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.Color;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 public class NameTagEntity {
     private final @NotNull Entity bukkitEntity;
     private final @NotNull WrapperEntity passenger;
 
-    public NameTagEntity(@NotNull Entity entity) {
+    public NameTagEntity(@NotNull Entity entity, @NotNull BiConsumer<Entity, TextDisplayMeta> defaults) {
         this.bukkitEntity = entity;
         this.passenger = new WrapperEntity(EntityTypes.TEXT_DISPLAY);
 
-        applyDefaultMeta();
+        this.passenger.consumeEntityMeta(TextDisplayMeta.class, (meta) -> defaults.accept(entity, meta));
+
+        initialize();
     }
 
-    public void applyDefaultMeta() {
-        this.passenger.consumeEntityMeta(TextDisplayMeta.class, (meta) -> {
-            meta.setText(bukkitEntity.name());
-            meta.setTranslation(new Vector3f(0f, 0.25f, 0f));
-            meta.setBackgroundColor(Color.RED.setAlpha(50).asARGB());
-            meta.setBillboardConstraints(AbstractDisplayMeta.BillboardConstraints.CENTER);
-        });
+    public void initialize() {
+        Location location = SpigotConversionUtil.fromBukkitLocation(this.bukkitEntity.getLocation());
 
-        this.passenger.spawn(SpigotConversionUtil.fromBukkitLocation(this.bukkitEntity.getLocation()));
+        location.setPitch(0f);
+        location.setYaw(0f);
+
+        this.passenger.spawn(location);
 
         // TODO: Send packet to player if enabled in config
+        if (NameTags.getInstance().getConfig().getBoolean("show-self", false)) {
+
+            if (this.bukkitEntity instanceof Player self) {
+                this.passenger.addViewer(self.getUniqueId());
+                sendPassengerPacket(self);
+            }
+
+        }
+    }
+
+    public void modify(Consumer<TextDisplayMeta> consumer) {
+        this.passenger.consumeEntityMeta(TextDisplayMeta.class, consumer);
     }
 
     public void sendPassengerPacket(Player target) {

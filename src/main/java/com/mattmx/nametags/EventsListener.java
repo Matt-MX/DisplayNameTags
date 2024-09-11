@@ -40,6 +40,9 @@ public class EventsListener implements Listener {
 
         Location newLocation = SpigotConversionUtil.fromBukkitLocation(event.getPlayer().getLocation());
 
+        newLocation.setPitch(0f);
+        newLocation.setYaw(0f);
+
         nameTagEntity.getPassenger().setLocation(newLocation);
     }
 }

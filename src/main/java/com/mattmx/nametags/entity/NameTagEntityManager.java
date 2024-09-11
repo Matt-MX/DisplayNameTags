@@ -1,17 +1,28 @@
 package com.mattmx.nametags.entity;
 
+import com.github.retrooper.packetevents.util.Vector3f;
+import me.tofaa.entitylib.meta.display.AbstractDisplayMeta;
+import me.tofaa.entitylib.meta.display.TextDisplayMeta;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiConsumer;
 
 public class NameTagEntityManager {
-    private final ConcurrentHashMap<UUID, NameTagEntity> entityMap = new ConcurrentHashMap<>();
+    private final @NotNull ConcurrentHashMap<UUID, NameTagEntity> entityMap = new ConcurrentHashMap<>();
+    private @NotNull BiConsumer<Entity, TextDisplayMeta> defaultProvider = (entity, meta) -> {
+        // Default minecraft name-tag appearance
+        meta.setText(entity.name());
+        meta.setTranslation(new Vector3f(0f, 0.2f, 0f));
+        meta.setBillboardConstraints(AbstractDisplayMeta.BillboardConstraints.CENTER);
+        meta.setViewRange(50f);
+    };
 
     public @NotNull NameTagEntity getOrCreateNameTagEntity(@NotNull Entity entity) {
-        return entityMap.computeIfAbsent(entity.getUniqueId(), (k) -> new NameTagEntity(entity));
+        return entityMap.computeIfAbsent(entity.getUniqueId(), (k) -> new NameTagEntity(entity, defaultProvider));
     }
 
     public @Nullable NameTagEntity removeEntity(@NotNull Entity entity) {
@@ -32,5 +43,9 @@ public class NameTagEntityManager {
             .filter((e) -> e.getBukkitEntity().getEntityId() == entityId)
             .findFirst()
             .orElse(null);
+    }
+
+    public void setDefaultProvider(@NotNull BiConsumer<Entity, TextDisplayMeta> consumer) {
+        this.defaultProvider = consumer;
     }
 }
