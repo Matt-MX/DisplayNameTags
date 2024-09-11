@@ -29,7 +29,8 @@ public class NameTags extends JavaPlugin {
         saveDefaultConfig();
 
         entityManager.setDefaultProvider((entity, meta) -> {
-            meta.setText(LegacyComponentSerializer.legacyAmpersand()
+            meta.setText(LegacyComponentSerializer
+                .legacyAmpersand()
                 .deserialize(String.format("&f%s %s &#35A7FF0ms\n&#F3FFBDSome sub text", entity.getName(), "▪"))
             );
             meta.setBillboardConstraints(AbstractDisplayMeta.BillboardConstraints.VERTICAL);

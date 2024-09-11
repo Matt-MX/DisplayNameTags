@@ -30,10 +30,7 @@ public class NameTagEntity {
     }
 
     public void initialize() {
-        Location location = SpigotConversionUtil.fromBukkitLocation(this.bukkitEntity.getLocation());
-
-        location.setPitch(0f);
-        location.setYaw(0f);
+        Location location = updateLocation();
 
         this.passenger.spawn(location);
 
@@ -62,11 +59,26 @@ public class NameTagEntity {
         return new WrapperPlayServerSetPassengers(bukkitEntity.getEntityId(), new int[]{this.passenger.getEntityId()});
     }
 
-    public Entity getBukkitEntity() {
+    public @NotNull Entity getBukkitEntity() {
         return bukkitEntity;
     }
 
-    public WrapperEntity getPassenger() {
+    public @NotNull WrapperEntity getPassenger() {
         return passenger;
+    }
+
+    public @NotNull Location updateLocation() {
+        Location location = SpigotConversionUtil.fromBukkitLocation(
+            bukkitEntity.getLocation()
+                .clone()
+                .add(0.0, bukkitEntity.getBoundingBox().getMaxY(), 0.0)
+        );
+
+        location.setYaw(0f);
+        location.setPitch(0f);
+
+        this.passenger.setLocation(location);
+
+        return location;
     }
 }

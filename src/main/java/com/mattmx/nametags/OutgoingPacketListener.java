@@ -3,6 +3,7 @@ package com.mattmx.nametags;
 import com.github.retrooper.packetevents.event.PacketListenerAbstract;
 import com.github.retrooper.packetevents.event.PacketSendEvent;
 import com.github.retrooper.packetevents.protocol.packettype.PacketType;
+import com.github.retrooper.packetevents.protocol.world.Location;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerDestroyEntities;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSpawnEntity;
 import com.mattmx.nametags.entity.NameTagEntity;
@@ -28,10 +29,14 @@ public class OutgoingPacketListener extends PacketListenerAbstract {
 
                 if (nameTagEntity == null) return;
 
-                // Add passenger and send to player (Delayed so this packet sends first)
+                // Add passenger and send to player after
                 event.getTasksAfterSend().add(() -> {
+                    // To avoid name tag moving when being added
+                    nameTagEntity.updateLocation();
+
                     nameTagEntity.getPassenger().removeViewer(event.getUser());
                     nameTagEntity.getPassenger().addViewer(event.getUser());
+
                     event.getUser().sendPacket(nameTagEntity.getPassengersPacket());
                 });
             }
