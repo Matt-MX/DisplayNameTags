@@ -7,3 +7,13 @@ shift:
   opacity: 80
 
 defaults:
+  # If not enabled then plugin simulates vanilla name tags
+  enabled: true
+  text:
+    - "<white>%player_name%</white>"
+    - "<blue>%player_ping%ms</blue>"
+  background: black
+  billboard: center
+  shadow: true
+  range: default
+  gap: 0.2

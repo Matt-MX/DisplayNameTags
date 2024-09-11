@@ -1,21 +1,22 @@
 package com.mattmx.nametags;
 
 import com.github.retrooper.packetevents.PacketEvents;
-import com.github.retrooper.packetevents.util.Vector3f;
+import com.mattmx.nametags.config.ConfigDefaultsListener;
 import com.mattmx.nametags.entity.NameTagEntityManager;
 import me.tofaa.entitylib.APIConfig;
 import me.tofaa.entitylib.EntityLib;
-import me.tofaa.entitylib.meta.display.AbstractDisplayMeta;
 import me.tofaa.entitylib.spigot.SpigotEntityLibPlatform;
-import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Objects;
+
 public class NameTags extends JavaPlugin {
-    private static final int TRANSPARENT = Color.fromARGB(0).asARGB();
+    public static final int TRANSPARENT = Color.fromARGB(0).asARGB();
     private static @Nullable NameTags instance;
 
     private NameTagEntityManager entityManager;
@@ -28,15 +29,10 @@ public class NameTags extends JavaPlugin {
         entityManager = new NameTagEntityManager();
         saveDefaultConfig();
 
-        entityManager.setDefaultProvider((entity, meta) -> {
-            // Set to empty since we're updating automatically
-            meta.setText(Component.empty());
-            meta.setBillboardConstraints(AbstractDisplayMeta.BillboardConstraints.VERTICAL);
-            meta.setTranslation(new Vector3f(0f, 0.2f, 0f));
-            meta.setBackgroundColor(TRANSPARENT);
-            meta.setShadow(true);
-            meta.setViewRange(50f);
-        });
+        ConfigurationSection defaults = getConfig().getConfigurationSection("defaults");
+        if (defaults != null && defaults.getBoolean("enabled")) {
+            Bukkit.getPluginManager().registerEvents(new ConfigDefaultsListener(this), this);
+        }
 
         SpigotEntityLibPlatform platform = new SpigotEntityLibPlatform(this);
         APIConfig settings = new APIConfig(PacketEvents.getAPI())
@@ -52,6 +48,8 @@ public class NameTags extends JavaPlugin {
             .registerListener(packetListener);
 
         Bukkit.getPluginManager().registerEvents(eventsListener, this);
+
+        Objects.requireNonNull(Bukkit.getPluginCommand("nametags-reload")).setExecutor(new NameTagsCommand(this));
     }
 
     public @NotNull NameTagEntityManager getEntityManager() {

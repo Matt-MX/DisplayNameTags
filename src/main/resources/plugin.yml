@@ -9,3 +9,7 @@ depend:
 
 softdepend:
   - PlaceholderAPI
+
+commands:
+  nametags-reload:
+    description: Reload the config
