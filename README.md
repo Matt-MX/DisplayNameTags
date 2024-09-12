@@ -4,7 +4,6 @@
 
 </div>
 
----
 Replace your players' boring old name tags with customizable ones based on 
 text displays!
 
