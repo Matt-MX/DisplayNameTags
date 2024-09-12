@@ -17,10 +17,10 @@ public class ConfigDefaultsListener implements Listener {
 
         NameTags.getInstance()
             .getEntityManager()
-            .setDefaultProvider(((entity, meta) -> TextDisplayMetaConfiguration.applyMeta(section(), meta)));
+            .setDefaultProvider(((entity, meta) -> TextDisplayMetaConfiguration.applyMeta(defaultSection(), meta)));
     }
 
-    private ConfigurationSection section() {
+    private ConfigurationSection defaultSection() {
         return plugin.getConfig().getConfigurationSection("defaults");
     }
 
@@ -35,8 +35,19 @@ public class ConfigDefaultsListener implements Listener {
                     NameTags.getInstance(),
                     1L,
                     (entity) -> {
-                        TextDisplayMetaConfiguration.applyMeta(section(), entity.getMeta());
-                        TextDisplayMetaConfiguration.applyTextMeta(section(), entity.getMeta(), player, player);
+                        TextDisplayMetaConfiguration.applyMeta(defaultSection(), entity.getMeta());
+                        TextDisplayMetaConfiguration.applyTextMeta(defaultSection(), entity.getMeta(), player, player);
+
+                        // TODO we should cache this stuff
+                        plugin.getGroups()
+                            .entrySet()
+                            .stream()
+                            .filter((e) -> player.hasPermission(e.getKey()))
+                            .forEach((e) -> {
+                                TextDisplayMetaConfiguration.applyMeta(e.getValue(), entity.getMeta());
+                                TextDisplayMetaConfiguration.applyTextMeta(e.getValue(), entity.getMeta(), player, player);
+                            });
+
                         entity.getPassenger().refresh();
                     }
                 )

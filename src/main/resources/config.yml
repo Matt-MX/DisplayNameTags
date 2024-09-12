@@ -17,3 +17,12 @@ defaults:
   shadow: true
   range: default
   gap: 0.2
+
+groups:
+  # e.g nametags.groups.vip
+  vip:
+    background: gray
+  mvp:
+    background: green
+  staff:
+    background: red

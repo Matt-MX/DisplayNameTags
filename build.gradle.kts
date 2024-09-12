@@ -76,6 +76,7 @@ tasks {
             hangar("ViaVersion", "5.0.1")
             hangar("ViaBackwards", "5.0.1")
             hangar("PlaceholderAPI", "2.11.6")
+            url("https://download.luckperms.net/1556/bukkit/loader/LuckPerms-Bukkit-5.4.141.jar")
         }
     }
 }
