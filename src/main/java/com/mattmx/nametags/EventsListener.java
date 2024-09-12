@@ -1,13 +1,17 @@
 package com.mattmx.nametags;
 
+import com.mattmx.nametags.config.TextDisplayMetaConfiguration;
 import com.mattmx.nametags.entity.NameTagEntity;
 import com.mattmx.nametags.entity.trait.RefreshTrait;
+import com.mattmx.nametags.entity.trait.SneakTrait;
 import com.mattmx.nametags.event.NameTagEntityCreateEvent;
+import org.bukkit.Color;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.jetbrains.annotations.NotNull;
 
 public class EventsListener implements Listener {
@@ -45,5 +49,22 @@ public class EventsListener implements Listener {
             nameTagEntity.getPassenger().addViewer(nameTagEntity.getBukkitEntity().getUniqueId());
             nameTagEntity.sendPassengerPacket(event.getPlayer());
         }
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onPlayerSneak(@NotNull PlayerToggleSneakEvent event) {
+        if (!NameTags.getInstance().getConfig().getBoolean("sneak.enabled")) {
+            return;
+        }
+
+        NameTagEntity nameTagEntity = NameTags.getInstance()
+            .getEntityManager()
+            .getNameTagEntity(event.getPlayer());
+
+        if (nameTagEntity == null) return;
+
+        nameTagEntity.getTraits()
+            .getOrAddTrait(SneakTrait.class, SneakTrait::new)
+            .updateSneak(event.isSneaking());
     }
 }

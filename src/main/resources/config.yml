@@ -1,10 +1,10 @@
 # Should the player see their own tag?
 show-self: false
 
-shift:
+sneak:
   # Should we modify the opacity of the tag's background when the player shifts?
   enabled: true
-  opacity: 80
+  opacity: 70
 
 defaults:
   # If not enabled then plugin simulates vanilla name tags
