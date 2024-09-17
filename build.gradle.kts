@@ -36,9 +36,6 @@ dependencies {
 }
 
 tasks {
-    base {
-        archivesName = id
-    }
 
     withType<ProcessResources> {
         val props = mapOf(
@@ -65,7 +62,7 @@ tasks {
     }
 
     assemble {
-        dependsOn("reobfJar")
+        dependsOn(reobfJar)
     }
 
     runServer {
@@ -82,13 +79,13 @@ tasks {
 }
 
 java {
-    withJavadocJar()
+//    withJavadocJar()
     withSourcesJar()
-}
 
-//kotlin {
-//    jvmToolchain(21)
-//}
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
 
 sourceSets["main"].resources.srcDir("src/resources/")
 
