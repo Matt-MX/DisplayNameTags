@@ -34,6 +34,7 @@ public class RefreshTrait extends Trait {
 
     @Override
     public void onDestroy() {
+        setPaused(true);
         task.cancel();
     }
 
