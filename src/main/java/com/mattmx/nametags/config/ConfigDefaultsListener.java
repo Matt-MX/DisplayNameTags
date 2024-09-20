@@ -17,7 +17,10 @@ public class ConfigDefaultsListener implements Listener {
 
         NameTags.getInstance()
             .getEntityManager()
-            .setDefaultProvider(((entity, meta) -> TextDisplayMetaConfiguration.applyMeta(defaultSection(), meta)));
+            .setDefaultProvider(((entity, meta) -> {
+                meta.setUseDefaultBackground(false);
+                TextDisplayMetaConfiguration.applyMeta(defaultSection(), meta);
+            }));
     }
 
     private ConfigurationSection defaultSection() {

@@ -49,9 +49,7 @@ public class TextDisplayMetaConfiguration {
                 background = NameTags.TRANSPARENT;
             }
 
-            if (background != to.getBackgroundColor()) {
-                to.setBackgroundColor(background);
-            }
+            to.setBackgroundColor(background);
         }
 
         String billboardString = section.getString("billboard");

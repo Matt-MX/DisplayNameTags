@@ -39,8 +39,8 @@ public class NameTags extends JavaPlugin {
 
         SpigotEntityLibPlatform platform = new SpigotEntityLibPlatform(this);
         APIConfig settings = new APIConfig(PacketEvents.getAPI())
-            .tickTickables()
-            .trackPlatformEntities()
+//            .tickTickables()
+//            .trackPlatformEntities()
             .usePlatformLogger();
 
         EntityLib.init(platform, settings);
@@ -88,9 +88,6 @@ public class NameTags extends JavaPlugin {
     }
 
     public static @NotNull NameTags getInstance() {
-        if (instance == null)
-            throw new RuntimeException("NameTags plugin has not initialized yet! Did you forget to depend?");
-
-        return instance;
+        return Objects.requireNonNull(instance, "NameTags plugin has not initialized yet! Did you forget to depend?");
     }
 }

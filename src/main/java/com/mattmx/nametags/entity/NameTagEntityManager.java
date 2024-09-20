@@ -1,6 +1,7 @@
 package com.mattmx.nametags.entity;
 
 import com.github.retrooper.packetevents.util.Vector3f;
+import com.mattmx.nametags.NameTags;
 import com.mattmx.nametags.event.NameTagEntityCreateEvent;
 import me.tofaa.entitylib.meta.display.AbstractDisplayMeta;
 import me.tofaa.entitylib.meta.display.TextDisplayMeta;
