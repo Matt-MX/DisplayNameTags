@@ -31,6 +31,7 @@ dependencies {
     paperweight.paperDevBundle(libs.versions.paperApi.get())
 
     compileOnly(libs.placeholder.api)
+    compileOnly(libs.tab.api)
     compileOnly(libs.packet.events)
     implementation(libs.entity.lib)
 }
