@@ -11,6 +11,7 @@ runPaper = "2.2.4"
 
 packetEvents = "2.4.0"
 entityLib = "2.4.9-SNAPSHOT"
+tab = "4.1.8"
 
 [libraries]
 
@@ -21,6 +22,7 @@ placeholder-api = { module = "me.clip:placeholderapi", version.ref = "placeholde
 ktgui = { module = "com.mattmx:ktgui", version.ref = "ktgui" }
 packet-events = { module = "com.github.retrooper:packetevents-spigot", version.ref = "packetEvents" }
 entity-lib = { module = "me.tofaa.entitylib:spigot", version.ref = "entityLib" }
+tab-api = { module = "com.github.NEZNAMY:TAB-API", version.ref = "tab" }
 
 [plugins]
 
