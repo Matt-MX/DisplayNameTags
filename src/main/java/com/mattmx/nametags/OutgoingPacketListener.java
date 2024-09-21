@@ -3,8 +3,10 @@ package com.mattmx.nametags;
 import com.github.retrooper.packetevents.event.PacketListenerAbstract;
 import com.github.retrooper.packetevents.event.PacketSendEvent;
 import com.github.retrooper.packetevents.protocol.packettype.PacketType;
-import com.github.retrooper.packetevents.protocol.world.Location;
+import com.github.retrooper.packetevents.protocol.potion.PotionTypes;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerDestroyEntities;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityEffect;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerRemoveEntityEffect;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSpawnEntity;
 import com.mattmx.nametags.entity.NameTagEntity;
 import org.jetbrains.annotations.NotNull;
@@ -50,6 +52,28 @@ public class OutgoingPacketListener extends PacketListenerAbstract {
 
                     nameTagEntity.getPassenger().removeViewer(event.getUser());
                 }
+            }
+            case PacketType.Play.Server.ENTITY_EFFECT -> {
+                final WrapperPlayServerEntityEffect packet = new WrapperPlayServerEntityEffect(event);
+
+                if (packet.getPotionType() != PotionTypes.INVISIBILITY) return;
+
+                final NameTagEntity nameTagEntity = plugin.getEntityManager().getNameTagEntityById(packet.getEntityId());
+
+                if (nameTagEntity == null) return;
+
+                nameTagEntity.updateVisibility(true);
+            }
+            case PacketType.Play.Server.REMOVE_ENTITY_EFFECT -> {
+                final WrapperPlayServerRemoveEntityEffect packet = new WrapperPlayServerRemoveEntityEffect(event);
+
+                if (packet.getPotionType() != PotionTypes.INVISIBILITY) return;
+
+                final NameTagEntity nameTagEntity = plugin.getEntityManager().getNameTagEntityById(packet.getEntityId());
+
+                if (nameTagEntity == null) return;
+
+                nameTagEntity.updateVisibility(false);
             }
             default -> {
             }

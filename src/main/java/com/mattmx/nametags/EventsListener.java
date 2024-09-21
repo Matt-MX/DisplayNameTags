@@ -18,9 +18,11 @@ public class EventsListener implements Listener {
 
     @EventHandler
     public void onPlayerJoin(@NotNull PlayerJoinEvent event) {
-        NameTags.getInstance()
+        final NameTagEntity tag = NameTags.getInstance()
             .getEntityManager()
             .getOrCreateNameTagEntity(event.getPlayer());
+
+        tag.updateVisibility();
     }
 
     @EventHandler

@@ -14,7 +14,7 @@ defaults:
     - "<blue>%player_ping%ms</blue>"
   background: black
   billboard: center
-  shadow: true
+  text-shadow: true
   range: default
   gap: 0.2
 
@@ -26,3 +26,8 @@ groups:
     background: green
   staff:
     background: red
+
+# Extra features
+extra:
+  # Should the name-tag be see-through if the player is glowing?
+  glowing-feature: true
