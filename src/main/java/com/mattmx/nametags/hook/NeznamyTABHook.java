@@ -2,14 +2,19 @@ package com.mattmx.nametags.hook;
 
 import com.mattmx.nametags.NameTags;
 import me.neznamy.tab.api.TabAPI;
+import me.neznamy.tab.api.TabPlayer;
+import me.neznamy.tab.api.event.player.PlayerLoadEvent;
 import me.neznamy.tab.api.nametag.NameTagManager;
 import me.neznamy.tab.api.nametag.UnlimitedNameTagManager;
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
+
 public class NeznamyTABHook {
 
     public static void inject(@NotNull NameTags plugin) {
+        // Execute on first tick since we don't know when TAB will be available.
         Bukkit.getScheduler().runTask(plugin, NeznamyTABHook::start);
     }
 
@@ -18,12 +23,38 @@ public class NeznamyTABHook {
 
         if (!isTab) return;
 
+        NameTags plugin = NameTags.getInstance();
         NameTagManager nameTagManager = TabAPI.getInstance().getNameTagManager();
 
-        if (nameTagManager instanceof UnlimitedNameTagManager unlimitedNameTagManager) {
-            // TODO(matt): Disable this module somehow?
-            // Maybe we need to use the TAB jar as a dependency, i don't think api exposes it.
+        if (nameTagManager instanceof UnlimitedNameTagManager) {
+            plugin.getLogger().warning("""
+                ⚠ TAB UnlimitedNameTags Mode detected! ⚠
+                                
+                DisplayNameTags will attempt to disable this module however
+                we strongly recommend disabling it in TAB's config.
+                                
+                This is because both TAB UNT mode and DisplayNameTags attempt
+                to use Passengers to sync positions of custom name tags.
+                Having both could cause some visual issues in-game.
+                                
+                Furthermore, the UnlimitedNameTags module is deprecated and
+                will be removed in 5.0.0
+                                
+                Read more at https://gist.github.com/NEZNAMY/f4cabf2fd9251a836b5eb877720dee5c
+                                
+                """);
+        } else {
+            plugin.getLogger().info("Attempting to override TAB's name tags");
         }
+
+        Objects.requireNonNull(TabAPI.getInstance().getEventBus())
+            .register(PlayerLoadEvent.class, (event) -> {
+                final TabPlayer tabPlayer = event.getPlayer();
+
+                TabAPI.getInstance()
+                    .getNameTagManager()
+                    .hideNameTag(tabPlayer);
+            });
     }
 
 }

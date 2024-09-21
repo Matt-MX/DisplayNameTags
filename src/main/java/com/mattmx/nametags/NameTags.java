@@ -3,6 +3,7 @@ package com.mattmx.nametags;
 import com.github.retrooper.packetevents.PacketEvents;
 import com.mattmx.nametags.config.ConfigDefaultsListener;
 import com.mattmx.nametags.entity.NameTagEntityManager;
+import com.mattmx.nametags.hook.NeznamyTABHook;
 import me.tofaa.entitylib.APIConfig;
 import me.tofaa.entitylib.EntityLib;
 import me.tofaa.entitylib.spigot.SpigotEntityLibPlatform;
@@ -48,6 +49,8 @@ public class NameTags extends JavaPlugin {
         PacketEvents.getAPI()
             .getEventManager()
             .registerListener(packetListener);
+
+        NeznamyTABHook.inject(this);
 
         Bukkit.getPluginManager().registerEvents(eventsListener, this);
 
