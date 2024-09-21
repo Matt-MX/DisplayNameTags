@@ -3,6 +3,7 @@ package com.mattmx.nametags.config;
 import com.mattmx.nametags.NameTags;
 import com.mattmx.nametags.entity.trait.RefreshTrait;
 import com.mattmx.nametags.event.NameTagEntityCreateEvent;
+import me.tofaa.entitylib.meta.display.AbstractDisplayMeta;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -52,6 +53,11 @@ public class ConfigDefaultsListener implements Listener {
                             });
 
                         entity.updateVisibility();
+
+                        if (entity.getMeta().getBillboardConstraints() == AbstractDisplayMeta.BillboardConstraints.CENTER) {
+                            // Look passenger down to remove debug getting in the way
+                            entity.getPassenger().rotateHead(0f, 90f);
+                        }
 
                         entity.getPassenger().refresh();
                     }
