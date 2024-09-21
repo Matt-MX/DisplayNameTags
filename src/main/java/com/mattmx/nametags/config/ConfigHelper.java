@@ -1,9 +1,11 @@
 package com.mattmx.nametags.config;
 
+import me.tofaa.entitylib.meta.display.AbstractDisplayMeta;
 import org.bukkit.configuration.ConfigurationSection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -35,6 +37,12 @@ public class ConfigHelper {
         optional.ifPresentOrElse(take, orElse);
 
         return optional.orElse(null);
+    }
+
+    public static <T extends Enum<T>> @Nullable T getEnumByNameOrNull(Class<T> enums, @NotNull String name) {
+        return Arrays.stream(enums.getEnumConstants())
+            .filter((e) -> e.name().equalsIgnoreCase(name))
+            .findFirst().orElse(null);
     }
 
 }

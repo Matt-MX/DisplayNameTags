@@ -38,9 +38,7 @@ public class TextDisplayMetaConfiguration {
 
     public static void applyMeta(@NotNull ConfigurationSection section, @NotNull TextDisplayMeta to) {
 
-        String backgroundColor = section.getString("background");
-
-        if (backgroundColor != null) {
+        ConfigHelper.takeIfPresent(section, "background", section::getString, (backgroundColor) -> {
             int background;
 
             if (backgroundColor.equalsIgnoreCase("transparent")) {
@@ -54,15 +52,20 @@ public class TextDisplayMetaConfiguration {
             }
 
             to.setBackgroundColor(background);
-        }
+        });
 
-        String billboardString = section.getString("billboard");
-        if (billboardString != null) {
-            AbstractDisplayMeta.BillboardConstraints billboard = AbstractDisplayMeta.BillboardConstraints.valueOf(billboardString.toUpperCase(Locale.ROOT));
+        ConfigHelper.takeIfPresent(section, "billboard", section::getString, (billboardString) -> {
+            AbstractDisplayMeta.BillboardConstraints billboard = ConfigHelper.getEnumByNameOrNull(
+                AbstractDisplayMeta.BillboardConstraints.class,
+                billboardString.toLowerCase(Locale.ROOT)
+            );
+
+            Objects.requireNonNull(billboard, "Unknown billboard type in section " + section.getCurrentPath() + " named " + billboardString);
+
             if (billboard != to.getBillboardConstraints()) {
                 to.setBillboardConstraints(billboard);
             }
-        }
+        });
 
         // TODO(matt): impl other features
         ConfigHelper.takeIfPresent(section, "see-through", section::getBoolean, (seeThrough) -> {
@@ -140,15 +143,7 @@ public class TextDisplayMetaConfiguration {
 
         });
 
-        String shadow = section.getString("shadow");
-        if (shadow != null) {
-            if (!shadow.equalsIgnoreCase(Boolean.toString(to.isShadow()))) {
-                to.setShadow(Boolean.parseBoolean(shadow));
-            }
-        }
-
-        String range = section.getString("range");
-        if (range != null) {
+        ConfigHelper.takeIfPresent(section, "range", section::getString, (range) -> {
             float finalRange = range.equalsIgnoreCase("default")
                 ? (Bukkit.getSimulationDistance() * 16f)
                 : Float.parseFloat(range);
@@ -156,7 +151,7 @@ public class TextDisplayMetaConfiguration {
             if (finalRange != to.getViewRange()) {
                 to.setViewRange(finalRange);
             }
-        }
+        });
 
         // TODO(matt): This function needs access to the WrapperEntity
         String yaw = section.getString("yaw");
