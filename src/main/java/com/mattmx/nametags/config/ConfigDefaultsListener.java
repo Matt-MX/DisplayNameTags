@@ -51,6 +51,8 @@ public class ConfigDefaultsListener implements Listener {
                                 TextDisplayMetaConfiguration.applyTextMeta(e.getValue(), entity.getMeta(), player, player);
                             });
 
+                        entity.updateVisibility();
+
                         entity.getPassenger().refresh();
                     }
                 )

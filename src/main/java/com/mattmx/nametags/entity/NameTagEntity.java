@@ -11,8 +11,10 @@ import io.github.retrooper.packetevents.util.SpigotConversionUtil;
 import me.tofaa.entitylib.meta.display.TextDisplayMeta;
 import me.tofaa.entitylib.wrapper.WrapperEntity;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.TextDisplay;
+import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
@@ -21,6 +23,7 @@ public class NameTagEntity {
     private final @NotNull TraitHolder traits = new TraitHolder(this);
     private final @NotNull Entity bukkitEntity;
     private final @NotNull WrapperEntity passenger;
+    private float cachedViewRange = -1f;
 
     public NameTagEntity(@NotNull Entity entity) {
         this.bukkitEntity = entity;
@@ -43,6 +46,28 @@ public class NameTagEntity {
             }
 
         }
+    }
+
+    public boolean isInvisible() {
+        boolean hasInvisibilityEffect = bukkitEntity instanceof LivingEntity e
+            && e.hasPotionEffect(PotionEffectType.INVISIBILITY);
+
+        return bukkitEntity.isInvisible() || hasInvisibilityEffect;
+    }
+
+    public void updateVisibility() {
+        updateVisibility(isInvisible());
+    }
+
+    public void updateVisibility(final boolean isInvisible) {
+        modify((meta) -> {
+            if (isInvisible && !meta.isInvisible()) {
+                this.cachedViewRange = meta.getViewRange();
+                meta.setViewRange(0f);
+            } else if (!isInvisible && meta.isInvisible()) {
+                meta.setViewRange(this.cachedViewRange);
+            }
+        });
     }
 
     public @NotNull TraitHolder getTraits() {

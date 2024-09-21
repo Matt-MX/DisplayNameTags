@@ -26,3 +26,8 @@ groups:
     background: green
   staff:
     background: red
+
+# Extra features
+extra:
+  # Should the name-tag be see-through if the player is glowing?
+  glowing-feature: true
