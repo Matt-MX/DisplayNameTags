@@ -54,6 +54,7 @@ public class OutgoingPacketListener extends PacketListenerAbstract {
                 }
             }
             case PacketType.Play.Server.ENTITY_EFFECT -> {
+                // TODO per-player impl
                 final WrapperPlayServerEntityEffect packet = new WrapperPlayServerEntityEffect(event);
 
                 if (packet.getPotionType() != PotionTypes.INVISIBILITY) return;
@@ -65,6 +66,7 @@ public class OutgoingPacketListener extends PacketListenerAbstract {
                 nameTagEntity.updateVisibility(true);
             }
             case PacketType.Play.Server.REMOVE_ENTITY_EFFECT -> {
+                // TODO per-player impl
                 final WrapperPlayServerRemoveEntityEffect packet = new WrapperPlayServerRemoveEntityEffect(event);
 
                 if (packet.getPotionType() != PotionTypes.INVISIBILITY) return;

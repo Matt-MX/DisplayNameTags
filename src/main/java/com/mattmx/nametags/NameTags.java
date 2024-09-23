@@ -4,6 +4,7 @@ import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.PacketEventsAPI;
 import com.mattmx.nametags.config.ConfigDefaultsListener;
 import com.mattmx.nametags.entity.NameTagEntityManager;
+import com.mattmx.nametags.hook.GlowingEffectHook;
 import com.mattmx.nametags.hook.NeznamyTABHook;
 import me.tofaa.entitylib.APIConfig;
 import me.tofaa.entitylib.EntityLib;
@@ -50,6 +51,7 @@ public class NameTags extends JavaPlugin {
         final PacketEventsAPI<?> packetEvents = PacketEvents.getAPI();
 
         packetEvents.getEventManager().registerListener(packetListener);
+//        packetEvents.getEventManager().registerListener(new GlowingEffectHook());
 
         NeznamyTABHook.inject(this);
 
