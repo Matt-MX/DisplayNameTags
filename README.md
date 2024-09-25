@@ -7,6 +7,12 @@
 Replace your players' boring old name tags with customizable ones based on 
 text displays!
 
+
+<p align="center">
+    <img width="650px" src=nametags.gif />
+</p>
+
+
 ## Configuration
 
 Currently, you can customize default name tags and create grouped name tags.
