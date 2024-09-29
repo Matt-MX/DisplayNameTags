@@ -4,6 +4,7 @@ import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.PacketEventsAPI;
 import com.mattmx.nametags.config.ConfigDefaultsListener;
 import com.mattmx.nametags.entity.NameTagEntityManager;
+import com.mattmx.nametags.hook.GlowingEffectHook;
 import com.mattmx.nametags.hook.NeznamyTABHook;
 import me.tofaa.entitylib.APIConfig;
 import me.tofaa.entitylib.EntityLib;
@@ -11,6 +12,7 @@ import me.tofaa.entitylib.spigot.SpigotEntityLibPlatform;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.event.HandlerList;
 import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
@@ -50,6 +52,7 @@ public class NameTags extends JavaPlugin {
         final PacketEventsAPI<?> packetEvents = PacketEvents.getAPI();
 
         packetEvents.getEventManager().registerListener(packetListener);
+//        packetEvents.getEventManager().registerListener(new GlowingEffectHook());
 
         NeznamyTABHook.inject(this);
 

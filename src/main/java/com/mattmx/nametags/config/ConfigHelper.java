@@ -18,6 +18,8 @@ public class ConfigHelper {
         @NotNull Function<String, T> provider,
         @NotNull Consumer<T> take
     ) {
+        if (section.get(key) == null) return null;
+
         Optional<T> optional = Optional.ofNullable(provider.apply(key));
 
         optional.ifPresent(take);

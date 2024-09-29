@@ -9,6 +9,8 @@ sneak:
 defaults:
   # If not enabled then plugin simulates vanilla name tags
   enabled: true
+  # How often should we refresh tags (in milliseconds)
+  refresh-every: 50
   text:
     - "<white>%player_name%</white>"
     - "<blue>%player_ping%ms</blue>"

@@ -67,7 +67,6 @@ public class TextDisplayMetaConfiguration {
             }
         });
 
-        // TODO(matt): impl other features
         ConfigHelper.takeIfPresent(section, "see-through", section::getBoolean, (seeThrough) -> {
             if (to.isSeeThrough() != seeThrough) {
                 to.setSeeThrough(seeThrough);
