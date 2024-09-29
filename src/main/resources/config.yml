@@ -11,15 +11,37 @@ defaults:
   enabled: true
   # How often should we refresh tags (in milliseconds)
   refresh-every: 50
+  # Lines of text to display.
   text:
     - "<white>%player_name%</white>"
     - "<blue>%player_ping%ms</blue>"
+  # Background colour of the billboard.
+  # You can use AARRGGBB hex codes e.g '#FF00FF00'
+  # Otherwise you can use named text colours e.g 'white',
+  # 'black' or 'red' as well as 'transparent'.
   background: black
+  # Billboard display type.
+  # You can choose 'center', 'vertical' or 'horizontal
   billboard: center
   text-shadow: true
+  # Visual display range.
+  # You can specify range in blocks or use 'default'
+  # which will use the server's simulation distance.
   range: default
+  # Gap above the head, closest to vanilla is 0.2
   gap: 0.2
 
+# Permission based groups.
+# Will only work if you have the "defaults" section enabled.
+# Specify sub-groups that override the defaults.
+# e.g
+# groups:
+#   vip:
+#     background: red
+#     ...
+#
+# Here, you would grant a user the permission "nametags.groups.vip"
+# to receive a red background
 groups:
   # e.g nametags.groups.vip
   vip:
@@ -30,6 +52,7 @@ groups:
     background: red
 
 # Extra features
+# These will likely not work yet since they're experimental.
 extra:
   # Should the name-tag be see-through if the player is glowing?
   glowing-feature: true

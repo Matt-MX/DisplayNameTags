@@ -10,7 +10,14 @@ public class SneakTrait extends Trait {
     public void updateSneak(boolean sneaking) {
         getTag().modify((meta) -> {
             Color color = Color.fromARGB(meta.getBackgroundColor());
+
             if (sneaking) {
+
+                // If it's transparent then we shouldn't do anything really
+                if (color.getAlpha() == 0) {
+                    return;
+                }
+
                 previousOpacity = color.getAlpha();
 
                 int sneakAmount = NameTags.getInstance()
