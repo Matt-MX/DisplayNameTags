@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 public class TraitHolder {
@@ -16,13 +17,17 @@ public class TraitHolder {
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends Trait> @Nullable T getTrait(@NotNull Class<T> traitClazz) {
+    public <T extends Trait> @Nullable T getTraitOrNull(@NotNull Class<T> traitClazz) {
         Trait trait = map.get(traitClazz);
 
         if (trait != null) {
             return (T) trait;
         }
         return null;
+    }
+
+    public <T extends Trait> @NotNull Optional<T> getTrait(@NotNull Class<T> traitClazz) {
+        return Optional.ofNullable(getTraitOrNull(traitClazz));
     }
 
     @SuppressWarnings("unchecked")
