@@ -32,12 +32,20 @@ public class ConfigDefaultsListener implements Listener {
     public void onCreate(@NotNull NameTagEntityCreateEvent event) {
         if (!(event.getNameTag().getBukkitEntity() instanceof Player player)) return;
 
+        // By default, we shouldn't notify until we have finished processing.
+        event.getNameTag()
+            .getPassenger()
+            .getEntityMeta()
+            .setNotifyAboutChanges(false);
+
+        long refreshMillis = plugin.getConfig().getLong("defaults.refresh-every", 50);
+
         event.getNameTag()
             .getTraits()
             .getOrAddTrait(RefreshTrait.class, () ->
-                RefreshTrait.ofSeconds(
-                    NameTags.getInstance(),
-                    1L,
+                RefreshTrait.ofMillis(
+                    plugin,
+                    refreshMillis,
                     (entity) -> {
                         TextDisplayMetaConfiguration.applyMeta(defaultSection(), entity.getMeta());
                         TextDisplayMetaConfiguration.applyTextMeta(defaultSection(), entity.getMeta(), player, player);
@@ -52,13 +60,13 @@ public class ConfigDefaultsListener implements Listener {
                                 TextDisplayMetaConfiguration.applyTextMeta(e.getValue(), entity.getMeta(), player, player);
                             });
 
-                        entity.updateVisibility();
 
                         if (entity.getMeta().getBillboardConstraints() == AbstractDisplayMeta.BillboardConstraints.CENTER) {
                             // Look passenger down to remove debug getting in the way
                             entity.getPassenger().rotateHead(0f, 90f);
                         }
 
+                        entity.updateVisibility();
                         entity.getPassenger().refresh();
                     }
                 )

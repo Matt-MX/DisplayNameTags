@@ -12,6 +12,7 @@ import me.tofaa.entitylib.spigot.SpigotEntityLibPlatform;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.event.HandlerList;
 import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;

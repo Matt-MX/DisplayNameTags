@@ -1,11 +1,7 @@
 package com.mattmx.nametags;
 
-import com.mattmx.nametags.config.TextDisplayMetaConfiguration;
 import com.mattmx.nametags.entity.NameTagEntity;
-import com.mattmx.nametags.entity.trait.RefreshTrait;
 import com.mattmx.nametags.entity.trait.SneakTrait;
-import com.mattmx.nametags.event.NameTagEntityCreateEvent;
-import org.bukkit.Color;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
@@ -18,11 +14,10 @@ public class EventsListener implements Listener {
 
     @EventHandler
     public void onPlayerJoin(@NotNull PlayerJoinEvent event) {
-        final NameTagEntity tag = NameTags.getInstance()
+        NameTags.getInstance()
             .getEntityManager()
-            .getOrCreateNameTagEntity(event.getPlayer());
-
-        tag.updateVisibility();
+            .getOrCreateNameTagEntity(event.getPlayer())
+            .updateVisibility();
     }
 
     @EventHandler

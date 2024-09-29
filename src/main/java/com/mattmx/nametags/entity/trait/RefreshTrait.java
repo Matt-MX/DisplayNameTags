@@ -46,8 +46,12 @@ public class RefreshTrait extends Trait {
         return new RefreshTrait(plugin, seconds, TimeUnit.SECONDS, update);
     }
 
+    public static @NotNull RefreshTrait ofMillis(@NotNull JavaPlugin plugin, long millis, Consumer<NameTagEntity> update) {
+        return new RefreshTrait(plugin, millis, TimeUnit.MILLISECONDS, update);
+    }
+
     public static @NotNull RefreshTrait ofTicks(@NotNull JavaPlugin plugin, long ticks, Consumer<NameTagEntity> update) {
-        return new RefreshTrait(plugin, ticks * 50, TimeUnit.MILLISECONDS, update);
+        return ofMillis(plugin, ticks * 50, update);
     }
 
 }
