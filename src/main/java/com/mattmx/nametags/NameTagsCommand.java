@@ -32,9 +32,16 @@ public class NameTagsCommand implements CommandExecutor {
 
             final NameTagEntity newTag = plugin.getEntityManager().getOrCreateNameTagEntity(player);
 
+            // Add existing viewers
             if (tag != null) {
                 for (final UUID viewer : tag.getPassenger().getViewers()) {
                     newTag.getPassenger().addViewer(viewer);
+
+                    // Send passenger packet
+                    Player playerViewer = Bukkit.getPlayer(viewer);
+                    if (playerViewer != null) {
+                        newTag.sendPassengerPacket(playerViewer);
+                    }
                 }
             }
 
