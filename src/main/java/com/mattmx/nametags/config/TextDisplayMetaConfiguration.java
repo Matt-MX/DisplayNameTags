@@ -3,18 +3,17 @@ package com.mattmx.nametags.config;
 import com.github.retrooper.packetevents.util.Vector3f;
 import com.mattmx.nametags.NameTags;
 import com.mattmx.nametags.hook.PapiHook;
-import me.clip.placeholderapi.PlaceholderAPI;
 import me.tofaa.entitylib.meta.display.AbstractDisplayMeta;
 import me.tofaa.entitylib.meta.display.TextDisplayMeta;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
+import org.bukkit.Color;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.*;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -46,7 +45,15 @@ public class TextDisplayMetaConfiguration {
             } else if (NamedTextColor.NAMES.value(backgroundColor) != null) {
                 background = 0x40000000 | Objects.requireNonNull(NamedTextColor.NAMES.value(backgroundColor)).value();
             } else if (backgroundColor.startsWith("#")) {
-                background = new Color((int) Long.parseLong(backgroundColor.replace("#", ""), 16), true).getRGB();
+                int intValue = Integer.parseInt(backgroundColor.replace("#", ""), 16);
+                Color color = Color.fromARGB(intValue);
+
+                // Set a default alpha of 0x40 (minecraft's internal default)
+                if (color.getAlpha() == 0 && !backgroundColor.startsWith("#00")) {
+                    background = color.setAlpha(0x40).asARGB();
+                } else {
+                    background = color.asARGB();
+                }
             } else {
                 background = NameTags.TRANSPARENT;
             }
