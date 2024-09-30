@@ -26,14 +26,16 @@ public class NameTagsCommand implements CommandExecutor {
         for (final Player player : Bukkit.getOnlinePlayers()) {
             final NameTagEntity tag = plugin.getEntityManager().removeEntity(player);
 
-            if (tag == null) continue;
-
-            tag.destroy();
+            if (tag != null) {
+                tag.destroy();
+            }
 
             final NameTagEntity newTag = plugin.getEntityManager().getOrCreateNameTagEntity(player);
 
-            for (final UUID viewer : tag.getPassenger().getViewers()) {
-                newTag.getPassenger().addViewer(viewer);
+            if (tag != null) {
+                for (final UUID viewer : tag.getPassenger().getViewers()) {
+                    newTag.getPassenger().addViewer(viewer);
+                }
             }
 
             newTag.updateVisibility();

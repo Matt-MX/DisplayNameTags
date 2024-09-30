@@ -17,7 +17,14 @@ public class RefreshTrait extends Trait {
         this.task = Bukkit.getAsyncScheduler()
             .runAtFixedRate(plugin, (task) -> {
 
+                // Don't process if paused
                 if (!this.isPaused()) {
+
+                    // If the tag is not currently spawned in then we shouldn't process
+                    if (!getTag().getPassenger().isSpawned()) {
+                        return;
+                    }
+
                     update.accept(getTag());
                 }
 
