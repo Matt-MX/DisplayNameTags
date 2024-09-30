@@ -1,7 +1,6 @@
 package com.mattmx.nametags.entity;
 
 import com.github.retrooper.packetevents.util.Vector3f;
-import com.mattmx.nametags.NameTags;
 import com.mattmx.nametags.event.NameTagEntityCreateEvent;
 import me.tofaa.entitylib.meta.display.AbstractDisplayMeta;
 import me.tofaa.entitylib.meta.display.TextDisplayMeta;
@@ -10,6 +9,7 @@ import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
@@ -54,6 +54,10 @@ public class NameTagEntityManager {
             .filter((e) -> e.getBukkitEntity().getEntityId() == entityId)
             .findFirst()
             .orElse(null);
+    }
+
+    public @NotNull Collection<NameTagEntity> getAllEntities() {
+        return this.entityMap.values();
     }
 
     public void setDefaultProvider(@NotNull BiConsumer<Entity, TextDisplayMeta> consumer) {

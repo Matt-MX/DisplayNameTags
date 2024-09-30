@@ -27,7 +27,7 @@ public class NameTags extends JavaPlugin {
 
     private HashMap<String, ConfigurationSection> groups = new HashMap<>();
     private NameTagEntityManager entityManager;
-    private final EventsListener eventsListener = new EventsListener();
+    private final EventsListener eventsListener = new EventsListener(this);
     private final OutgoingPacketListener packetListener = new OutgoingPacketListener(this);
 
     @Override

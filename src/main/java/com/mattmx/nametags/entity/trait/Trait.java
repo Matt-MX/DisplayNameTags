@@ -16,8 +16,10 @@ public abstract class Trait {
         return nameTag;
     }
 
-    public void onDestroy() {
+    public void onEnable() {
+    }
 
+    public void onDestroy() {
     }
 
 }

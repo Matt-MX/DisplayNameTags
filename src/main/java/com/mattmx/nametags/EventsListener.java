@@ -12,18 +12,28 @@ import org.jetbrains.annotations.NotNull;
 
 public class EventsListener implements Listener {
 
+    private final @NotNull NameTags plugin;
+
+    public EventsListener(@NotNull NameTags plugin) {
+        this.plugin = plugin;
+    }
+
     @EventHandler
     public void onPlayerJoin(@NotNull PlayerJoinEvent event) {
-        NameTags.getInstance()
-            .getEntityManager()
+        plugin.getEntityManager()
             .getOrCreateNameTagEntity(event.getPlayer())
             .updateVisibility();
     }
 
     @EventHandler
     public void onPlayerQuit(@NotNull PlayerQuitEvent event) {
-        NameTagEntity entity = NameTags.getInstance()
-            .getEntityManager()
+
+        // Remove as a viewer from all entities
+        for (final NameTagEntity entity : plugin.getEntityManager().getAllEntities()) {
+            entity.getPassenger().removeViewer(event.getPlayer().getUniqueId());
+        }
+
+        NameTagEntity entity = plugin.getEntityManager()
             .removeEntity(event.getPlayer());
 
         if (entity == null) return;
@@ -33,15 +43,14 @@ public class EventsListener implements Listener {
 
     @EventHandler
     public void onPlayerChangeWorld(@NotNull PlayerChangedWorldEvent event) {
-        NameTagEntity nameTagEntity = NameTags.getInstance()
-            .getEntityManager()
+        NameTagEntity nameTagEntity = plugin.getEntityManager()
             .getNameTagEntity(event.getPlayer());
 
         if (nameTagEntity == null) return;
 
         nameTagEntity.updateLocation();
 
-        if (NameTags.getInstance().getConfig().getBoolean("show-self", false)) {
+        if (plugin.getConfig().getBoolean("show-self", false)) {
             nameTagEntity.getPassenger().removeViewer(nameTagEntity.getBukkitEntity().getUniqueId());
             nameTagEntity.getPassenger().addViewer(nameTagEntity.getBukkitEntity().getUniqueId());
             nameTagEntity.sendPassengerPacket(event.getPlayer());
@@ -50,12 +59,11 @@ public class EventsListener implements Listener {
 
     @EventHandler(ignoreCancelled = true)
     public void onPlayerSneak(@NotNull PlayerToggleSneakEvent event) {
-        if (!NameTags.getInstance().getConfig().getBoolean("sneak.enabled")) {
+        if (!plugin.getConfig().getBoolean("sneak.enabled")) {
             return;
         }
 
-        NameTagEntity nameTagEntity = NameTags.getInstance()
-            .getEntityManager()
+        NameTagEntity nameTagEntity = plugin.getEntityManager()
             .getNameTagEntity(event.getPlayer());
 
         if (nameTagEntity == null) return;

@@ -13,7 +13,6 @@ import me.tofaa.entitylib.wrapper.WrapperEntity;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.TextDisplay;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
 
@@ -37,7 +36,6 @@ public class NameTagEntity {
 
         this.passenger.spawn(location);
 
-        // TODO: Send packet to player if enabled in config
         if (NameTags.getInstance().getConfig().getBoolean("show-self", false)) {
 
             if (this.bukkitEntity instanceof Player self) {

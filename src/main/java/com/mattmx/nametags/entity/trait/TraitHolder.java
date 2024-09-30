@@ -35,6 +35,9 @@ public class TraitHolder {
         return (T) map.computeIfAbsent(traitClazz, (k) -> {
             T trait = supplier.get();
             trait.setNameTag(owner);
+
+            trait.onEnable();
+
             return trait;
         });
     }
