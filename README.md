@@ -77,21 +77,6 @@ class MyCustomListener implements Listener {
     Currently the plugin does not support PlaceholderAPI's
     relational placeholders.
 
-
-- `/feat/align`
-    Ability to specify text align.
-    
-    e.g We want to align `z` on the right side, `y` on the left.
-
-    ```
-    |             z         | 
-    |         xxxxx         |
-    |         y             |
-    ```
-
-    We would want to do this by writing `<align:right>z` and `<align:left>`.
-
-
 - `/feat/customization`
     Extension plugin to give players ability to customize their own
     name tags by using a command and customizable GUI interface.
