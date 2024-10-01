@@ -23,19 +23,23 @@ public class SneakTrait extends Trait {
                 previousOpacity = color.getAlpha();
 
                 meta.setBackgroundColor(withCustomSneakOpacity(color).asARGB());
+                meta.setTextOpacity((byte) getCustomOpacity());
             } else {
                 meta.setBackgroundColor(color.setAlpha(previousOpacity).asARGB());
+                meta.setTextOpacity((byte) getCustomOpacity());
             }
         });
         getTag().getPassenger().refresh();
     }
 
     public Color withCustomSneakOpacity(@NotNull Color previous) {
-        int sneakAmount = NameTags.getInstance()
+        return previous.setAlpha(getCustomOpacity());
+    }
+
+    public int getCustomOpacity() {
+        return NameTags.getInstance()
             .getConfig()
             .getInt("sneak.opacity", 70);
-
-        return previous.setAlpha(sneakAmount);
     }
 
     public boolean isSneaking() {

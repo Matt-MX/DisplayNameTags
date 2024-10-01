@@ -1,16 +1,8 @@
-# Should the player see their own tag?
-show-self: false
-
-sneak:
-  # Should we modify the opacity of the tag's background when the player shifts?
-  enabled: true
-  opacity: 70
-
 defaults:
   # If not enabled then plugin simulates vanilla name tags
   enabled: true
   # How often should we refresh tags (in milliseconds)
-  refresh-every: 50
+  refresh-every: 1
   # Lines of text to display.
   text:
     - "<white>%player_name%</white>"
@@ -31,6 +23,14 @@ defaults:
   range: default
   # Gap above the head, closest to vanilla is 0.2
   gap: 0.2
+
+# Should the player see their own tag?
+show-self: false
+
+sneak:
+  # Should we modify the opacity of the tag's background when the player shifts?
+  enabled: true
+  opacity: 70
 
 # Permission based groups.
 # Will only work if you have the "defaults" section enabled.

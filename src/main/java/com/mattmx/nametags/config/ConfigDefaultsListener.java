@@ -1,13 +1,10 @@
 package com.mattmx.nametags.config;
 
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityHeadLook;
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityRotation;
 import com.mattmx.nametags.NameTags;
 import com.mattmx.nametags.entity.trait.RefreshTrait;
 import com.mattmx.nametags.entity.trait.SneakTrait;
 import com.mattmx.nametags.event.NameTagEntityCreateEvent;
 import me.tofaa.entitylib.meta.display.AbstractDisplayMeta;
-import me.tofaa.entitylib.wrapper.WrapperEntity;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.configuration.ConfigurationSection;
@@ -46,6 +43,10 @@ public class ConfigDefaultsListener implements Listener {
 
         long refreshMillis = plugin.getConfig().getLong("defaults.refresh-every", 50);
 
+        if (refreshMillis == 0L) {
+            return;
+        }
+
         event.getNameTag()
             .getTraits()
             .getOrAddTrait(RefreshTrait.class, () ->
@@ -53,41 +54,44 @@ public class ConfigDefaultsListener implements Listener {
                     plugin,
                     refreshMillis,
                     (entity) -> {
-                        TextDisplayMetaConfiguration.applyMeta(defaultSection(), entity.getMeta());
-                        TextDisplayMetaConfiguration.applyTextMeta(defaultSection(), entity.getMeta(), player, player);
+                        synchronized (entity) {
 
-                        // TODO we should cache this stuff
-                        plugin.getGroups()
-                            .entrySet()
-                            .stream()
-                            .filter((e) -> player.hasPermission(e.getKey()))
-                            .forEach((e) -> {
-                                TextDisplayMetaConfiguration.applyMeta(e.getValue(), entity.getMeta());
-                                TextDisplayMetaConfiguration.applyTextMeta(e.getValue(), entity.getMeta(), player, player);
-                            });
+                            // TODO we need to change the text based off the player the packet is being sent to.
+                            TextDisplayMetaConfiguration.applyMeta(defaultSection(), entity.getMeta());
+                            TextDisplayMetaConfiguration.applyTextMeta(defaultSection(), entity.getMeta(), player, player);
 
-
-                        if (entity.getMeta().getBillboardConstraints() == AbstractDisplayMeta.BillboardConstraints.CENTER) {
-                            // Look passenger down to remove debug getting in the way
-                            entity.getPassenger().rotateHead(0f, 90f);
-                        }
-
-                        // Preserve background color for sneaking
-                        // Maybe we should introduce an `afterRefresh` callback?
-                        entity.getTraits()
-                            .getTrait(SneakTrait.class)
-                            .ifPresent((sneak) -> {
-                                if (!sneak.isSneaking()) return;
-
-                                entity.modify((tag) -> {
-                                    Color currentColor = Color.fromARGB(tag.getBackgroundColor());
-                                    tag.setBackgroundColor(sneak.withCustomSneakOpacity(currentColor).asARGB());
+                            // TODO we should cache this stuff
+                            plugin.getGroups()
+                                .entrySet()
+                                .stream()
+                                .filter((e) -> player.hasPermission(e.getKey()))
+                                .forEach((e) -> {
+                                    TextDisplayMetaConfiguration.applyMeta(e.getValue(), entity.getMeta());
+                                    TextDisplayMetaConfiguration.applyTextMeta(e.getValue(), entity.getMeta(), player, player);
                                 });
-                            });
 
-                        entity.updateVisibility();
 
-                        Bukkit.getScheduler().runTaskLaterAsynchronously(plugin, () -> entity.getPassenger().refresh(), 0L);
+                            if (entity.getMeta().getBillboardConstraints() == AbstractDisplayMeta.BillboardConstraints.CENTER) {
+                                // Look passenger down to remove debug getting in the way
+                                entity.getPassenger().rotateHead(0f, 90f);
+                            }
+
+                            // Preserve background color for sneaking
+                            // Maybe we should introduce an `afterRefresh` callback?
+                            entity.getTraits()
+                                .getTrait(SneakTrait.class)
+                                .ifPresent((sneak) -> {
+                                    if (!sneak.isSneaking()) return;
+
+                                    entity.modify((tag) -> {
+                                        Color currentColor = Color.fromARGB(tag.getBackgroundColor());
+                                        tag.setBackgroundColor(sneak.withCustomSneakOpacity(currentColor).asARGB());
+                                    });
+                                });
+
+                            entity.updateVisibility();
+                            entity.getPassenger().refresh();
+                        }
                     }
                 )
             );
