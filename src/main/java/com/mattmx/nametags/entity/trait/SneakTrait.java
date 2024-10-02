@@ -5,7 +5,8 @@ import org.bukkit.Color;
 import org.jetbrains.annotations.NotNull;
 
 public class SneakTrait extends Trait {
-    private int previousOpacity = 0;
+    private int previousBackgroundOpacity = 0;
+    private int previousTextOpacity = Byte.MAX_VALUE;
     private boolean isSneaking = false;
 
     public void updateSneak(boolean sneaking) {
@@ -20,13 +21,14 @@ public class SneakTrait extends Trait {
                     return;
                 }
 
-                previousOpacity = color.getAlpha();
+                previousBackgroundOpacity = color.getAlpha();
+                previousTextOpacity = meta.getTextOpacity();
 
                 meta.setBackgroundColor(withCustomSneakOpacity(color).asARGB());
                 meta.setTextOpacity((byte) getCustomOpacity());
             } else {
-                meta.setBackgroundColor(color.setAlpha(previousOpacity).asARGB());
-                meta.setTextOpacity((byte) getCustomOpacity());
+                meta.setBackgroundColor(color.setAlpha(previousBackgroundOpacity).asARGB());
+                meta.setTextOpacity((byte) previousTextOpacity);
             }
         });
         getTag().getPassenger().refresh();
