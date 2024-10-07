@@ -16,13 +16,19 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 public class TextDisplayMetaConfiguration {
 
     public static boolean applyTextMeta(@NotNull ConfigurationSection section, @NotNull TextDisplayMeta to, @NotNull Player self, @NotNull Player sender) {
-        Component text = section.getStringList("text")
+        Stream<Component> stream = section.getStringList("text")
             .stream()
             .map((line) -> convertToComponent(self, sender, line))
+            .filter((line) -> line != Component.empty() && !line.children().stream().allMatch((c) -> c == Component.empty()));
+
+        // TODO(matt): Test + Use config for filtering empty lines
+
+        Component text = stream
             .reduce((a, b) -> a.append(Component.newline()).append(b))
             .orElse(null);
 
