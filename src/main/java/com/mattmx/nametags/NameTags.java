@@ -3,8 +3,8 @@ package com.mattmx.nametags;
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.PacketEventsAPI;
 import com.mattmx.nametags.config.ConfigDefaultsListener;
+import com.mattmx.nametags.config.TextFormatter;
 import com.mattmx.nametags.entity.NameTagEntityManager;
-import com.mattmx.nametags.hook.GlowingEffectHook;
 import com.mattmx.nametags.hook.NeznamyTABHook;
 import me.tofaa.entitylib.APIConfig;
 import me.tofaa.entitylib.EntityLib;
@@ -12,7 +12,6 @@ import me.tofaa.entitylib.spigot.SpigotEntityLibPlatform;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.event.HandlerList;
 import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
@@ -25,7 +24,8 @@ public class NameTags extends JavaPlugin {
     public static final int TRANSPARENT = Color.fromARGB(0).asARGB();
     private static @Nullable NameTags instance;
 
-    private HashMap<String, ConfigurationSection> groups = new HashMap<>();
+    private final HashMap<String, ConfigurationSection> groups = new HashMap<>();
+    private @NotNull TextFormatter formatter = TextFormatter.MINI_MESSAGE;
     private NameTagEntityManager entityManager;
     private final EventsListener eventsListener = new EventsListener(this);
     private final OutgoingPacketListener packetListener = new OutgoingPacketListener(this);
@@ -65,6 +65,12 @@ public class NameTags extends JavaPlugin {
     public void reloadConfig() {
         super.reloadConfig();
 
+        String textFormatterIdentifier = getConfig().getString("formatter", "minimessage");
+        formatter = TextFormatter.getById(textFormatterIdentifier)
+            .orElse(TextFormatter.MINI_MESSAGE);
+
+        getLogger().info("Using " + formatter.name() + " as text formatter.");
+
         for (String permissionNode : groups.keySet()) {
             Bukkit.getPluginManager().removePermission(permissionNode);
         }
@@ -92,6 +98,10 @@ public class NameTags extends JavaPlugin {
 
     public HashMap<String, ConfigurationSection> getGroups() {
         return groups;
+    }
+
+    public @NotNull TextFormatter getFormatter() {
+        return this.formatter;
     }
 
     public static @NotNull NameTags getInstance() {

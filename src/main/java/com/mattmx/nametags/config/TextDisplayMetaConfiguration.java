@@ -16,13 +16,21 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 public class TextDisplayMetaConfiguration {
 
     public static boolean applyTextMeta(@NotNull ConfigurationSection section, @NotNull TextDisplayMeta to, @NotNull Player self, @NotNull Player sender) {
-        Component text = section.getStringList("text")
+        Stream<Component> stream = section.getStringList("text")
             .stream()
-            .map((line) -> convertToComponent(self, sender, line))
+            .map((line) -> convertToComponent(self, sender, line));
+
+        // TODO(matt): Test
+        if (NameTags.getInstance().getConfig().getBoolean("defaults.remove-empty-lines", false)) {
+            stream = stream.filter((line) -> line != Component.empty() && !line.children().stream().allMatch((c) -> c == Component.empty()));
+        }
+
+        Component text = stream
             .reduce((a, b) -> a.append(Component.newline()).append(b))
             .orElse(null);
 
@@ -169,7 +177,9 @@ public class TextDisplayMetaConfiguration {
 
         formatted = PapiHook.setPlaceholders(self, sending, formatted);
 
-        return MiniMessage.miniMessage().deserialize(formatted);
+        return NameTags.getInstance()
+            .getFormatter()
+            .format(formatted);
     }
 
 }

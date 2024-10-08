@@ -24,6 +24,7 @@ public class SneakTrait extends Trait {
                 previousBackgroundOpacity = color.getAlpha();
                 previousTextOpacity = meta.getTextOpacity();
 
+                // Not sure if this is vanilla behavior? Does only text opacity change??
                 meta.setBackgroundColor(withCustomSneakOpacity(color).asARGB());
                 meta.setTextOpacity((byte) getCustomOpacity());
             } else {
