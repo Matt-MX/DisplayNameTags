@@ -23,10 +23,12 @@ public class TextDisplayMetaConfiguration {
     public static boolean applyTextMeta(@NotNull ConfigurationSection section, @NotNull TextDisplayMeta to, @NotNull Player self, @NotNull Player sender) {
         Stream<Component> stream = section.getStringList("text")
             .stream()
-            .map((line) -> convertToComponent(self, sender, line))
-            .filter((line) -> line != Component.empty() && !line.children().stream().allMatch((c) -> c == Component.empty()));
+            .map((line) -> convertToComponent(self, sender, line));
 
-        // TODO(matt): Test + Use config for filtering empty lines
+        // TODO(matt): Test
+        if (NameTags.getInstance().getConfig().getBoolean("defaults.remove-empty-lines", false)) {
+            stream = stream.filter((line) -> line != Component.empty() && !line.children().stream().allMatch((c) -> c == Component.empty()));
+        }
 
         Component text = stream
             .reduce((a, b) -> a.append(Component.newline()).append(b))
@@ -175,7 +177,9 @@ public class TextDisplayMetaConfiguration {
 
         formatted = PapiHook.setPlaceholders(self, sending, formatted);
 
-        return MiniMessage.miniMessage().deserialize(formatted);
+        return NameTags.getInstance()
+            .getFormatter()
+            .format(formatted);
     }
 
 }

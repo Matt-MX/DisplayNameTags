@@ -23,6 +23,8 @@ defaults:
   range: default
   # Gap above the head, closest to vanilla is 0.2
   gap: 0.2
+  # Should the plugin remove any empty lines?
+  remove-empty-lines: false
 
 # Should the player see their own tag?
 show-self: false
@@ -51,6 +53,13 @@ groups:
     background: green
   staff:
     background: red
+
+# Formatting.
+# Select a formatter for your text, default is minimessage.
+# Options:
+# - minimessage
+# - legacy
+formatter: minimessage
 
 # Extra features
 # These will likely not work yet since they're experimental.
