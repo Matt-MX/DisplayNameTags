@@ -87,6 +87,7 @@ public class NameTagEntity {
     }
 
     public PacketWrapper<?> getPassengersPacket() {
+        // TODO(Matt): track previous passengers
         return new WrapperPlayServerSetPassengers(bukkitEntity.getEntityId(), new int[]{this.passenger.getEntityId()});
     }
 

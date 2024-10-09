@@ -6,6 +6,7 @@ import com.mattmx.nametags.hook.PapiHook;
 import me.tofaa.entitylib.meta.display.AbstractDisplayMeta;
 import me.tofaa.entitylib.meta.display.TextDisplayMeta;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
@@ -27,7 +28,7 @@ public class TextDisplayMetaConfiguration {
 
         // TODO(matt): Test
         if (NameTags.getInstance().getConfig().getBoolean("defaults.remove-empty-lines", false)) {
-            stream = stream.filter((line) -> line != Component.empty() && !line.children().stream().allMatch((c) -> c == Component.empty()));
+            stream = stream.filter(TextComponent.IS_NOT_EMPTY);
         }
 
         Component text = stream

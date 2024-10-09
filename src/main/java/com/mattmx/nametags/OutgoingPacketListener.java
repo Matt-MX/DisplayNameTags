@@ -4,12 +4,11 @@ import com.github.retrooper.packetevents.event.PacketListenerAbstract;
 import com.github.retrooper.packetevents.event.PacketSendEvent;
 import com.github.retrooper.packetevents.protocol.packettype.PacketType;
 import com.github.retrooper.packetevents.protocol.potion.PotionTypes;
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerDestroyEntities;
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityEffect;
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerRemoveEntityEffect;
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSpawnEntity;
+import com.github.retrooper.packetevents.wrapper.play.server.*;
 import com.mattmx.nametags.entity.NameTagEntity;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Arrays;
 
 public class OutgoingPacketListener extends PacketListenerAbstract {
 
@@ -77,6 +76,22 @@ public class OutgoingPacketListener extends PacketListenerAbstract {
 
                 nameTagEntity.updateVisibility(false);
             }
+//            case PacketType.Play.Server.SET_PASSENGERS -> {
+//                final WrapperPlayServerSetPassengers packet = new WrapperPlayServerSetPassengers(event);
+//
+//                final NameTagEntity nameTagEntity = plugin.getEntityManager().getNameTagEntityById(packet.getEntityId());
+//
+//                if (nameTagEntity == null) return;
+//
+//                if (Arrays.stream(packet.getPassengers()).noneMatch((i) -> nameTagEntity.getPassenger().getEntityId() == i)) {
+//
+//                    // Add our entity
+//                    int[] passengers = Arrays.copyOf(packet.getPassengers(), packet.getPassengers().length + 1);
+//                    passengers[passengers.length - 1] = nameTagEntity.getPassenger().getEntityId();
+//
+//                    packet.setPassengers(passengers);
+//                }
+//            }
             default -> {
             }
         }
