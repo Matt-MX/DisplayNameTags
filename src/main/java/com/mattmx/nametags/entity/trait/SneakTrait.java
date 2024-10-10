@@ -9,6 +9,15 @@ public class SneakTrait extends Trait {
     private int previousTextOpacity = Byte.MAX_VALUE;
     private boolean isSneaking = false;
 
+    public void manuallyUpdateSneakingOpacity() {
+        if (!isSneaking()) return;
+
+        getTag().modify((tag) -> {
+            Color currentColor = Color.fromARGB(tag.getBackgroundColor());
+            tag.setBackgroundColor(withCustomSneakOpacity(currentColor).asARGB());
+        });
+    }
+
     public void updateSneak(boolean sneaking) {
         this.isSneaking = sneaking;
         getTag().modify((meta) -> {

@@ -5,7 +5,6 @@ import com.mattmx.nametags.entity.trait.RefreshTrait;
 import com.mattmx.nametags.entity.trait.SneakTrait;
 import com.mattmx.nametags.event.NameTagEntityCreateEvent;
 import me.tofaa.entitylib.meta.display.AbstractDisplayMeta;
-import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
@@ -80,14 +79,7 @@ public class ConfigDefaultsListener implements Listener {
                             // Maybe we should introduce an `afterRefresh` callback?
                             entity.getTraits()
                                 .getTrait(SneakTrait.class)
-                                .ifPresent((sneak) -> {
-                                    if (!sneak.isSneaking()) return;
-
-                                    entity.modify((tag) -> {
-                                        Color currentColor = Color.fromARGB(tag.getBackgroundColor());
-                                        tag.setBackgroundColor(sneak.withCustomSneakOpacity(currentColor).asARGB());
-                                    });
-                                });
+                                .ifPresent(SneakTrait::manuallyUpdateSneakingOpacity);
 
                             entity.updateVisibility();
                             entity.getPassenger().refresh();
