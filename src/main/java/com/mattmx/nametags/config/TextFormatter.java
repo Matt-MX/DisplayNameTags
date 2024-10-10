@@ -16,9 +16,19 @@ public enum TextFormatter {
     ),
     LEGACY(
         "legacy",
-        (line) -> LegacyComponentSerializer.legacyAmpersand().deserialize(line)
+        (line) -> getLegacySerializer().deserialize(line)
     )
     ;
+
+    private static final LegacyComponentSerializer legacy = LegacyComponentSerializer.builder()
+        .character('&')
+        .hexCharacter('#')
+        .hexColors()
+        .build();
+
+    public static @NotNull LegacyComponentSerializer getLegacySerializer() {
+        return legacy;
+    }
 
     private final @NotNull String identifier;
     private final @NotNull Function<String, Component> formatter;
