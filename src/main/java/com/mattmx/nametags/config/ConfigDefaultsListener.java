@@ -1,6 +1,7 @@
 package com.mattmx.nametags.config;
 
 import com.mattmx.nametags.NameTags;
+import com.mattmx.nametags.entity.NameTagEntity;
 import com.mattmx.nametags.entity.trait.RefreshTrait;
 import com.mattmx.nametags.entity.trait.SneakTrait;
 import com.mattmx.nametags.event.NameTagEntityCreateEvent;
@@ -10,7 +11,11 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
+import java.util.Map;
 
 public class ConfigDefaultsListener implements Listener {
     private final @NotNull NameTags plugin;
@@ -46,47 +51,65 @@ public class ConfigDefaultsListener implements Listener {
             return;
         }
 
-        event.getNameTag()
-            .getTraits()
-            .getOrAddTrait(RefreshTrait.class, () ->
-                RefreshTrait.ofMillis(
-                    plugin,
-                    refreshMillis,
-                    (entity) -> {
-                        synchronized (entity) {
+        registerDefaultRefreshListener(event.getNameTag(), refreshMillis);
+    }
 
-                            // TODO we need to change the text based off the player the packet is being sent to.
-                            TextDisplayMetaConfiguration.applyMeta(defaultSection(), entity.getMeta());
-                            TextDisplayMetaConfiguration.applyTextMeta(defaultSection(), entity.getMeta(), player, player);
+    public void registerDefaultRefreshListener(@NotNull NameTagEntity tag, long refreshMillis) {
+        Player player = (Player) tag.getBukkitEntity();
 
-                            // TODO we should cache this stuff
-                            plugin.getGroups()
-                                .entrySet()
-                                .stream()
-                                .filter((e) -> player.hasPermission(e.getKey()))
-                                .forEach((e) -> {
-                                    TextDisplayMetaConfiguration.applyMeta(e.getValue(), entity.getMeta());
-                                    TextDisplayMetaConfiguration.applyTextMeta(e.getValue(), entity.getMeta(), player, player);
-                                });
+        tag.getTraits().getOrAddTrait(RefreshTrait.class, () ->
+            RefreshTrait.ofMillis(
+                plugin,
+                refreshMillis,
+                (entity) -> {
+                    synchronized (entity) {
 
+                        // TODO we need to change the text based off the player the packet is being sent to.
+                        TextDisplayMetaConfiguration.applyMeta(defaultSection(), entity.getMeta());
+                        TextDisplayMetaConfiguration.applyTextMeta(defaultSection(), entity.getMeta(), player, player);
 
-                            if (entity.getMeta().getBillboardConstraints() == AbstractDisplayMeta.BillboardConstraints.CENTER) {
-                                // Look passenger down to remove debug getting in the way
-                                entity.getPassenger().rotateHead(0f, 90f);
+                        // TODO we should cache this stuff
+                        List<Map.Entry<String, ConfigurationSection>> groups = plugin.getGroups()
+                            .entrySet()
+                            .stream()
+                            .filter((e) -> player.hasPermission(e.getKey()))
+                            .toList();
+
+                        long recentRefreshEvery = plugin.getConfig().getLong("defaults.refresh-every", 50);
+                        if (!groups.isEmpty()) {
+                            Map.Entry<String, ConfigurationSection> highest = groups.getLast();
+
+                            TextDisplayMetaConfiguration.applyMeta(highest.getValue(), entity.getMeta());
+                            TextDisplayMetaConfiguration.applyTextMeta(highest.getValue(), entity.getMeta(), player, player);
+
+                            long groupRefresh = highest.getValue().getLong("refresh-every", -1);
+                            if (groupRefresh > 0) {
+                                recentRefreshEvery = groupRefresh;
                             }
-
-                            // Preserve background color for sneaking
-                            // Maybe we should introduce an `afterRefresh` callback?
-                            entity.getTraits()
-                                .getTrait(SneakTrait.class)
-                                .ifPresent(SneakTrait::manuallyUpdateSneakingOpacity);
-
-                            entity.updateVisibility();
-                            entity.getPassenger().refresh();
                         }
+
+                        if (recentRefreshEvery != refreshMillis) {
+                            entity.getTraits().removeTrait(RefreshTrait.class);
+                            registerDefaultRefreshListener(tag, recentRefreshEvery);
+                        }
+
+                        if (entity.getMeta().getBillboardConstraints() == AbstractDisplayMeta.BillboardConstraints.CENTER) {
+                            // Look passenger down to remove debug getting in the way
+                            entity.getPassenger().rotateHead(0f, 90f);
+                        }
+
+                        // Preserve background color for sneaking
+                        // Maybe we should introduce an `afterRefresh` callback?
+                        entity.getTraits()
+                            .getTrait(SneakTrait.class)
+                            .ifPresent(SneakTrait::manuallyUpdateSneakingOpacity);
+
+                        entity.updateVisibility();
+                        entity.getPassenger().refresh();
                     }
-                )
-            );
+                }
+            )
+        );
     }
 
 }
