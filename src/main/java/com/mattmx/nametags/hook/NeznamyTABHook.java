@@ -26,7 +26,15 @@ public class NeznamyTABHook {
         NameTags plugin = NameTags.getInstance();
         NameTagManager nameTagManager = TabAPI.getInstance().getNameTagManager();
 
-        if (nameTagManager instanceof UnlimitedNameTagManager) {
+        boolean isUnlimitedNameTag = false;
+
+        try {
+            Class.forName("me.neznamy.tab.api.nametag.UnlimitedNameTagManager");
+            isUnlimitedNameTag = nameTagManager instanceof UnlimitedNameTagManager;
+        } catch (ClassNotFoundException ignored) {
+        }
+
+        if (isUnlimitedNameTag) {
             plugin.getLogger().warning("""
                 ⚠ TAB UnlimitedNameTags Mode detected! ⚠
                                 
@@ -51,9 +59,11 @@ public class NeznamyTABHook {
             .register(PlayerLoadEvent.class, (event) -> {
                 final TabPlayer tabPlayer = event.getPlayer();
 
-                TabAPI.getInstance()
-                    .getNameTagManager()
-                    .hideNameTag(tabPlayer);
+                NameTagManager manager = TabAPI.getInstance().getNameTagManager();
+
+                if (manager != null) {
+                    manager.hideNameTag(tabPlayer);
+                }
             });
     }
 
