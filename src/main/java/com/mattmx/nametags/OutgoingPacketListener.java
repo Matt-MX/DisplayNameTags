@@ -76,22 +76,24 @@ public class OutgoingPacketListener extends PacketListenerAbstract {
 
                 nameTagEntity.updateVisibility(false);
             }
-//            case PacketType.Play.Server.SET_PASSENGERS -> {
-//                final WrapperPlayServerSetPassengers packet = new WrapperPlayServerSetPassengers(event);
-//
-//                final NameTagEntity nameTagEntity = plugin.getEntityManager().getNameTagEntityById(packet.getEntityId());
-//
-//                if (nameTagEntity == null) return;
-//
-//                if (Arrays.stream(packet.getPassengers()).noneMatch((i) -> nameTagEntity.getPassenger().getEntityId() == i)) {
-//
-//                    // Add our entity
-//                    int[] passengers = Arrays.copyOf(packet.getPassengers(), packet.getPassengers().length + 1);
-//                    passengers[passengers.length - 1] = nameTagEntity.getPassenger().getEntityId();
-//
-//                    packet.setPassengers(passengers);
-//                }
-//            }
+            case PacketType.Play.Server.SET_PASSENGERS -> {
+                final WrapperPlayServerSetPassengers packet = new WrapperPlayServerSetPassengers(event);
+
+                final NameTagEntity nameTagEntity = plugin.getEntityManager().getNameTagEntityById(packet.getEntityId());
+
+                if (nameTagEntity == null) return;
+
+                // If the packet doesn't already contain our entity
+                if (Arrays.stream(packet.getPassengers()).noneMatch((i) -> nameTagEntity.getPassenger().getEntityId() == i)) {
+
+                    // Add our entity
+                    int[] passengers = Arrays.copyOf(packet.getPassengers(), packet.getPassengers().length + 1);
+                    passengers[passengers.length - 1] = nameTagEntity.getPassenger().getEntityId();
+
+                    packet.setPassengers(passengers);
+                    event.markForReEncode(true);
+                }
+            }
             default -> {
             }
         }
