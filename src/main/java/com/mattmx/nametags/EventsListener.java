@@ -63,6 +63,8 @@ public class EventsListener implements Listener {
             return;
         }
 
+        if (event.getPlayer().isInsideVehicle()) return;
+
         NameTagEntity nameTagEntity = plugin.getEntityManager()
             .getNameTagEntity(event.getPlayer());
 
