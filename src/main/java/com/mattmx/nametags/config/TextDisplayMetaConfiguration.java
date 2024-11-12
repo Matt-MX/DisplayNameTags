@@ -54,15 +54,24 @@ public class TextDisplayMetaConfiguration {
             } else if (NamedTextColor.NAMES.value(backgroundColor) != null) {
                 background = 0x40000000 | Objects.requireNonNull(NamedTextColor.NAMES.value(backgroundColor)).value();
             } else if (backgroundColor.startsWith("#")) {
-                int intValue = Integer.parseInt(backgroundColor.replace("#", ""), 16);
-                Color color = Color.fromARGB(intValue);
+                String hex = backgroundColor.replace("#", "");
 
-                // Set a default alpha of 0x40 (minecraft's internal default)
-                if (color.getAlpha() == 0 && !backgroundColor.startsWith("#00")) {
-                    background = color.setAlpha(0x40).asARGB();
+                int rgb;
+                int a;
+                if (hex.length() == 6) {
+                    rgb = Integer.parseInt(hex, 16);
+                    // Set a default alpha of 0x40 (minecraft's internal default)
+                    a = 0x40;
+                } else if (hex.length() == 8) {
+                    rgb = Integer.parseInt(hex.substring(2), 16);
+                    a = Integer.parseInt(hex.substring(0, 2), 16);
                 } else {
-                    background = color.asARGB();
+                    throw new RuntimeException(String.format("Invalid hex string '#%s'!", hex));
                 }
+
+                Color color = Color.fromARGB(rgb).setAlpha(a);
+
+                background = color.asARGB();
             } else {
                 background = NameTags.TRANSPARENT;
             }

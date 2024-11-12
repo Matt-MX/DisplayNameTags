@@ -24,12 +24,6 @@ public class SneakTrait extends Trait {
             Color color = Color.fromARGB(meta.getBackgroundColor());
 
             if (sneaking) {
-
-                // If it's transparent then we shouldn't do anything really
-                if (color.getAlpha() == 0) {
-                    return;
-                }
-
                 previousBackgroundOpacity = color.getAlpha();
                 previousTextOpacity = meta.getTextOpacity();
 
@@ -45,6 +39,10 @@ public class SneakTrait extends Trait {
     }
 
     public Color withCustomSneakOpacity(@NotNull Color previous) {
+        if (previous.getAlpha() == 0) {
+            return previous;
+        }
+
         return previous.setAlpha(getCustomOpacity());
     }
 
