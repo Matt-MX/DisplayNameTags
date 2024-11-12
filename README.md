@@ -5,7 +5,7 @@
 </div>
 
 Replace your players' boring old name tags with customizable ones based on 
-text displays!
+text displays! (Thanks to [EntityLib](https://github.com/Tofaa2/EntityLib)!)
 
 
 <p align="center">
@@ -70,6 +70,59 @@ class MyCustomListener implements Listener {
 }
 
 ```
+
+<details>
+    <summary>Kotlin example</summary>
+
+Here is a brief example of Kotlin usage, and shows that you can use the nametags on entities other than just Players!
+
+In this example, a dropped item will display a timer of 4 seconds before it is removed from the world, with a timer above it!
+
+```kt
+@EventHandler
+fun onItemSpawn(event: ItemSpawnEvent) = event.apply {
+    entity.isPersistent = false
+
+    // Armour and tools should take longer to despawn
+    val ticksTillRemove = 80 // 4 seconds
+
+    val nameTagEntity = NameTags.getInstance()
+        .entityManager
+        .getOrCreateNameTagEntity(entity)
+
+    nameTagEntity.modify { meta ->
+        meta.isShadow = true
+        meta.viewRange = 90f
+        meta.backgroundColor = NameTags.TRANSPARENT
+        meta.translation = Vector3f(0f, 0.45f, 0f)
+        meta.billboardConstraints = AbstractDisplayMeta.BillboardConstraints.VERTICAL
+        meta.textOpacity = (-180).toByte()
+    }
+
+    var counter = ticksTillRemove / 20L
+    val update = runAsyncRepeat(20) {
+        counter--
+        nameTagEntity.modify { meta ->
+            meta.text = Component.text(counter.toString()).color(NamedTextColor.RED)
+        }
+    }
+
+    runSyncLater(ticksTillRemove) {
+        update?.cancel()
+
+        NameTags.getInstance()
+            .entityManager
+            .removeEntity(entity)
+            ?.destroy()
+
+        if (entity.isValid) {
+            entity.remove()
+        }
+    }
+}
+```
+    
+</details>
 
 ## Roadmap
 
