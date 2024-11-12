@@ -1,5 +1,6 @@
 package com.mattmx.nametags;
 
+import com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent;
 import com.mattmx.nametags.entity.NameTagEntity;
 import com.mattmx.nametags.entity.trait.SneakTrait;
 import org.bukkit.event.EventHandler;
@@ -26,7 +27,20 @@ public class EventsListener implements Listener {
     }
 
     @EventHandler
+    public void onEntityRemove(@NotNull EntityRemoveFromWorldEvent event) {
+        plugin.getEntityManager().removeLastSentPassengersCache(event.getEntity().getEntityId());
+
+        NameTagEntity entity = plugin.getEntityManager()
+            .removeEntity(event.getEntity());
+
+        if (entity != null) {
+            entity.destroy();
+        }
+    }
+
+    @EventHandler
     public void onPlayerQuit(@NotNull PlayerQuitEvent event) {
+        plugin.getEntityManager().removeLastSentPassengersCache(event.getPlayer().getEntityId());
 
         // Remove as a viewer from all entities
         for (final NameTagEntity entity : plugin.getEntityManager().getAllEntities()) {
@@ -36,9 +50,9 @@ public class EventsListener implements Listener {
         NameTagEntity entity = plugin.getEntityManager()
             .removeEntity(event.getPlayer());
 
-        if (entity == null) return;
-
-        entity.destroy();
+        if (entity != null) {
+            entity.destroy();
+        }
     }
 
     @EventHandler

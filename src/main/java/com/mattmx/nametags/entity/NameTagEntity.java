@@ -16,6 +16,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
 import java.util.function.Consumer;
 
 public class NameTagEntity {
@@ -87,8 +88,22 @@ public class NameTagEntity {
     }
 
     public PacketWrapper<?> getPassengersPacket() {
-        // TODO(Matt): track previous passengers
-        return new WrapperPlayServerSetPassengers(bukkitEntity.getEntityId(), new int[]{this.passenger.getEntityId()});
+        int[] previousPackets = NameTags.getInstance()
+            .getEntityManager()
+            .getLastSentPassengers(getBukkitEntity().getEntityId())
+            .orElseGet(() -> {
+                int[] bukkitPassengers = this.bukkitEntity.getPassengers()
+                    .stream()
+                    .mapToInt(Entity::getEntityId)
+                    .toArray();
+
+                int[] passengers = Arrays.copyOf(bukkitPassengers, bukkitPassengers.length + 1);
+                passengers[passengers.length - 1] = getPassenger().getEntityId();
+
+                return passengers;
+            });
+
+        return new WrapperPlayServerSetPassengers(bukkitEntity.getEntityId(), previousPackets);
     }
 
     public @NotNull Entity getBukkitEntity() {

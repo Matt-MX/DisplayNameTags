@@ -11,7 +11,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Arrays;
 
 public class OutgoingPacketListener extends PacketListenerAbstract {
-
     private final @NotNull NameTags plugin;
 
     public OutgoingPacketListener(@NotNull NameTags plugin) {
@@ -91,6 +90,11 @@ public class OutgoingPacketListener extends PacketListenerAbstract {
                     passengers[passengers.length - 1] = nameTagEntity.getPassenger().getEntityId();
 
                     packet.setPassengers(passengers);
+
+                    NameTags.getInstance()
+                        .getEntityManager()
+                        .setLastSentPassengers(packet.getEntityId(), passengers);
+
                     event.markForReEncode(true);
                 }
             }

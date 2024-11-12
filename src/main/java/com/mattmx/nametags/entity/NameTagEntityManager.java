@@ -10,12 +10,15 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
+import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 
 public class NameTagEntityManager {
     private final @NotNull ConcurrentHashMap<UUID, NameTagEntity> entityMap = new ConcurrentHashMap<>();
+    private final Map<Integer, int[]> lastSentPassengers = new ConcurrentHashMap<>();
     private @NotNull BiConsumer<Entity, TextDisplayMeta> defaultProvider = (entity, meta) -> {
         // Default minecraft name-tag appearance
         meta.setText(entity.name());
@@ -62,5 +65,17 @@ public class NameTagEntityManager {
 
     public void setDefaultProvider(@NotNull BiConsumer<Entity, TextDisplayMeta> consumer) {
         this.defaultProvider = consumer;
+    }
+
+    public void setLastSentPassengers(int entityId, int[] passengers) {
+        this.lastSentPassengers.put(entityId, passengers);
+    }
+
+    public void removeLastSentPassengersCache(int entityId) {
+        this.lastSentPassengers.remove(entityId);
+    }
+
+    public @NotNull Optional<int[]> getLastSentPassengers(int entityId) {
+        return Optional.ofNullable(this.lastSentPassengers.get(entityId));
     }
 }
