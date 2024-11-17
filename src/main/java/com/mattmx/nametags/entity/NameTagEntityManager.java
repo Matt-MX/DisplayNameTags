@@ -59,6 +59,14 @@ public class NameTagEntityManager {
             .orElse(null);
     }
 
+    public @Nullable NameTagEntity getNameTagEntityByTagEntityId(int entityId) {
+        return entityMap.values()
+            .stream()
+            .filter((e) -> e.getPassenger().getEntityId() == entityId)
+            .findFirst()
+            .orElse(null);
+    }
+
     public @NotNull Collection<NameTagEntity> getAllEntities() {
         return this.entityMap.values();
     }

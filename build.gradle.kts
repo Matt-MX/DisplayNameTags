@@ -25,6 +25,7 @@ repositories {
     maven("https://repo.extendedclip.com/content/repositories/placeholderapi/")
     maven("https://repo.codemc.io/repository/maven-releases/")
     maven("https://maven.evokegames.gg/snapshots")
+    maven("https://repo.viaversion.com")
 }
 
 dependencies {
