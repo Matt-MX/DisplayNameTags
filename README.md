@@ -17,7 +17,7 @@ text displays! (Thanks to [EntityLib](https://github.com/Tofaa2/EntityLib)!)
 
 Currently, you can customize default name tags and create grouped name tags.
 
-You can also choose if players get to see their own name tags (Disabled by default).
+Install the plugin and access the `plugins/NameTags/config.yml` for more information.
 
 ## API
 
