@@ -5,6 +5,8 @@ import com.mattmx.nametags.entity.NameTagEntity;
 import com.mattmx.nametags.entity.trait.SneakTrait;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.EntityRemoveEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -26,17 +28,17 @@ public class EventsListener implements Listener {
             .updateVisibility();
     }
 
-    @EventHandler
-    public void onEntityRemove(@NotNull EntityRemoveFromWorldEvent event) {
-        plugin.getEntityManager().removeLastSentPassengersCache(event.getEntity().getEntityId());
-
-        NameTagEntity entity = plugin.getEntityManager()
-            .removeEntity(event.getEntity());
-
-        if (entity != null) {
-            entity.destroy();
-        }
-    }
+//    @EventHandler
+//    public void onEntityRemove(@NotNull EntityRemoveFromWorldEvent event) {
+//        plugin.getEntityManager().removeLastSentPassengersCache(event.getEntity().getEntityId());
+//
+//        NameTagEntity entity = plugin.getEntityManager()
+//            .removeEntity(event.getEntity());
+//
+//        if (entity != null) {
+//            entity.destroy();
+//        }
+//    }
 
     @EventHandler
     public void onPlayerQuit(@NotNull PlayerQuitEvent event) {
