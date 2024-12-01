@@ -35,6 +35,7 @@ dependencies {
     compileOnly(libs.tab.api)
     compileOnly(libs.packet.events)
     implementation(libs.entity.lib)
+    testImplementation("org.junit.jupiter:junit-jupiter:5.7.1")
 }
 
 tasks {

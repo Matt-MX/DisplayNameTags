@@ -1,6 +1,5 @@
 package com.mattmx.nametags.config;
 
-import me.tofaa.entitylib.meta.display.AbstractDisplayMeta;
 import org.bukkit.configuration.ConfigurationSection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
