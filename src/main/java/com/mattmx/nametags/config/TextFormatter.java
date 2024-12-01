@@ -22,21 +22,19 @@ public enum TextFormatter {
     )
     ;
 
-    // Converts legacy hex format &x&9&0&0&c&3&f to modern hex format &#900c3f
+    // Converts legacy hex format &x&9&0&0&c&3&f -> &#900c3f modern hex format
     // https://github.com/Matt-MX/DisplayNameTags/issues/32#issuecomment-2509403581
-    private static String convertLegacyHex(String input) {
-        //regex to match the legacy hex format
-        String legacyHexPattern = "&x(&[0-9a-fA-F]){6}";
-        Pattern pattern = Pattern.compile(legacyHexPattern);
-        Matcher matcher = pattern.matcher(input);
+    private static final Pattern LEGACY_HEX_PATTERN = Pattern.compile("&x(&[0-9a-fA-F]){6}");
+    public static String convertLegacyHex(String input) {
+        Matcher matcher = LEGACY_HEX_PATTERN.matcher(input);
 
         StringBuilder result = new StringBuilder();
         while (matcher.find()) {
             String legacyHex = matcher.group();
-            //extract hex digits from the legacy format
+            // Extract hex digits from the legacy format
             String hexColor = legacyHex.replace("&x", "")
                 .replace("&", "");
-            //replace with modern format
+            // Replace with modern format
             String modernHex = "&#" + hexColor;
             matcher.appendReplacement(result, modernHex);
         }
