@@ -186,6 +186,7 @@ public class TextDisplayMetaConfiguration {
         String formatted = line;
 
         formatted = PapiHook.setPlaceholders(self, sending, formatted);
+        System.out.println(formatted);
 
         return NameTags.getInstance()
             .getFormatter()

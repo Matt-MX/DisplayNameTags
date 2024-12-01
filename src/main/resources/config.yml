@@ -59,6 +59,7 @@ groups:
 # Options:
 # - minimessage
 # - legacy
+# - smart (Attempts to format legacy -> minimessage)
 formatter: minimessage
 
 # Extra features
