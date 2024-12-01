@@ -12,6 +12,7 @@ runPaper = "2.2.4"
 packetEvents = "2.6.0"
 entityLib = "2.4.11-SNAPSHOT"
 tab = "4.1.8"
+viaversion = "5.0.0"
 
 [libraries]
 
@@ -23,6 +24,7 @@ ktgui = { module = "com.mattmx:ktgui", version.ref = "ktgui" }
 packet-events = { module = "com.github.retrooper:packetevents-spigot", version.ref = "packetEvents" }
 entity-lib = { module = "me.tofaa.entitylib:spigot", version.ref = "entityLib" }
 tab-api = { module = "com.github.NEZNAMY:TAB-API", version.ref = "tab" }
+via-version = { module = "com.viaversion:viaversion-api", version.ref = "viaversion" }
 
 [plugins]
 

@@ -1,9 +1,12 @@
 package com.mattmx.nametags;
 
+import com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent;
 import com.mattmx.nametags.entity.NameTagEntity;
 import com.mattmx.nametags.entity.trait.SneakTrait;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.EntityRemoveEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -25,8 +28,21 @@ public class EventsListener implements Listener {
             .updateVisibility();
     }
 
+//    @EventHandler
+//    public void onEntityRemove(@NotNull EntityRemoveFromWorldEvent event) {
+//        plugin.getEntityManager().removeLastSentPassengersCache(event.getEntity().getEntityId());
+//
+//        NameTagEntity entity = plugin.getEntityManager()
+//            .removeEntity(event.getEntity());
+//
+//        if (entity != null) {
+//            entity.destroy();
+//        }
+//    }
+
     @EventHandler
     public void onPlayerQuit(@NotNull PlayerQuitEvent event) {
+        plugin.getEntityManager().removeLastSentPassengersCache(event.getPlayer().getEntityId());
 
         // Remove as a viewer from all entities
         for (final NameTagEntity entity : plugin.getEntityManager().getAllEntities()) {
@@ -36,9 +52,9 @@ public class EventsListener implements Listener {
         NameTagEntity entity = plugin.getEntityManager()
             .removeEntity(event.getPlayer());
 
-        if (entity == null) return;
-
-        entity.destroy();
+        if (entity != null) {
+            entity.destroy();
+        }
     }
 
     @EventHandler
@@ -62,6 +78,8 @@ public class EventsListener implements Listener {
         if (!plugin.getConfig().getBoolean("sneak.enabled")) {
             return;
         }
+
+        if (event.getPlayer().isInsideVehicle()) return;
 
         NameTagEntity nameTagEntity = plugin.getEntityManager()
             .getNameTagEntity(event.getPlayer());
