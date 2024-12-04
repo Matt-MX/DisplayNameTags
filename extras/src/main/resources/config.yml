@@ -1,0 +1,3 @@
+storage:
+  method: "yaml"
+  connection-string: "<empty>"

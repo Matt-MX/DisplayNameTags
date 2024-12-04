@@ -1,0 +1,20 @@
+name: ${name}
+main: ${main}
+version: ${version}
+author: ${author}
+api-version: 1.17
+
+depend:
+  - packetevents
+  - NameTags
+
+softdepend:
+  - PlaceholderAPI
+  - TAB
+
+commands:
+  nametag:
+    description: Create name tags
+
+libraries:
+  - com.mysql:mysql-connector-j:9.1.0

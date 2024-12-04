@@ -8,6 +8,7 @@ pluginManagement {
 
 plugins {
     id("com.gradle.enterprise") version("3.15")
+    id("org.gradle.toolchains.foojay-resolver-convention") version "0.5.0"
 }
 
 gradleEnterprise {
@@ -19,3 +20,5 @@ gradleEnterprise {
         }
     }
 }
+include("extras")
+include("extras")
