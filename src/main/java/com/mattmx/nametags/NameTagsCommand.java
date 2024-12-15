@@ -10,6 +10,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Map;
 import java.util.UUID;
 
 public class NameTagsCommand implements CommandExecutor {
@@ -21,6 +22,14 @@ public class NameTagsCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+        for (final Player player : Bukkit.getOnlinePlayers()) {
+            final NameTagEntity tag = plugin.getEntityManager().getNameTagEntity(player);
+
+            if (tag != null) {
+                tag.getTraits().destroy();
+            }
+        }
+
         this.plugin.reloadConfig();
 
         for (final Player player : Bukkit.getOnlinePlayers()) {
