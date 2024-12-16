@@ -13,13 +13,19 @@ import com.github.retrooper.packetevents.protocol.potion.PotionTypes;
 import com.github.retrooper.packetevents.util.Vector3f;
 import com.github.retrooper.packetevents.wrapper.play.server.*;
 import com.mattmx.nametags.entity.NameTagEntity;
-import me.tofaa.entitylib.meta.display.TextDisplayMeta;
+import me.clip.placeholderapi.PlaceholderAPI;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 
 public class OutgoingPacketListener extends PacketListenerAbstract {
-    private static final Vector3f PRE_1_20_2_TRANSLATION = new Vector3f(0f, 0.4f, 0f);
+    private static final byte TEXT_DISPLAY_TEXT_INDEX = 23;
+    private static final byte PRE_1_20_2_TRANSLATION_INDEX = 10;
+    private static final byte POST_1_20_2_TRANSLATION_INDEX = 10;
+    private static final Vector3f PRE_1_20_2_TRANSLATION_OFFSET = new Vector3f(0f, 0.4f, 0f);
     private final @NotNull NameTags plugin;
 
     public OutgoingPacketListener(@NotNull NameTags plugin) {
@@ -50,38 +56,66 @@ public class OutgoingPacketListener extends PacketListenerAbstract {
                 });
             }
             case PacketType.Play.Server.ENTITY_METADATA -> {
-                if (event.getUser().getClientVersion().isNewerThanOrEquals(ClientVersion.V_1_20_2)) {
-                    return;
-                }
-
                 WrapperPlayServerEntityMetadata packet = new WrapperPlayServerEntityMetadata(event);
 
                 NameTagEntity nameTagEntity = plugin.getEntityManager().getNameTagEntityByTagEntityId(packet.getEntityId());
 
                 if (nameTagEntity == null) return;
 
-                byte index = PacketEvents.getAPI()
-                    .getServerManager()
-                    .getVersion()
-                    .is(VersionComparison.OLDER_THAN, ServerVersion.V_1_20_2)
-                    ? (byte) 10
-                    : (byte) 11;
+                // Backwards compatibility for clients older than 1.20.2
+                // Mojank changed the passenger origin point when riding an entity so the tag appears inside their head.
+                if (event.getUser().getClientVersion().isOlderThan(ClientVersion.V_1_20_2)) {
 
-                packet.getEntityMetadata()
-                    .stream()
-                    .filter((meta) -> meta.getIndex() == index)
-                    .findFirst()
-                    .ifPresentOrElse((data) -> {
-                            Vector3f vec = (Vector3f) data.getValue();
-                            data.setValue(vec.add(PRE_1_20_2_TRANSLATION));
-                        }, () -> packet.getEntityMetadata().add(new EntityData(
-                            index,
-                            EntityDataTypes.VECTOR3F,
-                            PRE_1_20_2_TRANSLATION
-                        ))
-                    );
+                    byte index = PacketEvents.getAPI()
+                        .getServerManager()
+                        .getVersion()
+                        .is(VersionComparison.OLDER_THAN, ServerVersion.V_1_20_2)
+                        ? PRE_1_20_2_TRANSLATION_INDEX
+                        : POST_1_20_2_TRANSLATION_INDEX;
 
-                event.markForReEncode(true);
+                    packet.getEntityMetadata()
+                        .stream()
+                        .filter((meta) -> meta.getIndex() == index)
+                        .findFirst()
+                        .ifPresentOrElse((data) -> {
+                                Vector3f vec = (Vector3f) data.getValue();
+                                data.setValue(vec.add(PRE_1_20_2_TRANSLATION_OFFSET));
+                            }, () -> packet.getEntityMetadata().add(new EntityData(
+                                index,
+                                EntityDataTypes.VECTOR3F,
+                                PRE_1_20_2_TRANSLATION_OFFSET
+                            ))
+                        );
+                    event.markForReEncode(true);
+                }
+
+                // Apply relational placeholders to the text of an outgoing display entity
+                if (nameTagEntity.getBukkitEntity() instanceof Player from) {
+                    packet.getEntityMetadata()
+                        .stream()
+                        .filter((meta) -> meta.getIndex() == TEXT_DISPLAY_TEXT_INDEX && meta.getValue() instanceof Component)
+                        .findFirst()
+                        .ifPresent((data) -> {
+                            final Component originalText = (Component) data.getValue();
+                            final Player to = event.getPlayer();
+
+                            // TODO(Matt): Replace use of legacy serializer
+                            String legacy = LegacyComponentSerializer
+                                .legacyAmpersand()
+                                .serialize(originalText);
+
+                            final Component appliedText = LegacyComponentSerializer
+                                .legacyAmpersand()
+                                .deserialize(PlaceholderAPI.setRelationalPlaceholders(from, to, legacy));
+
+                            if (!originalText.equals(appliedText)) {
+
+                                data.setValue(appliedText);
+
+                                event.markForReEncode(true);
+                            }
+                        });
+                }
             }
             case PacketType.Play.Server.DESTROY_ENTITIES -> {
                 WrapperPlayServerDestroyEntities packet = new WrapperPlayServerDestroyEntities(event);

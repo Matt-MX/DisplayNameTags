@@ -63,8 +63,6 @@ public class ConfigDefaultsListener implements Listener {
                 refreshMillis,
                 (entity) -> {
                     synchronized (entity) {
-
-                        // TODO we need to change the text based off the player the packet is being sent to.
                         TextDisplayMetaConfiguration.applyMeta(defaultSection(), entity.getMeta());
                         TextDisplayMetaConfiguration.applyTextMeta(defaultSection(), entity.getMeta(), player, player);
 

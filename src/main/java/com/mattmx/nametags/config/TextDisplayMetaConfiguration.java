@@ -26,7 +26,6 @@ public class TextDisplayMetaConfiguration {
             .stream()
             .map((line) -> convertToComponent(self, sender, line));
 
-        // TODO(matt): Test
         if (NameTags.getInstance().getConfig().getBoolean("defaults.remove-empty-lines", false)) {
             stream = stream.filter(TextComponent.IS_NOT_EMPTY);
         }
