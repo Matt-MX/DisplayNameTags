@@ -13,6 +13,7 @@ import com.github.retrooper.packetevents.protocol.potion.PotionTypes;
 import com.github.retrooper.packetevents.util.Vector3f;
 import com.github.retrooper.packetevents.wrapper.play.server.*;
 import com.mattmx.nametags.entity.NameTagEntity;
+import com.mattmx.nametags.hook.PapiHook;
 import me.clip.placeholderapi.PlaceholderAPI;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -104,9 +105,12 @@ public class OutgoingPacketListener extends PacketListenerAbstract {
                                 .legacyAmpersand()
                                 .serialize(originalText);
 
+                            // If it doesn't have any placeholders in then stop
+                            if (!legacy.contains("%rel_")) return;
+
                             final Component appliedText = LegacyComponentSerializer
                                 .legacyAmpersand()
-                                .deserialize(PlaceholderAPI.setRelationalPlaceholders(from, to, legacy));
+                                .deserialize(PapiHook.setRelationalPlaceholders(from, to, legacy));
 
                             if (!originalText.equals(appliedText)) {
 

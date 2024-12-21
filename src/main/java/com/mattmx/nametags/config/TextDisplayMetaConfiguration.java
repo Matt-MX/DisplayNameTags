@@ -21,10 +21,10 @@ import java.util.stream.Stream;
 
 public class TextDisplayMetaConfiguration {
 
-    public static boolean applyTextMeta(@NotNull ConfigurationSection section, @NotNull TextDisplayMeta to, @NotNull Player self, @NotNull Player sender) {
+    public static boolean applyTextMeta(@NotNull ConfigurationSection section, @NotNull TextDisplayMeta to, @NotNull Player self) {
         Stream<Component> stream = section.getStringList("text")
             .stream()
-            .map((line) -> convertToComponent(self, sender, line));
+            .map((line) -> convertToComponent(self, line));
 
         if (NameTags.getInstance().getConfig().getBoolean("defaults.remove-empty-lines", false)) {
             stream = stream.filter(TextComponent.IS_NOT_EMPTY);
@@ -181,10 +181,10 @@ public class TextDisplayMetaConfiguration {
         String pitch = section.getString("pitch");
     }
 
-    private static Component convertToComponent(Player self, Player sending, String line) {
+    private static Component convertToComponent(Player self, String line) {
         String formatted = line;
 
-        formatted = PapiHook.setPlaceholders(self, sending, formatted);
+        formatted = PapiHook.setPlaceholders(self, formatted);
 
         return NameTags.getInstance()
             .getFormatter()

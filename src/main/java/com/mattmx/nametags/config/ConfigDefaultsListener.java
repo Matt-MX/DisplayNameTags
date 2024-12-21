@@ -65,7 +65,7 @@ public class ConfigDefaultsListener implements Listener {
                 (entity) -> {
                     synchronized (entity) {
                         TextDisplayMetaConfiguration.applyMeta(defaultSection(), entity.getMeta());
-                        TextDisplayMetaConfiguration.applyTextMeta(defaultSection(), entity.getMeta(), player, player);
+                        TextDisplayMetaConfiguration.applyTextMeta(defaultSection(), entity.getMeta(), player);
 
                         // TODO we should cache this stuff
                         List<Map.Entry<String, ConfigurationSection>> groups = plugin.getGroups()
@@ -80,7 +80,7 @@ public class ConfigDefaultsListener implements Listener {
                             Map.Entry<String, ConfigurationSection> highest = groups.getLast();
 
                             TextDisplayMetaConfiguration.applyMeta(highest.getValue(), entity.getMeta());
-                            TextDisplayMetaConfiguration.applyTextMeta(highest.getValue(), entity.getMeta(), player, player);
+                            TextDisplayMetaConfiguration.applyTextMeta(highest.getValue(), entity.getMeta(), player);
 
                             long groupRefresh = highest.getValue().getLong("refresh-every", -1);
                             if (groupRefresh > 0) {
