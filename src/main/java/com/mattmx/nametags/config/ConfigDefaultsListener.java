@@ -14,6 +14,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -63,16 +64,15 @@ public class ConfigDefaultsListener implements Listener {
                 refreshMillis,
                 (entity) -> {
                     synchronized (entity) {
-
-                        // TODO we need to change the text based off the player the packet is being sent to.
                         TextDisplayMetaConfiguration.applyMeta(defaultSection(), entity.getMeta());
-                        TextDisplayMetaConfiguration.applyTextMeta(defaultSection(), entity.getMeta(), player, player);
+                        TextDisplayMetaConfiguration.applyTextMeta(defaultSection(), entity.getMeta(), player);
 
                         // TODO we should cache this stuff
                         List<Map.Entry<String, ConfigurationSection>> groups = plugin.getGroups()
                             .entrySet()
                             .stream()
                             .filter((e) -> player.hasPermission(e.getKey()))
+                            .sorted(GroupPriorityComparator.get())
                             .toList();
 
                         long recentRefreshEvery = plugin.getConfig().getLong("defaults.refresh-every", 50);
@@ -80,7 +80,7 @@ public class ConfigDefaultsListener implements Listener {
                             Map.Entry<String, ConfigurationSection> highest = groups.getLast();
 
                             TextDisplayMetaConfiguration.applyMeta(highest.getValue(), entity.getMeta());
-                            TextDisplayMetaConfiguration.applyTextMeta(highest.getValue(), entity.getMeta(), player, player);
+                            TextDisplayMetaConfiguration.applyTextMeta(highest.getValue(), entity.getMeta(), player);
 
                             long groupRefresh = highest.getValue().getLong("refresh-every", -1);
                             if (groupRefresh > 0) {

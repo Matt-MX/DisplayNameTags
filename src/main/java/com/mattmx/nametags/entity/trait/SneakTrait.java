@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class SneakTrait extends Trait {
     private int previousBackgroundOpacity = 0;
-    private int previousTextOpacity = Byte.MAX_VALUE;
+    private byte previousTextOpacity = Byte.MAX_VALUE;
     private boolean isSneaking = false;
 
     public void manuallyUpdateSneakingOpacity() {
@@ -32,7 +32,7 @@ public class SneakTrait extends Trait {
                 meta.setTextOpacity((byte) getCustomOpacity());
             } else {
                 meta.setBackgroundColor(color.setAlpha(previousBackgroundOpacity).asARGB());
-                meta.setTextOpacity((byte) previousTextOpacity);
+                meta.setTextOpacity(previousTextOpacity);
             }
         });
         getTag().getPassenger().refresh();
