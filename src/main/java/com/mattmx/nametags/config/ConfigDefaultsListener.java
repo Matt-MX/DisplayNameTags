@@ -14,6 +14,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -71,6 +72,7 @@ public class ConfigDefaultsListener implements Listener {
                             .entrySet()
                             .stream()
                             .filter((e) -> player.hasPermission(e.getKey()))
+                            .sorted(GroupPriorityComparator.get())
                             .toList();
 
                         long recentRefreshEvery = plugin.getConfig().getLong("defaults.refresh-every", 50);
