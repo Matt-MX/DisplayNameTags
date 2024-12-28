@@ -6,6 +6,7 @@ import com.mattmx.nametags.config.ConfigDefaultsListener;
 import com.mattmx.nametags.config.TextFormatter;
 import com.mattmx.nametags.entity.NameTagEntityManager;
 import com.mattmx.nametags.hook.NeznamyTABHook;
+import com.mattmx.nametags.hook.SkinRestorerHook;
 import me.tofaa.entitylib.APIConfig;
 import me.tofaa.entitylib.EntityLib;
 import me.tofaa.entitylib.spigot.SpigotEntityLibPlatform;
@@ -58,6 +59,7 @@ public class NameTags extends JavaPlugin {
         NeznamyTABHook.inject(this);
 
         Bukkit.getPluginManager().registerEvents(eventsListener, this);
+        new SkinRestorerHook();
 
         Objects.requireNonNull(Bukkit.getPluginCommand("nametags-reload")).setExecutor(new NameTagsCommand(this));
     }
