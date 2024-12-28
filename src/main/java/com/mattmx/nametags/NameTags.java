@@ -57,9 +57,9 @@ public class NameTags extends JavaPlugin {
 //        packetEvents.getEventManager().registerListener(new GlowingEffectHook());
 
         NeznamyTABHook.inject(this);
+        SkinRestorerHook.inject(this);
 
         Bukkit.getPluginManager().registerEvents(eventsListener, this);
-        new SkinRestorerHook();
 
         Objects.requireNonNull(Bukkit.getPluginCommand("nametags-reload")).setExecutor(new NameTagsCommand(this));
     }
