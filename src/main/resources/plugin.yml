@@ -14,3 +14,4 @@ softdepend:
 commands:
   nametags-reload:
     description: Reload the config
+    permission: nametags.command.reload
