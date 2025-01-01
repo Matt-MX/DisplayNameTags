@@ -1,12 +1,9 @@
 package com.mattmx.nametags;
 
-import com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent;
 import com.mattmx.nametags.entity.NameTagEntity;
 import com.mattmx.nametags.entity.trait.SneakTrait;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityDeathEvent;
-import org.bukkit.event.entity.EntityRemoveEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;

@@ -26,6 +26,9 @@ repositories {
     maven("https://repo.codemc.io/repository/maven-releases/")
     maven("https://maven.evokegames.gg/snapshots")
     maven("https://repo.viaversion.com")
+    maven("https://repo.codemc.org/repository/maven-public/") {
+        name = "codemc"
+    }
 }
 
 dependencies {
@@ -36,6 +39,7 @@ dependencies {
     compileOnly(libs.packet.events)
     implementation(libs.entity.lib)
     testImplementation("org.junit.jupiter:junit-jupiter:5.7.1")
+    compileOnly("net.skinsrestorer:skinsrestorer-api:15.5.1")
 }
 
 tasks {
