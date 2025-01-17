@@ -9,7 +9,7 @@ placeholderapi = "2.11.6"
 ktgui = "2.4.2-alpha"
 runPaper = "2.2.4"
 
-packetEvents = "2.6.0"
+packetEvents = "2.7.0"
 entityLib = "2.4.11-SNAPSHOT"
 tab = "4.1.8"
 viaversion = "5.0.0"
