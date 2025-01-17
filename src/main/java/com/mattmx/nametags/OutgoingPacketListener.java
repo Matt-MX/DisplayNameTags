@@ -25,7 +25,7 @@ import java.util.Arrays;
 public class OutgoingPacketListener extends PacketListenerAbstract {
     private static final byte TEXT_DISPLAY_TEXT_INDEX = 23;
     private static final byte PRE_1_20_2_TRANSLATION_INDEX = 10;
-    private static final byte POST_1_20_2_TRANSLATION_INDEX = 10;
+    private static final byte POST_1_20_2_TRANSLATION_INDEX = 11;
     private static final Vector3f PRE_1_20_2_TRANSLATION_OFFSET = new Vector3f(0f, 0.4f, 0f);
     private final @NotNull NameTags plugin;
 
