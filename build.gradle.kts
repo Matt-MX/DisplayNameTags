@@ -127,6 +127,6 @@ fun getCurrentCommitHash(): String {
     if (process.exitValue() == 0) {
         return commitHash?.substring(0, 7) ?: ""
     } else {
-        throw IllegalStateException("Failed to retrieve the commit hash.")
+        return "unknown"
     }
 }
