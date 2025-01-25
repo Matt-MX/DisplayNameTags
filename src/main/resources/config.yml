@@ -25,6 +25,10 @@ defaults:
   gap: 0.2
   # Should the plugin remove any empty lines?
   remove-empty-lines: false
+  # Controls when text should wrap to a new line
+  # Higher values will allow more text before wrapping
+  # Default Minecraft text display width is 200
+  line-width: 200
 
 # Should the player see their own tag?
 show-self: false
