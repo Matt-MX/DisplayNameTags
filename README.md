@@ -5,13 +5,19 @@
 </div>
 
 Replace your players' boring old name tags with customizable ones based on 
-text displays!
+text displays! (Thanks to [EntityLib](https://github.com/Tofaa2/EntityLib)!)
+
+
+<p align="center">
+    <img width="650px" src=nametags.gif />
+</p>
+
 
 ## Configuration
 
 Currently, you can customize default name tags and create grouped name tags.
 
-You can also choose if players get to see their own name tags (Disabled by default).
+Install the plugin and access the `plugins/NameTags/config.yml` for more information.
 
 ## API
 
@@ -65,26 +71,64 @@ class MyCustomListener implements Listener {
 
 ```
 
+<details>
+    <summary>Kotlin example</summary>
+
+Here is a brief example of Kotlin usage, and shows that you can use the nametags on entities other than just Players!
+
+In this example, a dropped item will display a timer of 4 seconds before it is removed from the world, with a timer above it!
+
+```kt
+@EventHandler
+fun onItemSpawn(event: ItemSpawnEvent) = event.apply {
+    entity.isPersistent = false
+
+    // Armour and tools should take longer to despawn
+    val ticksTillRemove = 80 // 4 seconds
+
+    val nameTagEntity = NameTags.getInstance()
+        .entityManager
+        .getOrCreateNameTagEntity(entity)
+
+    nameTagEntity.modify { meta ->
+        meta.isShadow = true
+        meta.viewRange = 90f
+        meta.backgroundColor = NameTags.TRANSPARENT
+        meta.translation = Vector3f(0f, 0.45f, 0f)
+        meta.billboardConstraints = AbstractDisplayMeta.BillboardConstraints.VERTICAL
+        meta.textOpacity = (-180).toByte()
+    }
+
+    var counter = ticksTillRemove / 20L
+    val update = runAsyncRepeat(20) {
+        counter--
+        nameTagEntity.modify { meta ->
+            meta.text = Component.text(counter.toString()).color(NamedTextColor.RED)
+        }
+    }
+
+    runSyncLater(ticksTillRemove) {
+        update?.cancel()
+
+        NameTags.getInstance()
+            .entityManager
+            .removeEntity(entity)
+            ?.destroy()
+
+        if (entity.isValid) {
+            entity.remove()
+        }
+    }
+}
+```
+    
+</details>
+
 ## Roadmap
 
 - `/feat/rel_placeholders`
     Currently the plugin does not support PlaceholderAPI's
     relational placeholders.
-
-
-- `/feat/align`
-    Ability to specify text align.
-    
-    e.g We want to align `z` on the right side, `y` on the left.
-
-    ```
-    |             z         | 
-    |         xxxxx         |
-    |         y             |
-    ```
-
-    We would want to do this by writing `<align:right>z` and `<align:left>`.
-
 
 - `/feat/customization`
     Extension plugin to give players ability to customize their own
