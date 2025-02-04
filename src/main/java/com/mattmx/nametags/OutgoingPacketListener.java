@@ -74,51 +74,60 @@ public class OutgoingPacketListener extends PacketListenerAbstract {
                         ? PRE_1_20_2_TRANSLATION_INDEX
                         : POST_1_20_2_TRANSLATION_INDEX;
 
-                    packet.getEntityMetadata()
-                        .stream()
-                        .filter((meta) -> meta.getIndex() == index)
-                        .findFirst()
-                        .ifPresentOrElse((data) -> {
-                                Vector3f vec = (Vector3f) data.getValue();
-                                data.setValue(vec.add(PRE_1_20_2_TRANSLATION_OFFSET));
-                            }, () -> packet.getEntityMetadata().add(new EntityData(
-                                index,
-                                EntityDataTypes.VECTOR3F,
-                                PRE_1_20_2_TRANSLATION_OFFSET
-                            ))
-                        );
+                    boolean found = false;
+                    for (final EntityData entry : packet.getEntityMetadata()) {
+                        if (entry.getIndex() != index) {
+                            continue;
+                        }
+
+                        found = true;
+                        Vector3f vec = (Vector3f) entry.getValue();
+                        entry.setValue(vec.add(PRE_1_20_2_TRANSLATION_OFFSET));
+                        break;
+                    }
+
+                    if (!found) {
+                        packet.getEntityMetadata().add(new EntityData(
+                            index,
+                            EntityDataTypes.VECTOR3F,
+                            PRE_1_20_2_TRANSLATION_OFFSET
+                        ));
+                    }
+
                     event.markForReEncode(true);
                 }
 
                 // Apply relational placeholders to the text of an outgoing display entity
                 if (nameTagEntity.getBukkitEntity() instanceof Player from) {
-                    packet.getEntityMetadata()
-                        .stream()
-                        .filter((meta) -> meta.getIndex() == TEXT_DISPLAY_TEXT_INDEX && meta.getValue() instanceof Component)
-                        .findFirst()
-                        .ifPresent((data) -> {
-                            final Component originalText = (Component) data.getValue();
-                            final Player to = event.getPlayer();
+                    for (final EntityData entry : packet.getEntityMetadata()) {
+                        if (entry.getIndex() != TEXT_DISPLAY_TEXT_INDEX || !(entry.getType() instanceof Component)) {
+                            continue;
+                        }
 
-                            // TODO(Matt): Replace use of legacy serializer
-                            String legacy = LegacyComponentSerializer
-                                .legacyAmpersand()
-                                .serialize(originalText);
+                        final Component originalText = (Component) entry.getValue();
+                        final Player to = event.getPlayer();
 
-                            // If it doesn't have any placeholders in then stop
-                            if (!legacy.contains("%rel_")) return;
+                        // TODO(Matt): Replace use of legacy serializer
+                        String legacy = LegacyComponentSerializer
+                            .legacyAmpersand()
+                            .serialize(originalText);
 
-                            final Component appliedText = LegacyComponentSerializer
-                                .legacyAmpersand()
-                                .deserialize(PapiHook.setRelationalPlaceholders(from, to, legacy));
+                        // If it doesn't have any placeholders in then stop
+                        if (!legacy.contains("%rel_")) break;
 
-                            if (!originalText.equals(appliedText)) {
+                        final Component appliedText = LegacyComponentSerializer
+                            .legacyAmpersand()
+                            .deserialize(PapiHook.setRelationalPlaceholders(from, to, legacy));
 
-                                data.setValue(appliedText);
+                        if (!originalText.equals(appliedText)) {
 
-                                event.markForReEncode(true);
-                            }
-                        });
+                            entry.setValue(appliedText);
+
+                            event.markForReEncode(true);
+                        }
+
+                        break;
+                    }
                 }
             }
             case PacketType.Play.Server.DESTROY_ENTITIES -> {
@@ -164,7 +173,14 @@ public class OutgoingPacketListener extends PacketListenerAbstract {
                 if (nameTagEntity == null) return;
 
                 // If the packet doesn't already contain our entity
-                if (Arrays.stream(packet.getPassengers()).noneMatch((i) -> nameTagEntity.getPassenger().getEntityId() == i)) {
+                boolean containsNameTagPassenger = false;
+                for (final int passengerId : packet.getPassengers()) {
+                    if (passengerId == nameTagEntity.getPassenger().getEntityId()) {
+                        containsNameTagPassenger = true;
+                    }
+                }
+
+                if (!containsNameTagPassenger) {
 
                     // Add our entity
                     int[] passengers = Arrays.copyOf(packet.getPassengers(), packet.getPassengers().length + 1);
