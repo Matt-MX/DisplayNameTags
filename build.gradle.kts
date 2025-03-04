@@ -62,6 +62,7 @@ tasks {
 
     shadowJar {
         mergeServiceFiles()
+        relocate("me.tofaa.entitylib", "com.mattmx.shadow.entitylib")
     }
 
     test {
