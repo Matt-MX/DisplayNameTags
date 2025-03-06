@@ -32,7 +32,8 @@ repositories {
 }
 
 dependencies {
-    paperweight.paperDevBundle(libs.versions.paperApi.get())
+    //paperweight.paperDevBundle(libs.versions.paperApi.get())
+    compileOnly(libs.paper.api)
 
     compileOnly(libs.placeholder.api)
     compileOnly(libs.tab.api)
