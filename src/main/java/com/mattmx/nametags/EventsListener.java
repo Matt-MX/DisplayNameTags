@@ -2,11 +2,14 @@ package com.mattmx.nametags;
 
 import com.mattmx.nametags.entity.NameTagEntity;
 import com.mattmx.nametags.entity.trait.SneakTrait;
+import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.jetbrains.annotations.NotNull;
 
@@ -67,6 +70,45 @@ public class EventsListener implements Listener {
             nameTagEntity.getPassenger().removeViewer(nameTagEntity.getBukkitEntity().getUniqueId());
             nameTagEntity.getPassenger().addViewer(nameTagEntity.getBukkitEntity().getUniqueId());
             nameTagEntity.sendPassengerPacket(event.getPlayer());
+        }
+    }
+
+
+    @EventHandler
+    public void onPlayerDeath(@NotNull PlayerDeathEvent event) {
+        NameTagEntity nameTagEntity = plugin.getEntityManager()
+                .getNameTagEntity(event.getPlayer());
+
+        if (nameTagEntity == null) return;
+
+        if (plugin.getConfig().getBoolean("show-self", false)) {
+            // Hides/removes tag on death/respawn screen
+            nameTagEntity.getPassenger().removeViewer(nameTagEntity.getBukkitEntity().getUniqueId());
+        }
+    }
+
+    @EventHandler
+    public void onPlayerRespawn(@NotNull PlayerRespawnEvent event) {
+        NameTagEntity nameTagEntity = plugin.getEntityManager()
+                .getNameTagEntity(event.getPlayer());
+
+        if (nameTagEntity == null) return;
+
+        if (plugin.getConfig().getBoolean("show-self", false)) {
+
+            String respawnWorld = event.getRespawnLocation().getWorld().getName();
+            String playerWorld = event.getPlayer().getWorld().getName();
+            // Ignoring since same action is handled at EventListener#onPlayerChangeWorld if player was killed in another world.
+            if (!playerWorld.equalsIgnoreCase(respawnWorld)) return;
+
+            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+                // Update entity location.
+                nameTagEntity.updateLocation();
+                // Add player back as viewer
+                nameTagEntity.getPassenger().addViewer(nameTagEntity.getBukkitEntity().getUniqueId());
+                // Send passenger packet
+                nameTagEntity.sendPassengerPacket(event.getPlayer());
+            });
         }
     }
 
