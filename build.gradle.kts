@@ -32,7 +32,7 @@ repositories {
 }
 
 dependencies {
-    paperweight.paperDevBundle(libs.versions.paperApi.get())
+    compileOnly(libs.paper.api)
 
     compileOnly(libs.placeholder.api)
     compileOnly(libs.tab.api)
@@ -62,6 +62,7 @@ tasks {
 
     shadowJar {
         mergeServiceFiles()
+        relocate("me.tofaa.entitylib", "com.mattmx.shadow.entitylib")
     }
 
     test {
