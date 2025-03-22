@@ -4,7 +4,6 @@ import java.io.InputStreamReader
 plugins {
     id("java")
     alias(libs.plugins.runPaper)
-    alias(libs.plugins.paperweight) apply true
     alias(libs.plugins.shadow) apply true
 
     `maven-publish`
@@ -67,10 +66,6 @@ tasks {
 
     test {
         useJUnitPlatform()
-    }
-
-    assemble {
-        dependsOn(reobfJar)
     }
 
     runServer {
