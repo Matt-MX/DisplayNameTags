@@ -7,11 +7,11 @@ shadow = "8.1.8"
 paperApi = "1.21.1-R0.1-SNAPSHOT"
 placeholderapi = "2.11.6"
 ktgui = "2.4.2-alpha"
-runPaper = "2.2.4"
+runPaper = "2.3.1"
 
 packetEvents = "2.7.0"
-entityLib = "2.4.11-SNAPSHOT"
-tab = "4.1.8"
+entityLib = "+6fba8ea-SNAPSHOT"
+tab = "4.1.9"
 viaversion = "5.0.0"
 
 [libraries]
