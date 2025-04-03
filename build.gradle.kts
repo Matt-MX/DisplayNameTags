@@ -4,7 +4,6 @@ import java.io.InputStreamReader
 plugins {
     id("java")
     alias(libs.plugins.runPaper)
-    alias(libs.plugins.paperweight) apply true
     alias(libs.plugins.shadow) apply true
 
     `maven-publish`
@@ -32,7 +31,7 @@ repositories {
 }
 
 dependencies {
-    paperweight.paperDevBundle(libs.versions.paperApi.get())
+    compileOnly(libs.paper.api)
 
     compileOnly(libs.placeholder.api)
     compileOnly(libs.tab.api)
@@ -62,14 +61,11 @@ tasks {
 
     shadowJar {
         mergeServiceFiles()
+        relocate("me.tofaa.entitylib", "com.mattmx.shadow.entitylib")
     }
 
     test {
         useJUnitPlatform()
-    }
-
-    assemble {
-        dependsOn(reobfJar)
     }
 
     runServer {
