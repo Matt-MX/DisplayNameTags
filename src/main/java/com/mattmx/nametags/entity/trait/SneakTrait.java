@@ -15,6 +15,7 @@ public class SneakTrait extends Trait {
         getTag().modify((tag) -> {
             Color currentColor = Color.fromARGB(tag.getBackgroundColor());
             tag.setBackgroundColor(withCustomSneakOpacity(currentColor).asARGB());
+            tag.setTextOpacity((byte) getCustomOpacity());
         });
     }
 
