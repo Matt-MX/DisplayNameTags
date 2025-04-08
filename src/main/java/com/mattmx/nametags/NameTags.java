@@ -2,6 +2,7 @@ package com.mattmx.nametags;
 
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.PacketEventsAPI;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.mattmx.nametags.config.ConfigDefaultsListener;
 import com.mattmx.nametags.config.TextFormatter;
 import com.mattmx.nametags.entity.NameTagEntityManager;
@@ -20,12 +21,14 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Objects;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 public class NameTags extends JavaPlugin {
     public static final int TRANSPARENT = Color.fromARGB(0).asARGB();
     public static final char LEGACY_CHAR = (char)167;
     private static @Nullable NameTags instance;
-
+    private @Nullable Executor executor = null;
     private final HashMap<String, ConfigurationSection> groups = new HashMap<>();
     private @NotNull TextFormatter formatter = TextFormatter.MINI_MESSAGE;
     private NameTagEntityManager entityManager;
@@ -37,6 +40,14 @@ public class NameTags extends JavaPlugin {
         instance = this;
         entityManager = new NameTagEntityManager();
         saveDefaultConfig();
+
+        executor = Executors.newFixedThreadPool(
+                getConfig().getInt("options.threads", 4),
+                new ThreadFactoryBuilder()
+                        .setPriority(Thread.NORM_PRIORITY + 1)
+                        .setNameFormat("NameTags-Processor")
+                        .build()
+        );
 
         ConfigurationSection defaults = getConfig().getConfigurationSection("defaults");
         if (defaults != null && defaults.getBoolean("enabled")) {
@@ -93,6 +104,14 @@ public class NameTags extends JavaPlugin {
 
             Bukkit.getPluginManager().addPermission(new Permission(permissionNode));
         }
+    }
+
+    public Executor getExecutor() {
+        if (this.executor == null) {
+            throw new RuntimeException("Executor is not available until the plugin has initialized.");
+        }
+
+        return this.executor;
     }
 
     public @NotNull NameTagEntityManager getEntityManager() {
