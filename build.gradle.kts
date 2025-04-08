@@ -37,7 +37,7 @@ dependencies {
     compileOnly(libs.placeholder.api)
     compileOnly(libs.tab.api)
     compileOnly(libs.packet.events)
-    implementation(libs.entity.lib)
+    compileOnly(libs.entity.lib)
     testImplementation("org.junit.jupiter:junit-jupiter:5.7.1")
     compileOnly("net.skinsrestorer:skinsrestorer-api:15.5.1")
 }
@@ -51,11 +51,12 @@ tasks {
             "author" to findProperty("plugin_author"),
             "version" to if (findProperty("include_commit_hash")
                     .toString().toBoolean()
-            ) "${rootProject.version}-commit-${getCurrentCommitHash()}" else rootProject.version.toString()
+            ) "${rootProject.version}-commit-${getCurrentCommitHash()}" else rootProject.version.toString(),
+            "loader" to findProperty("loader")
         )
         inputs.properties(props)
         filteringCharset = "UTF-8"
-        filesMatching("plugin.yml") {
+        filesMatching("*plugin.yml") {
             expand(props)
         }
     }

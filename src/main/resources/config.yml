@@ -1,3 +1,7 @@
+options:
+  threads: 4
+  relative-placeholders-support: true
+
 defaults:
   # If not enabled then plugin simulates vanilla name tags
   enabled: true

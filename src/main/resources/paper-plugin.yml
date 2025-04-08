@@ -1,0 +1,6 @@
+name: ${name}
+main: ${main}
+version: ${version}
+author: ${author}
+api-version: 1.19.4
+loader: ${loader}

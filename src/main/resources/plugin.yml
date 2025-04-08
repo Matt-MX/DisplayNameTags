@@ -2,7 +2,7 @@ name: ${name}
 main: ${main}
 version: ${version}
 author: ${author}
-api-version: 1.17
+api-version: 1.19.4
 
 depend:
   - packetevents
