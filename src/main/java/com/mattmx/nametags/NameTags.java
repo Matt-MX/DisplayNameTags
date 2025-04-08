@@ -8,6 +8,7 @@ import com.mattmx.nametags.config.TextFormatter;
 import com.mattmx.nametags.entity.NameTagEntityManager;
 import com.mattmx.nametags.hook.NeznamyTABHook;
 import com.mattmx.nametags.hook.SkinRestorerHook;
+import com.mattmx.nametags.utils.Metrics;
 import me.tofaa.entitylib.APIConfig;
 import me.tofaa.entitylib.EntityLib;
 import me.tofaa.entitylib.spigot.SpigotEntityLibPlatform;
@@ -26,7 +27,7 @@ import java.util.concurrent.Executors;
 
 public class NameTags extends JavaPlugin {
     public static final int TRANSPARENT = Color.fromARGB(0).asARGB();
-    public static final char LEGACY_CHAR = (char)167;
+    public static final char LEGACY_CHAR = (char) 167;
     private static @Nullable NameTags instance;
     private @Nullable Executor executor = null;
     private final HashMap<String, ConfigurationSection> groups = new HashMap<>();
@@ -34,12 +35,15 @@ public class NameTags extends JavaPlugin {
     private NameTagEntityManager entityManager;
     private final EventsListener eventsListener = new EventsListener(this);
     private final OutgoingPacketListener packetListener = new OutgoingPacketListener(this);
+    private Metrics metrics;
 
     @Override
     public void onEnable() {
         instance = this;
         entityManager = new NameTagEntityManager();
         saveDefaultConfig();
+
+        metrics = new Metrics(this, 25409);
 
         executor = Executors.newFixedThreadPool(
                 getConfig().getInt("options.threads", 4),
@@ -58,7 +62,7 @@ public class NameTags extends JavaPlugin {
         APIConfig settings = new APIConfig(PacketEvents.getAPI())
 //            .tickTickables()
 //            .trackPlatformEntities()
-            .usePlatformLogger();
+                .usePlatformLogger();
 
         EntityLib.init(platform, settings);
 
@@ -81,7 +85,7 @@ public class NameTags extends JavaPlugin {
 
         String textFormatterIdentifier = getConfig().getString("formatter", "minimessage");
         formatter = TextFormatter.getById(textFormatterIdentifier)
-            .orElse(TextFormatter.MINI_MESSAGE);
+                .orElse(TextFormatter.MINI_MESSAGE);
 
         getLogger().info("Using " + formatter.name() + " as text formatter.");
 
@@ -104,6 +108,11 @@ public class NameTags extends JavaPlugin {
 
             Bukkit.getPluginManager().addPermission(new Permission(permissionNode));
         }
+    }
+
+    @Override
+    public void onDisable() {
+        metrics.shutdown();
     }
 
     public Executor getExecutor() {
