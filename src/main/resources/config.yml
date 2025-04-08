@@ -25,6 +25,30 @@ defaults:
   gap: 0.2
   # Should the plugin remove any empty lines?
   remove-empty-lines: false
+  # Controls when text should wrap to a new line
+  # Higher values will allow more text before wrapping
+  # Default Minecraft text display width is 200
+  line-width: 200
+  # Makes the text display see-through
+  see-through: false
+  # Controls the opacity of the text (0-255)
+  text-opacity: 255
+  # Fine-tune the position offset
+  translate:
+    x: 0.0
+    y: 0.2 # Same as the gap option
+    z: 0.0
+  # Scale of the text display
+  scale:
+    x: 1.0
+    y: 1.0
+    z: 1.0 # Don't recommend changing this, it results in some strange results
+  # Override the brightness level
+  brightness: -1
+  # Text shadow configuration
+  shadow:
+    strength: 0.5
+    radius: 0.5
 
 # Should the player see their own tag?
 show-self: false
