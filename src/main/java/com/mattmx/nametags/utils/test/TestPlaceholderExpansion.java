@@ -1,4 +1,4 @@
-package com.mattmx.nametags;
+package com.mattmx.nametags.utils.test;
 
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.clip.placeholderapi.expansion.Relational;
@@ -21,6 +21,11 @@ public class TestPlaceholderExpansion extends PlaceholderExpansion implements Re
     @Override
     public @NotNull String getVersion() {
         return "1.0.0";
+    }
+
+    @Override
+    public boolean persist() {
+        return true;
     }
 
     private static final DecimalFormat decimalFormat = new DecimalFormat("#,###.0");

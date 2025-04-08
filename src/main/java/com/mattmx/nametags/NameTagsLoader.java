@@ -17,6 +17,8 @@ public class NameTagsLoader implements PluginLoader {
 
     @Override
     public void classloader(@NotNull PluginClasspathBuilder classpathBuilder) {
+        classpathBuilder.getContext().getLogger().info("Injecting dependencies");
+
         // File to override version
         final File override = classpathBuilder.getContext()
                 .getDataDirectory()
@@ -46,6 +48,8 @@ public class NameTagsLoader implements PluginLoader {
                         null
                 ).setOptional(false)
         );
+
+        classpathBuilder.addLibrary(resolver);
     }
 
 }

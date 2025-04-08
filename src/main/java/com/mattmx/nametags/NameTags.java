@@ -9,18 +9,22 @@ import com.mattmx.nametags.entity.NameTagEntityManager;
 import com.mattmx.nametags.hook.NeznamyTABHook;
 import com.mattmx.nametags.hook.SkinRestorerHook;
 import com.mattmx.nametags.utils.Metrics;
+import com.mattmx.nametags.utils.test.TestPassenger;
+import com.mattmx.nametags.utils.test.TestPlaceholderExpansion;
 import me.tofaa.entitylib.APIConfig;
 import me.tofaa.entitylib.EntityLib;
 import me.tofaa.entitylib.spigot.SpigotEntityLibPlatform;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.event.HandlerList;
 import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -33,17 +37,22 @@ public class NameTags extends JavaPlugin {
     private final HashMap<String, ConfigurationSection> groups = new HashMap<>();
     private @NotNull TextFormatter formatter = TextFormatter.MINI_MESSAGE;
     private NameTagEntityManager entityManager;
-    private final EventsListener eventsListener = new EventsListener(this);
-    private final OutgoingPacketListener packetListener = new OutgoingPacketListener(this);
+    private EventsListener eventsListener;
+    private OutgoingPacketListener packetListener;
     private Metrics metrics;
 
     @Override
     public void onEnable() {
         instance = this;
+
         entityManager = new NameTagEntityManager();
+        eventsListener = new EventsListener(this);
+        packetListener = new OutgoingPacketListener(this);
+
         saveDefaultConfig();
 
         metrics = new Metrics(this, 25409);
+        registerMetrics();
 
         executor = Executors.newFixedThreadPool(
                 getConfig().getInt("options.threads", 4),
@@ -77,6 +86,7 @@ public class NameTags extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(eventsListener, this);
 
         Objects.requireNonNull(Bukkit.getPluginCommand("nametags-reload")).setExecutor(new NameTagsCommand(this));
+
     }
 
     @Override
@@ -110,9 +120,19 @@ public class NameTags extends JavaPlugin {
         }
     }
 
+    public void registerMetrics() {
+        metrics.addCustomChart(new Metrics.DrilldownPie("serverName", () -> Map.of(Bukkit.getName(), Map.of(Bukkit.getName(), 1))));
+    }
+
     @Override
     public void onDisable() {
         metrics.shutdown();
+
+        HandlerList.unregisterAll(this.eventsListener);
+
+        PacketEvents.getAPI()
+                .getEventManager()
+                .unregisterListener(this.packetListener);
     }
 
     public Executor getExecutor() {

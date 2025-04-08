@@ -86,7 +86,7 @@ public class OutgoingPacketListener extends PacketListenerAbstract {
 
                         containsEntityOffset = true;
                         event.markForReEncode(true);
-                    } else if (entry.getIndex() == TEXT_DISPLAY_TEXT_INDEX && entry.getType() instanceof Component) {
+                    } else if (entry.getIndex() == TEXT_DISPLAY_TEXT_INDEX) {
                         textEntry = entry;
                         event.markForReEncode(true);
                     }
