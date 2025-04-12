@@ -51,11 +51,12 @@ tasks {
             "author" to findProperty("plugin_author"),
             "version" to if (findProperty("include_commit_hash")
                     .toString().toBoolean()
-            ) "${rootProject.version}-commit-${getCurrentCommitHash()}" else rootProject.version.toString()
+            ) "${rootProject.version}-commit-${getCurrentCommitHash()}" else rootProject.version.toString(),
+            "loader" to findProperty("loader")
         )
         inputs.properties(props)
         filteringCharset = "UTF-8"
-        filesMatching("plugin.yml") {
+        filesMatching("*plugin.yml") {
             expand(props)
         }
     }
