@@ -15,7 +15,7 @@ import org.jetbrains.annotations.NotNull;
 public class SkinRestorerHook {
 
     public static void inject(@NotNull NameTags plugin) {
-        Bukkit.getScheduler().runTask(plugin, SkinRestorerHook::start);
+        Bukkit.getScheduler().runTaskLater(plugin, SkinRestorerHook::start, 5L);
     }
 
     private static void start() {
