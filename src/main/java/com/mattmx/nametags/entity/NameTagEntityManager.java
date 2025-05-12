@@ -9,15 +9,15 @@ import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 
 public class NameTagEntityManager {
-    private final @NotNull ConcurrentHashMap<UUID, NameTagEntity> entityMap = new ConcurrentHashMap<>();
+    private final @NotNull Map<UUID, NameTagEntity> nameTagByEntityUUID = Collections.synchronizedMap(new HashMap<>());
+    private final @NotNull Map<Integer, NameTagEntity> nameTagEntityByEntityId = Collections.synchronizedMap(new HashMap<>());
+    private final @NotNull Map<Integer, NameTagEntity> nameTagEntityByPassengerEntityId = Collections.synchronizedMap(new HashMap<>());
+
     private final Map<Integer, int[]> lastSentPassengers = new ConcurrentHashMap<>();
     private @NotNull BiConsumer<Entity, TextDisplayMeta> defaultProvider = (entity, meta) -> {
         // Default minecraft name-tag appearance
@@ -28,47 +28,48 @@ public class NameTagEntityManager {
     };
 
     public @NotNull NameTagEntity getOrCreateNameTagEntity(@NotNull Entity entity) {
-        return entityMap.computeIfAbsent(entity.getUniqueId(), (k) -> {
-            NameTagEntity newEntity = new NameTagEntity(entity);
+        return nameTagByEntityUUID.computeIfAbsent(entity.getUniqueId(), (k) -> {
+            NameTagEntity nameTagEntity = new NameTagEntity(entity);
 
-            newEntity.getPassenger().consumeEntityMeta(TextDisplayMeta.class, (meta) -> defaultProvider.accept(entity, meta));
+            nameTagEntity.getPassenger().consumeEntityMeta(TextDisplayMeta.class, (meta) -> defaultProvider.accept(entity, meta));
 
-            Bukkit.getPluginManager().callEvent(new NameTagEntityCreateEvent(newEntity));
+            Bukkit.getPluginManager().callEvent(new NameTagEntityCreateEvent(nameTagEntity));
 
-            return newEntity;
+            nameTagEntityByEntityId.put(entity.getEntityId(), nameTagEntity);
+            nameTagEntityByPassengerEntityId.put(nameTagEntity.getPassenger().getEntityId(), nameTagEntity);
+
+            return nameTagEntity;
         });
     }
 
     public @Nullable NameTagEntity removeEntity(@NotNull Entity entity) {
-        return entityMap.remove(entity.getUniqueId());
+        final NameTagEntity nameTagEntity = nameTagEntityByPassengerEntityId.remove(entity.getEntityId());
+
+        if (nameTagEntity != null) {
+            nameTagEntityByPassengerEntityId.remove(nameTagEntity.getPassenger().getEntityId());
+        }
+
+        return nameTagByEntityUUID.remove(entity.getUniqueId());
     }
 
     public @Nullable NameTagEntity getNameTagEntity(@NotNull Entity entity) {
-        return entityMap.get(entity.getUniqueId());
+        return nameTagByEntityUUID.get(entity.getUniqueId());
     }
 
     public @Nullable NameTagEntity getNameTagEntityByUUID(UUID uuid) {
-        return entityMap.get(uuid);
+        return nameTagByEntityUUID.get(uuid);
     }
 
     public @Nullable NameTagEntity getNameTagEntityById(int entityId) {
-        return entityMap.values()
-            .stream()
-            .filter((e) -> e.getBukkitEntity().getEntityId() == entityId)
-            .findFirst()
-            .orElse(null);
+        return nameTagEntityByEntityId.get(entityId);
     }
 
     public @Nullable NameTagEntity getNameTagEntityByTagEntityId(int entityId) {
-        return entityMap.values()
-            .stream()
-            .filter((e) -> e.getPassenger().getEntityId() == entityId)
-            .findFirst()
-            .orElse(null);
+        return nameTagEntityByPassengerEntityId.get(entityId);
     }
 
     public @NotNull Collection<NameTagEntity> getAllEntities() {
-        return this.entityMap.values();
+        return this.nameTagByEntityUUID.values();
     }
 
     public void setDefaultProvider(@NotNull BiConsumer<Entity, TextDisplayMeta> consumer) {
