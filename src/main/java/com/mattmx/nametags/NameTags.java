@@ -55,7 +55,7 @@ public class NameTags extends JavaPlugin {
         registerMetrics();
 
         executor = Executors.newFixedThreadPool(
-                getConfig().getInt("options.threads", 4),
+                getConfig().getInt("options.threads", 2),
                 new ThreadFactoryBuilder()
                         .setPriority(Thread.NORM_PRIORITY + 1)
                         .setNameFormat("NameTags-Processor")
