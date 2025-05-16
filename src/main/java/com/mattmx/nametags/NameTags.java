@@ -9,8 +9,6 @@ import com.mattmx.nametags.entity.NameTagEntityManager;
 import com.mattmx.nametags.hook.NeznamyTABHook;
 import com.mattmx.nametags.hook.SkinRestorerHook;
 import com.mattmx.nametags.utils.Metrics;
-import com.mattmx.nametags.utils.test.TestPassenger;
-import com.mattmx.nametags.utils.test.TestPlaceholderExpansion;
 import me.tofaa.entitylib.APIConfig;
 import me.tofaa.entitylib.EntityLib;
 import me.tofaa.entitylib.spigot.SpigotEntityLibPlatform;
@@ -40,6 +38,7 @@ public class NameTags extends JavaPlugin {
     private EventsListener eventsListener;
     private OutgoingPacketListener packetListener;
     private Metrics metrics;
+    private @Nullable ConfigDefaultsListener defaultsListener = null;
 
     @Override
     public void onEnable() {
@@ -62,16 +61,8 @@ public class NameTags extends JavaPlugin {
                         .build()
         );
 
-        ConfigurationSection defaults = getConfig().getConfigurationSection("defaults");
-        if (defaults != null && defaults.getBoolean("enabled")) {
-            Bukkit.getPluginManager().registerEvents(new ConfigDefaultsListener(this), this);
-        }
-
         SpigotEntityLibPlatform platform = new SpigotEntityLibPlatform(this);
-        APIConfig settings = new APIConfig(PacketEvents.getAPI())
-//            .tickTickables()
-//            .trackPlatformEntities()
-                .usePlatformLogger();
+        APIConfig settings = new APIConfig(PacketEvents.getAPI()).usePlatformLogger();
 
         EntityLib.init(platform, settings);
 
@@ -84,14 +75,26 @@ public class NameTags extends JavaPlugin {
         SkinRestorerHook.inject(this);
 
         Bukkit.getPluginManager().registerEvents(eventsListener, this);
+        Bukkit.getScheduler().runTaskLater(this, DependencyVersionChecker::checkPacketEventsVersion, 10L);
 
         Objects.requireNonNull(Bukkit.getPluginCommand("nametags-reload")).setExecutor(new NameTagsCommand(this));
-
     }
 
     @Override
     public void reloadConfig() {
         super.reloadConfig();
+
+        ConfigurationSection defaults = getConfig().getConfigurationSection("defaults");
+        if (defaults != null && defaults.getBoolean("enabled")) {
+            getLogger().info("Using default behaviour from the config file.");
+
+            if (defaultsListener != null) {
+                HandlerList.unregisterAll(defaultsListener);
+            }
+
+            defaultsListener = new ConfigDefaultsListener(this);
+            Bukkit.getPluginManager().registerEvents(defaultsListener, this);
+        }
 
         String textFormatterIdentifier = getConfig().getString("formatter", "minimessage");
         formatter = TextFormatter.getById(textFormatterIdentifier)

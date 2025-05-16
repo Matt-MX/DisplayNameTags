@@ -23,15 +23,15 @@ import org.jetbrains.annotations.Nullable;
  * Responsible for two things:
  * <p>
  * 1. Modifying the passenger entity Y offset, since Mojang changed the
- *  entity passenger origin by a small amount, which results in the name
- *  tags rendering inside a player's head in older versions.
+ * entity passenger origin by a small amount, which results in the name
+ * tags rendering inside a player's head in older versions.
  * <p>
- *  To fix this, the function will apply an offset of +0.4f in the Y
- *  axis, which was the closest value found to how it should appear in
- *  modern versions.
+ * To fix this, the function will apply an offset of +0.4f in the Y
+ * axis, which was the closest value found to how it should appear in
+ * modern versions.
  * <p>
  * 2. Apply relational placeholders (off the netty thread) if there are
- *  any.
+ * any.
  */
 public class PlayServerEntityMetaDataHandler {
     private static final byte TEXT_DISPLAY_TEXT_INDEX = 23;
@@ -50,75 +50,79 @@ public class PlayServerEntityMetaDataHandler {
 
     public static void handlePacket(@NotNull PacketSendEvent event) {
         final NameTags plugin = NameTags.getInstance();
-        final WrapperPlayServerEntityMetadata packet = new WrapperPlayServerEntityMetadata(event);
 
-        final NameTagEntity nameTagEntity = plugin.getEntityManager().getNameTagEntityByTagEntityId(packet.getEntityId());
+        final PacketSendEvent eventClone = event.clone();
+        final WrapperPlayServerEntityMetadata packet0 = new WrapperPlayServerEntityMetadata(event);
 
-        if (nameTagEntity == null) return;
+        final NameTagEntity nameTagEntity = plugin.getEntityManager().getNameTagEntityByTagEntityId(packet0.getEntityId());
 
-        boolean isOldClient = event.getUser().getClientVersion().isOlderThan(ClientVersion.V_1_20_2);
-        boolean containsEntityOffset = false;
-        @Nullable EntityData textEntry = null;
-
-        for (final EntityData entry : packet.getEntityMetadata()) {
-            if (containsEntityOffset && textEntry != null) {
-                break;
-            }
-
-            if (isOldClient && entry.getIndex() == ENTITY_OFFSET_INDEX) {
-                Vector3f vec = (Vector3f) entry.getValue();
-                entry.setValue(vec.add(PRE_1_20_2_TRANSLATION_OFFSET));
-
-                containsEntityOffset = true;
-                event.markForReEncode(true);
-            } else if (entry.getIndex() == TEXT_DISPLAY_TEXT_INDEX) {
-                textEntry = entry;
-                event.markForReEncode(true);
-            }
+        if (nameTagEntity == null) {
+            eventClone.cleanUp();
+            return;
         }
 
-        // Backwards compatibility for clients older than 1.20.2
-        // Mojank changed the passenger origin point when riding an entity so the tag appears inside their head.
-        if (isOldClient) {
-            // If there was no offset found then add one ourselves for the offset.
-            if (!containsEntityOffset) {
+        event.setCancelled(true);
+        final WrapperPlayServerEntityMetadata packet = new WrapperPlayServerEntityMetadata(eventClone);
+
+        // This could prove a concurrency issue, maybe we should keep track of if there is a newer packet processing?
+        plugin.getExecutor().execute(() -> {
+            System.out.println(packet);
+            boolean isOldClient = eventClone.getUser().getClientVersion().isOlderThan(ClientVersion.V_1_20_2);
+            boolean containsEntityOffset = false;
+            @Nullable EntityData textEntry = null;
+
+            for (final EntityData entry : packet.getEntityMetadata()) {
+                if (containsEntityOffset && textEntry != null) {
+                    break;
+                }
+
+                if (isOldClient && entry.getIndex() == ENTITY_OFFSET_INDEX) {
+                    Vector3f vec = (Vector3f) entry.getValue();
+                    // If there is already an entity offset, and it's an old client, add to it.
+                    entry.setValue(vec.add(PRE_1_20_2_TRANSLATION_OFFSET));
+
+                    containsEntityOffset = true;
+                } else if (entry.getIndex() == TEXT_DISPLAY_TEXT_INDEX) {
+                    textEntry = entry;
+                }
+            }
+
+            // Backwards compatibility for clients older than 1.20.2
+            // Mojank changed the passenger origin point when riding an entity so the tag appears inside their head.
+            if (isOldClient && !containsEntityOffset) {
+                // If there was no offset found then add one ourselves for the offset.
                 packet.getEntityMetadata().add(new EntityData(
                         ENTITY_OFFSET_INDEX,
                         EntityDataTypes.VECTOR3F,
                         PRE_1_20_2_TRANSLATION_OFFSET
                 ));
-                event.markForReEncode(true);
+
             }
-        }
 
-        // Apply relational placeholders to the text of an outgoing display entity
-        if (plugin.getConfig().getBoolean("options.relative-placeholders-support") &&
-                nameTagEntity.getBukkitEntity() instanceof Player from &&
-                textEntry != null
-        ) {
-            final TextComponent originalText = (TextComponent) textEntry.getValue();
-            final Player to = event.getPlayer();
+            // Apply relational placeholders to the text of an outgoing display entity
+            if (plugin.getConfig().getBoolean("options.relative-placeholders-support") &&
+                    nameTagEntity.getBukkitEntity() instanceof Player from &&
+                    textEntry != null
+            ) {
+                final TextComponent originalText = (TextComponent) textEntry.getValue();
+                final Player to = eventClone.getPlayer();
 
-            // If this proves to increase ping, since it does require string processing
-            // I recommend always withholding the packet if it contains the textEntry,
-            // then we can process all of this off the main thread
-            boolean containsRelativePlaceholder = ComponentUtils.startsWith(originalText, RELATIVE_ARG_PREFIX);
+                boolean containsRelativePlaceholder = ComponentUtils.startsWith(originalText, RELATIVE_ARG_PREFIX);
 
-            // If it doesn't have any placeholders in then stop
-            if (!containsRelativePlaceholder) return;
+                // If it doesn't have any placeholders in then stop
+                if (!containsRelativePlaceholder) {
+                    eventClone.getUser().sendPacket(packet);
+                    return;
+                }
 
-            // Withhold the packet while we apply placeholders
-            event.setCancelled(true);
-
-            final PacketSendEvent clone = event.clone();
-            final EntityData finalTextEntry = textEntry;
-            plugin.getExecutor().execute(() -> {
                 final Component textWithRelativeApplied = PapiHook.setRelationalPlaceholders(from, to, originalText);
 
-                finalTextEntry.setValue(textWithRelativeApplied);
-                clone.getUser().sendPacket(packet);
-            });
-        }
+                textEntry.setValue(textWithRelativeApplied);
+                eventClone.getUser().sendPacket(packet);
+            } else {
+                eventClone.getUser().sendPacket(packet);
+            }
+        });
     }
 
 }
