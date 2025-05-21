@@ -98,7 +98,6 @@ public class PlayServerEntityMetaDataHandler {
                         EntityDataTypes.VECTOR3F,
                         PRE_1_20_2_TRANSLATION_OFFSET
                 ));
-
             }
 
             // Apply relational placeholders to the text of an outgoing display entity
@@ -113,16 +112,16 @@ public class PlayServerEntityMetaDataHandler {
 
                 // If it doesn't have any placeholders in then stop
                 if (!containsRelativePlaceholder) {
-                    eventClone.getUser().sendPacket(packet);
+                    eventClone.getUser().sendPacketSilently(packet);
                     return;
                 }
 
                 final Component textWithRelativeApplied = PapiHook.setRelationalPlaceholders(from, to, originalText);
 
                 textEntry.setValue(textWithRelativeApplied);
-                eventClone.getUser().sendPacket(packet);
+                eventClone.getUser().sendPacketSilently(packet);
             } else {
-                eventClone.getUser().sendPacket(packet);
+                eventClone.getUser().sendPacketSilently(packet);
             }
         });
     }
