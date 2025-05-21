@@ -1,9 +1,12 @@
 options:
-  threads: 4
+  threads: 2
   relative-placeholders-support: true
 
+# Base default options applied first
 defaults:
   # If not enabled then plugin simulates vanilla name tags
+  # Generally only use this option if you are a developer and are
+  # overwriting the vanilla implementation provided yourself.
   enabled: true
   # How often should we refresh tags (in milliseconds)
   refresh-every: 1
@@ -55,6 +58,7 @@ defaults:
     radius: 0.5
 
 # Should the player see their own tag?
+# This is not entirely supported, but bug reports still help
 show-self: false
 
 sneak:

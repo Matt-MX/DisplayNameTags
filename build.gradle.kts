@@ -4,7 +4,7 @@ import java.io.InputStreamReader
 plugins {
     id("java")
     alias(libs.plugins.runPaper)
-    alias(libs.plugins.paperweight) apply true
+    alias(libs.plugins.paperweight) apply false
     alias(libs.plugins.shadow) apply true
 
     `maven-publish`
@@ -32,7 +32,8 @@ repositories {
 }
 
 dependencies {
-    paperweight.paperDevBundle(libs.versions.paperApi.get())
+//    paperweight.paperDevBundle(libs.versions.paperApi.get())
+    compileOnly(libs.paper.api)
 
     compileOnly(libs.placeholder.api)
     compileOnly(libs.tab.api)
@@ -69,20 +70,20 @@ tasks {
         useJUnitPlatform()
     }
 
-    assemble {
-        dependsOn(reobfJar)
-    }
+//    assemble {
+//        dependsOn(reobfJar)
+//    }
 
     runServer {
         val mcVersion = libs.versions.paperApi.get().split("-")[0]
         minecraftVersion(mcVersion)
 
         downloadPlugins {
-            hangar("ViaVersion", "5.0.1")
-            hangar("ViaBackwards", "5.0.1")
+            hangar("ViaVersion", "5.3.2")
+            hangar("ViaBackwards", "5.3.2")
 
             // For testing groups in config.yml
-            url("https://download.luckperms.net/1567/bukkit/loader/LuckPerms-Bukkit-5.4.150.jar")
+            modrinth("luckperms", "v5.4.145-bukkit")
         }
     }
 }
