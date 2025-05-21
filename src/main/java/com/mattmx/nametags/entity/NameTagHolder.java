@@ -17,17 +17,19 @@ import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.function.Consumer;
 
-public class NameTagEntity {
+public class NameTagHolder {
     private final @NotNull TraitHolder traits = new TraitHolder(this);
     private final @NotNull Entity bukkitEntity;
-    private final @NotNull WrapperEntity passenger;
+    private final @NotNull List<WrapperEntity> passengers;
     private float cachedViewRange = -1f;
 
-    public NameTagEntity(@NotNull Entity entity) {
+    public NameTagHolder(@NotNull Entity entity) {
         this.bukkitEntity = entity;
-        this.passenger = new WrapperEntity(EntityTypes.TEXT_DISPLAY);
+        this.passengers = new LinkedList<>();
 
         initialize();
     }
@@ -35,21 +37,28 @@ public class NameTagEntity {
     public void initialize() {
         Location location = updateLocation();
 
-        this.passenger.spawn(location);
+        boolean showSelf = NameTags.getInstance()
+                .getConfig()
+                .getBoolean("show-self", false)
+                && this.bukkitEntity instanceof Player;
 
-        if (NameTags.getInstance().getConfig().getBoolean("show-self", false)) {
+        for (final WrapperEntity passenger : passengers) {
+            passenger.spawn(location);
 
-            if (this.bukkitEntity instanceof Player self) {
-                this.passenger.addViewer(self.getUniqueId());
-                sendPassengerPacket(self);
+            if (showSelf) {
+                Player self = (Player) this.bukkitEntity;
+                passenger.addViewer(self.getUniqueId());
             }
+        }
 
+        if (showSelf) {
+            sendPassengerPacket((Player) this.bukkitEntity);
         }
     }
 
     public boolean isInvisible() {
         boolean hasInvisibilityEffect = bukkitEntity instanceof LivingEntity e
-            && e.hasPotionEffect(PotionEffectType.INVISIBILITY);
+                && e.hasPotionEffect(PotionEffectType.INVISIBILITY);
 
         return bukkitEntity.isInvisible() || hasInvisibilityEffect;
     }
@@ -73,35 +82,57 @@ public class NameTagEntity {
         return traits;
     }
 
-    public void modify(Consumer<TextDisplayMeta> consumer) {
-        this.passenger.consumeEntityMeta(TextDisplayMeta.class, consumer);
+    public void modifyAll(Consumer<TextDisplayMeta> consumer) {
+        this.passengers.forEach((passenger) -> passenger.consumeEntityMeta(TextDisplayMeta.class, consumer));
     }
 
+    @Deprecated
+    public void modify(Consumer<TextDisplayMeta> consumer) {
+        modifyAll(consumer);
+    }
+
+    @Deprecated
+    public void modify(int index, Consumer<TextDisplayMeta> consumer) {
+        if (index >= this.passengers.size()) {
+            return;
+        }
+
+        this.passengers.get(index).consumeEntityMeta(TextDisplayMeta.class, consumer);
+    }
+
+    @Deprecated
     public @NotNull TextDisplayMeta getMeta() {
-        return this.passenger.getEntityMeta(TextDisplayMeta.class);
+        return this.passengers.getFirst().getEntityMeta(TextDisplayMeta.class);
+    }
+
+    public @NotNull TextDisplayMeta getMeta(int index) {
+        return this.passengers.get(index).getEntityMeta(TextDisplayMeta.class);
     }
 
     public void sendPassengerPacket(Player target) {
         PacketEvents.getAPI()
-            .getPlayerManager()
-            .sendPacket(target, getPassengersPacket());
+                .getPlayerManager()
+                .sendPacket(target, getPassengersPacket());
     }
 
     public PacketWrapper<?> getPassengersPacket() {
         int[] previousPackets = NameTags.getInstance()
-            .getEntityManager()
-            .getLastSentPassengers(getBukkitEntity().getEntityId())
-            .orElseGet(() -> {
-                int[] bukkitPassengers = this.bukkitEntity.getPassengers()
-                    .stream()
-                    .mapToInt(Entity::getEntityId)
-                    .toArray();
+                .getEntityManager()
+                .getLastSentPassengers(getBukkitEntity().getEntityId())
+                .orElseGet(() -> {
+                    int[] bukkitPassengers = this.bukkitEntity.getPassengers()
+                            .stream()
+                            .mapToInt(Entity::getEntityId)
+                            .toArray();
 
-                int[] passengers = Arrays.copyOf(bukkitPassengers, bukkitPassengers.length + 1);
-                passengers[passengers.length - 1] = getPassenger().getEntityId();
+                    int[] passengers = Arrays.copyOf(bukkitPassengers, bukkitPassengers.length + this.passengers.size());
 
-                return passengers;
-            });
+                    for (int i = 1; i < this.passengers.size(); i++) {
+                        passengers[passengers.length - i] = this.passengers.get(i).getEntityId();
+                    }
+
+                    return passengers;
+                });
 
         return new WrapperPlayServerSetPassengers(bukkitEntity.getEntityId(), previousPackets);
     }
@@ -110,27 +141,32 @@ public class NameTagEntity {
         return bukkitEntity;
     }
 
+    public @NotNull List<WrapperEntity> getPassengers() {
+        return this.passengers;
+    }
+
+    @Deprecated
     public @NotNull WrapperEntity getPassenger() {
-        return passenger;
+        return this.passengers.getFirst();
     }
 
     public @NotNull Location updateLocation() {
         Location location = SpigotConversionUtil.fromBukkitLocation(
-            bukkitEntity.getLocation()
-                .clone()
-                .add(0.0, bukkitEntity.getBoundingBox().getMaxY(), 0.0)
+                bukkitEntity.getLocation()
+                        .clone()
+                        .add(0.0, bukkitEntity.getBoundingBox().getMaxY(), 0.0)
         );
 
         location.setYaw(0f);
         location.setPitch(0f);
 
-        this.passenger.setLocation(location);
+        this.passengers.forEach((passenger) -> passenger.setLocation(location));
 
         return location;
     }
 
     public void destroy() {
-        this.passenger.despawn();
+        this.passengers.forEach(WrapperEntity::despawn);
         this.getTraits().destroy();
     }
 }

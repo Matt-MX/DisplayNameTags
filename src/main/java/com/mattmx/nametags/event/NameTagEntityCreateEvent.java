@@ -1,6 +1,6 @@
 package com.mattmx.nametags.event;
 
-import com.mattmx.nametags.entity.NameTagEntity;
+import com.mattmx.nametags.entity.NameTagHolder;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
@@ -8,15 +8,15 @@ import org.jetbrains.annotations.NotNull;
 
 public class NameTagEntityCreateEvent extends Event {
     private static final HandlerList handlers = new HandlerList();
-    private final @NotNull NameTagEntity nameTag;
+    private final @NotNull NameTagHolder nameTag;
 
-    public NameTagEntityCreateEvent(@NotNull NameTagEntity nameTag) {
+    public NameTagEntityCreateEvent(@NotNull NameTagHolder nameTag) {
         super(!Bukkit.isPrimaryThread());
 
         this.nameTag = nameTag;
     }
 
-    public @NotNull NameTagEntity getNameTag() {
+    public @NotNull NameTagHolder getNameTag() {
         return nameTag;
     }
 

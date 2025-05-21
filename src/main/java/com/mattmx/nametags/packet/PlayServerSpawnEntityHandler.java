@@ -3,7 +3,7 @@ package com.mattmx.nametags.packet;
 import com.github.retrooper.packetevents.event.PacketSendEvent;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSpawnEntity;
 import com.mattmx.nametags.NameTags;
-import com.mattmx.nametags.entity.NameTagEntity;
+import com.mattmx.nametags.entity.NameTagHolder;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -20,21 +20,21 @@ public class PlayServerSpawnEntityHandler {
 
         if (packet.getUUID().isEmpty()) return;
 
-        final NameTagEntity nameTagEntity = plugin.getEntityManager().getNameTagEntityByUUID(packet.getUUID().get());
+        final NameTagHolder nameTagHolder = plugin.getEntityManager().getNameTagEntityByUUID(packet.getUUID().get());
 
-        if (nameTagEntity == null) return;
+        if (nameTagHolder == null) return;
 
         // Add passenger and send to player after (off the netty thread)
         final PacketSendEvent clone = event.clone();
         event.getTasksAfterSend().add(() -> plugin.getExecutor().execute(() -> {
             // To avoid name tag moving when being added
-            nameTagEntity.updateLocation();
+            nameTagHolder.updateLocation();
 
             // Refreshes as viewer (crusty fix)
-            nameTagEntity.getPassenger().removeViewer(clone.getUser());
-            nameTagEntity.getPassenger().addViewer(clone.getUser());
+            nameTagHolder.getPassenger().removeViewer(clone.getUser());
+            nameTagHolder.getPassenger().addViewer(clone.getUser());
 
-            clone.getUser().sendPacket(nameTagEntity.getPassengersPacket());
+            clone.getUser().sendPacket(nameTagHolder.getPassengersPacket());
         }));
     }
 

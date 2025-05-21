@@ -10,7 +10,7 @@ import com.github.retrooper.packetevents.protocol.player.ClientVersion;
 import com.github.retrooper.packetevents.util.Vector3f;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityMetadata;
 import com.mattmx.nametags.NameTags;
-import com.mattmx.nametags.entity.NameTagEntity;
+import com.mattmx.nametags.entity.NameTagHolder;
 import com.mattmx.nametags.hook.PapiHook;
 import com.mattmx.nametags.utils.ComponentUtils;
 import net.kyori.adventure.text.Component;
@@ -54,9 +54,9 @@ public class PlayServerEntityMetaDataHandler {
         final PacketSendEvent eventClone = event.clone();
         final WrapperPlayServerEntityMetadata packet0 = new WrapperPlayServerEntityMetadata(event);
 
-        final NameTagEntity nameTagEntity = plugin.getEntityManager().getNameTagEntityByTagEntityId(packet0.getEntityId());
+        final NameTagHolder nameTagHolder = plugin.getEntityManager().getNameTagEntityByTagEntityId(packet0.getEntityId());
 
-        if (nameTagEntity == null) {
+        if (nameTagHolder == null) {
             eventClone.cleanUp();
             return;
         }
@@ -102,7 +102,7 @@ public class PlayServerEntityMetaDataHandler {
 
             // Apply relational placeholders to the text of an outgoing display entity
             if (plugin.getConfig().getBoolean("options.relative-placeholders-support") &&
-                    nameTagEntity.getBukkitEntity() instanceof Player from &&
+                    nameTagHolder.getBukkitEntity() instanceof Player from &&
                     textEntry != null
             ) {
                 final TextComponent originalText = (TextComponent) textEntry.getValue();

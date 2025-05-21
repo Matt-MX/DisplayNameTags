@@ -6,7 +6,7 @@ import com.github.retrooper.packetevents.protocol.entity.data.EntityDataType;
 import com.github.retrooper.packetevents.protocol.packettype.PacketType;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityMetadata;
 import com.mattmx.nametags.NameTags;
-import com.mattmx.nametags.entity.NameTagEntity;
+import com.mattmx.nametags.entity.NameTagHolder;
 import me.tofaa.entitylib.meta.EntityMeta;
 import me.tofaa.entitylib.meta.Metadata;
 
@@ -17,7 +17,7 @@ public class GlowingEffectHook extends PacketListenerAbstract {
         if (event.getPacketType() == PacketType.Play.Server.ENTITY_METADATA) return;
         final WrapperPlayServerEntityMetadata packet = new WrapperPlayServerEntityMetadata(event);
 
-        final NameTagEntity entity = NameTags.getInstance()
+        final NameTagHolder entity = NameTags.getInstance()
             .getEntityManager()
             .getNameTagEntityById(packet.getEntityId());
 

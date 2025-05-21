@@ -1,6 +1,6 @@
 package com.mattmx.nametags;
 
-import com.mattmx.nametags.entity.NameTagEntity;
+import com.mattmx.nametags.entity.NameTagHolder;
 import com.mattmx.nametags.entity.trait.SneakTrait;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
@@ -12,9 +12,6 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.jetbrains.annotations.NotNull;
-import org.spigotmc.event.player.PlayerSpawnLocationEvent;
-
-import java.util.concurrent.TimeUnit;
 
 public class EventsListener implements Listener {
 
@@ -55,11 +52,11 @@ public class EventsListener implements Listener {
         plugin.getEntityManager().removeLastSentPassengersCache(event.getPlayer().getEntityId());
 
         // Remove as a viewer from all entities
-        for (final NameTagEntity entity : plugin.getEntityManager().getAllEntities()) {
+        for (final NameTagHolder entity : plugin.getEntityManager().getAllEntities()) {
             entity.getPassenger().removeViewer(event.getPlayer().getUniqueId());
         }
 
-        NameTagEntity entity = plugin.getEntityManager().removeEntity(event.getPlayer());
+        NameTagHolder entity = plugin.getEntityManager().removeEntity(event.getPlayer());
 
         if (entity != null) {
             entity.destroy();
@@ -68,40 +65,40 @@ public class EventsListener implements Listener {
 
     @EventHandler
     public void onPlayerChangeWorld(@NotNull PlayerChangedWorldEvent event) {
-        NameTagEntity nameTagEntity = plugin.getEntityManager()
+        NameTagHolder nameTagHolder = plugin.getEntityManager()
                 .getNameTagEntity(event.getPlayer());
 
-        if (nameTagEntity == null) return;
+        if (nameTagHolder == null) return;
 
-        nameTagEntity.updateLocation();
+        nameTagHolder.updateLocation();
 
         if (plugin.getConfig().getBoolean("show-self", false)) {
-            nameTagEntity.getPassenger().removeViewer(nameTagEntity.getBukkitEntity().getUniqueId());
-            nameTagEntity.getPassenger().addViewer(nameTagEntity.getBukkitEntity().getUniqueId());
-            nameTagEntity.sendPassengerPacket(event.getPlayer());
+            nameTagHolder.getPassenger().removeViewer(nameTagHolder.getBukkitEntity().getUniqueId());
+            nameTagHolder.getPassenger().addViewer(nameTagHolder.getBukkitEntity().getUniqueId());
+            nameTagHolder.sendPassengerPacket(event.getPlayer());
         }
     }
 
 
     @EventHandler
     public void onPlayerDeath(@NotNull PlayerDeathEvent event) {
-        NameTagEntity nameTagEntity = plugin.getEntityManager()
+        NameTagHolder nameTagHolder = plugin.getEntityManager()
                 .getNameTagEntity(event.getPlayer());
 
-        if (nameTagEntity == null) return;
+        if (nameTagHolder == null) return;
 
         if (plugin.getConfig().getBoolean("show-self", false)) {
             // Hides/removes tag on death/respawn screen
-            nameTagEntity.getPassenger().removeViewer(nameTagEntity.getBukkitEntity().getUniqueId());
+            nameTagHolder.getPassenger().removeViewer(nameTagHolder.getBukkitEntity().getUniqueId());
         }
     }
 
     @EventHandler
     public void onPlayerRespawn(@NotNull PlayerRespawnEvent event) {
-        NameTagEntity nameTagEntity = plugin.getEntityManager()
+        NameTagHolder nameTagHolder = plugin.getEntityManager()
                 .getNameTagEntity(event.getPlayer());
 
-        if (nameTagEntity == null) return;
+        if (nameTagHolder == null) return;
 
         if (plugin.getConfig().getBoolean("show-self", false)) {
 
@@ -112,11 +109,11 @@ public class EventsListener implements Listener {
 
             Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
                 // Update entity location.
-                nameTagEntity.updateLocation();
+                nameTagHolder.updateLocation();
                 // Add player back as viewer
-                nameTagEntity.getPassenger().addViewer(nameTagEntity.getBukkitEntity().getUniqueId());
+                nameTagHolder.getPassenger().addViewer(nameTagHolder.getBukkitEntity().getUniqueId());
                 // Send passenger packet
-                nameTagEntity.sendPassengerPacket(event.getPlayer());
+                nameTagHolder.sendPassengerPacket(event.getPlayer());
             });
         }
     }
@@ -129,12 +126,12 @@ public class EventsListener implements Listener {
 
         if (event.getPlayer().isInsideVehicle()) return;
 
-        NameTagEntity nameTagEntity = plugin.getEntityManager()
+        NameTagHolder nameTagHolder = plugin.getEntityManager()
                 .getNameTagEntity(event.getPlayer());
 
-        if (nameTagEntity == null) return;
+        if (nameTagHolder == null) return;
 
-        nameTagEntity.getTraits()
+        nameTagHolder.getTraits()
                 .getOrAddTrait(SneakTrait.class, SneakTrait::new)
                 .updateSneak(event.isSneaking());
     }

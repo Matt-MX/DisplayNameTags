@@ -1,7 +1,7 @@
 package com.mattmx.nametags.hook;
 
 import com.mattmx.nametags.NameTags;
-import com.mattmx.nametags.entity.NameTagEntity;
+import com.mattmx.nametags.entity.NameTagHolder;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.skinsrestorer.api.SkinsRestorer;
@@ -46,13 +46,13 @@ public class SkinRestorerHook {
 
                 plugin.getEntityManager().removeLastSentPassengersCache(player.getEntityId());
 
-                NameTagEntity entity = plugin.getEntityManager().removeEntity(player);
+                NameTagHolder entity = plugin.getEntityManager().removeEntity(player);
 
                 if (entity != null) {
                     entity.destroy();
                 }
 
-                NameTagEntity newEntity = plugin.getEntityManager().getOrCreateNameTagEntity(player);
+                NameTagHolder newEntity = plugin.getEntityManager().getOrCreateNameTagEntity(player);
                 newEntity.updateVisibility();
                 newEntity.updateLocation();
 

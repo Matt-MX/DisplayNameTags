@@ -3,7 +3,7 @@ package com.mattmx.nametags.packet;
 import com.github.retrooper.packetevents.event.PacketSendEvent;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSetPassengers;
 import com.mattmx.nametags.NameTags;
-import com.mattmx.nametags.entity.NameTagEntity;
+import com.mattmx.nametags.entity.NameTagHolder;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
@@ -14,14 +14,14 @@ public class PlayServerSetPassengersHandler {
         final NameTags plugin = NameTags.getInstance();
         final WrapperPlayServerSetPassengers packet = new WrapperPlayServerSetPassengers(event);
 
-        final NameTagEntity nameTagEntity = plugin.getEntityManager().getNameTagEntityById(packet.getEntityId());
+        final NameTagHolder nameTagHolder = plugin.getEntityManager().getNameTagEntityById(packet.getEntityId());
 
-        if (nameTagEntity == null) return;
+        if (nameTagHolder == null) return;
 
         // If the packet doesn't already contain our entity
         boolean containsNameTagPassenger = false;
         for (final int passengerId : packet.getPassengers()) {
-            if (passengerId == nameTagEntity.getPassenger().getEntityId()) {
+            if (passengerId == nameTagHolder.getPassenger().getEntityId()) {
                 containsNameTagPassenger = true;
             }
         }
@@ -31,7 +31,7 @@ public class PlayServerSetPassengersHandler {
 
             // Add our entity
             int[] passengers = Arrays.copyOf(packet.getPassengers(), packet.getPassengers().length + 1);
-            passengers[passengers.length - 1] = nameTagEntity.getPassenger().getEntityId();
+            passengers[passengers.length - 1] = nameTagHolder.getPassenger().getEntityId();
 
             packet.setPassengers(passengers);
 

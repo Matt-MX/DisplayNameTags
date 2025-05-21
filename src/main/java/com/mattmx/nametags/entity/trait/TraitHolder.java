@@ -1,6 +1,6 @@
 package com.mattmx.nametags.entity.trait;
 
-import com.mattmx.nametags.entity.NameTagEntity;
+import com.mattmx.nametags.entity.NameTagHolder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -9,10 +9,10 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 public class TraitHolder {
-    private final @NotNull NameTagEntity owner;
+    private final @NotNull NameTagHolder owner;
     private final @NotNull HashMap<Class<?>, Trait> map = new HashMap<>();
 
-    public TraitHolder(@NotNull NameTagEntity owner) {
+    public TraitHolder(@NotNull NameTagHolder owner) {
         this.owner = owner;
     }
 

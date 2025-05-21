@@ -86,11 +86,11 @@ fun onItemSpawn(event: ItemSpawnEvent) = event.apply {
     // Armour and tools should take longer to despawn
     val ticksTillRemove = 80 // 4 seconds
 
-    val nameTagEntity = NameTags.getInstance()
+    val nameTagHolder = NameTags.getInstance()
         .entityManager
         .getOrCreateNameTagEntity(entity)
 
-    nameTagEntity.modify { meta ->
+    nameTagHolder.modify { meta ->
         meta.isShadow = true
         meta.viewRange = 90f
         meta.backgroundColor = NameTags.TRANSPARENT
@@ -102,7 +102,7 @@ fun onItemSpawn(event: ItemSpawnEvent) = event.apply {
     var counter = ticksTillRemove / 20L
     val update = runAsyncRepeat(20) {
         counter--
-        nameTagEntity.modify { meta ->
+        nameTagHolder.modify { meta ->
             meta.text = Component.text(counter.toString()).color(NamedTextColor.RED)
         }
     }

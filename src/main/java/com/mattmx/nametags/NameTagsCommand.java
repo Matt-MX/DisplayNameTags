@@ -1,6 +1,6 @@
 package com.mattmx.nametags;
 
-import com.mattmx.nametags.entity.NameTagEntity;
+import com.mattmx.nametags.entity.NameTagHolder;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
@@ -10,7 +10,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Map;
 import java.util.UUID;
 
 public class NameTagsCommand implements CommandExecutor {
@@ -23,7 +22,7 @@ public class NameTagsCommand implements CommandExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         for (final Player player : Bukkit.getOnlinePlayers()) {
-            final NameTagEntity tag = plugin.getEntityManager().getNameTagEntity(player);
+            final NameTagHolder tag = plugin.getEntityManager().getNameTagEntity(player);
 
             if (tag != null) {
                 tag.getTraits().destroy();
@@ -33,13 +32,13 @@ public class NameTagsCommand implements CommandExecutor {
         this.plugin.reloadConfig();
 
         for (final Player player : Bukkit.getOnlinePlayers()) {
-            final NameTagEntity tag = plugin.getEntityManager().removeEntity(player);
+            final NameTagHolder tag = plugin.getEntityManager().removeEntity(player);
 
             if (tag != null) {
                 tag.destroy();
             }
 
-            final NameTagEntity newTag = plugin.getEntityManager().getOrCreateNameTagEntity(player);
+            final NameTagHolder newTag = plugin.getEntityManager().getOrCreateNameTagEntity(player);
 
             // Add existing viewers
             if (tag != null) {

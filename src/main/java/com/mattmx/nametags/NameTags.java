@@ -5,7 +5,7 @@ import com.github.retrooper.packetevents.PacketEventsAPI;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.mattmx.nametags.config.ConfigDefaultsListener;
 import com.mattmx.nametags.config.TextFormatter;
-import com.mattmx.nametags.entity.NameTagEntityManager;
+import com.mattmx.nametags.entity.NameTagManager;
 import com.mattmx.nametags.hook.NeznamyTABHook;
 import com.mattmx.nametags.hook.SkinRestorerHook;
 import com.mattmx.nametags.utils.Metrics;
@@ -34,7 +34,7 @@ public class NameTags extends JavaPlugin {
     private @Nullable Executor executor = null;
     private final HashMap<String, ConfigurationSection> groups = new HashMap<>();
     private @NotNull TextFormatter formatter = TextFormatter.MINI_MESSAGE;
-    private NameTagEntityManager entityManager;
+    private NameTagManager entityManager;
     private EventsListener eventsListener;
     private OutgoingPacketListener packetListener;
     private Metrics metrics;
@@ -44,7 +44,7 @@ public class NameTags extends JavaPlugin {
     public void onEnable() {
         instance = this;
 
-        entityManager = new NameTagEntityManager();
+        entityManager = new NameTagManager();
         eventsListener = new EventsListener(this);
         packetListener = new OutgoingPacketListener(this);
 
@@ -146,7 +146,7 @@ public class NameTags extends JavaPlugin {
         return this.executor;
     }
 
-    public @NotNull NameTagEntityManager getEntityManager() {
+    public @NotNull NameTagManager getEntityManager() {
         return this.entityManager;
     }
 

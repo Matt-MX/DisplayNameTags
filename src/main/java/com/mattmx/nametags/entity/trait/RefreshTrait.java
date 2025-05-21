@@ -1,6 +1,6 @@
 package com.mattmx.nametags.entity.trait;
 
-import com.mattmx.nametags.entity.NameTagEntity;
+import com.mattmx.nametags.entity.NameTagHolder;
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -15,10 +15,10 @@ public class RefreshTrait extends Trait {
     private final JavaPlugin plugin;
     private final long period;
     private final TimeUnit unit;
-    private final Consumer<NameTagEntity> update;
+    private final Consumer<NameTagHolder> update;
     private boolean paused = false;
 
-    public RefreshTrait(@NotNull JavaPlugin plugin, long period, TimeUnit unit, Consumer<NameTagEntity> update) {
+    public RefreshTrait(@NotNull JavaPlugin plugin, long period, TimeUnit unit, Consumer<NameTagHolder> update) {
         this.plugin = plugin;
         this.period = period;
         this.unit = unit;
@@ -60,19 +60,19 @@ public class RefreshTrait extends Trait {
         }
     }
 
-    public static @NotNull RefreshTrait ofMinutes(@NotNull JavaPlugin plugin, long minutes, Consumer<NameTagEntity> update) {
+    public static @NotNull RefreshTrait ofMinutes(@NotNull JavaPlugin plugin, long minutes, Consumer<NameTagHolder> update) {
         return new RefreshTrait(plugin, minutes, TimeUnit.MINUTES, update);
     }
 
-    public static @NotNull RefreshTrait ofSeconds(@NotNull JavaPlugin plugin, long seconds, Consumer<NameTagEntity> update) {
+    public static @NotNull RefreshTrait ofSeconds(@NotNull JavaPlugin plugin, long seconds, Consumer<NameTagHolder> update) {
         return new RefreshTrait(plugin, seconds, TimeUnit.SECONDS, update);
     }
 
-    public static @NotNull RefreshTrait ofMillis(@NotNull JavaPlugin plugin, long millis, Consumer<NameTagEntity> update) {
+    public static @NotNull RefreshTrait ofMillis(@NotNull JavaPlugin plugin, long millis, Consumer<NameTagHolder> update) {
         return new RefreshTrait(plugin, millis, TimeUnit.MILLISECONDS, update);
     }
 
-    public static @NotNull RefreshTrait ofTicks(@NotNull JavaPlugin plugin, long ticks, Consumer<NameTagEntity> update) {
+    public static @NotNull RefreshTrait ofTicks(@NotNull JavaPlugin plugin, long ticks, Consumer<NameTagHolder> update) {
         return ofMillis(plugin, ticks * 50, update);
     }
 
