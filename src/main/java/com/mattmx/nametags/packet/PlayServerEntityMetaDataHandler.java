@@ -66,8 +66,10 @@ public class PlayServerEntityMetaDataHandler {
 
         // This could prove a concurrency issue, maybe we should keep track of if there is a newer packet processing?
         plugin.getExecutor().execute(() -> {
-            System.out.println(packet);
-            boolean isOldClient = eventClone.getUser().getClientVersion().isOlderThan(ClientVersion.V_1_20_2);
+            boolean isOldClient = eventClone.getUser()
+                    .getClientVersion()
+                    .isOlderThan(ClientVersion.V_1_20_2);
+
             boolean containsEntityOffset = false;
             @Nullable EntityData textEntry = null;
 
