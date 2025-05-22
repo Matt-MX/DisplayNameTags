@@ -31,10 +31,13 @@ public class PlayServerSpawnEntityHandler {
             nameTagHolder.updateLocation();
 
             // Refreshes as viewer (crusty fix)
-            nameTagHolder.getPassenger().removeViewer(clone.getUser());
-            nameTagHolder.getPassenger().addViewer(clone.getUser());
+            nameTagHolder.getPassengers().forEach((passenger) -> {
+                passenger.removeViewer(clone.getUser());
+                passenger.addViewer(clone.getUser());
+            });
 
             clone.getUser().sendPacket(nameTagHolder.getPassengersPacket());
+            clone.cleanUp();
         }));
     }
 
