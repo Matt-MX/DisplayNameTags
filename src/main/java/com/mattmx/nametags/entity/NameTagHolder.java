@@ -19,6 +19,9 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class NameTagHolder {
@@ -26,6 +29,7 @@ public class NameTagHolder {
     private final @NotNull Entity bukkitEntity;
     private final @NotNull List<WrapperEntity> passengers;
     private float cachedViewRange = -1f;
+    private final Lock modificationLock = new ReentrantLock();
 
     public NameTagHolder(@NotNull Entity entity) {
         this.bukkitEntity = entity;
@@ -84,6 +88,12 @@ public class NameTagHolder {
 
     public void modifyAll(Consumer<TextDisplayMeta> consumer) {
         this.passengers.forEach((passenger) -> passenger.consumeEntityMeta(TextDisplayMeta.class, consumer));
+    }
+
+    public void modifyAll(BiConsumer<Integer, TextDisplayMeta> consumer) {
+        for (int i = 0; i < passengers.size(); i++) {
+            consumer.accept(i, getMeta(i));
+        }
     }
 
     @Deprecated
@@ -168,5 +178,9 @@ public class NameTagHolder {
     public void destroy() {
         this.passengers.forEach(WrapperEntity::despawn);
         this.getTraits().destroy();
+    }
+
+    public @NotNull Lock getModificationLock() {
+        return this.modificationLock;
     }
 }

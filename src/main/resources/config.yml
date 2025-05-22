@@ -11,51 +11,52 @@ defaults:
   # How often should we refresh tags (in milliseconds)
   refresh-every: 1
   # Lines of text to display.
-  text:
-    - "<white>%player_name%</white>"
-    - "<blue>%player_ping%ms</blue>"
-  # Background colour of the billboard.
-  # You can use AARRGGBB hex codes e.g '#FF00FF00'
-  # as well as RRGGBB hex codes e.g '#00FF00'
-  # Otherwise you can use named text colours e.g 'white',
-  # 'black' or 'red' as well as 'transparent'.
-  background: black
-  # Billboard display type.
-  # You can choose 'center', 'vertical' or 'horizontal
-  billboard: center
-  text-shadow: true
-  # Visual display range.
-  # You can specify range in blocks or use 'default'
-  # which will use the server's simulation distance.
-  range: default
-  # Gap above the head, closest to vanilla is 0.2
-  gap: 0.2
-  # Should the plugin remove any empty lines?
-  remove-empty-lines: false
-  # Controls when text should wrap to a new line
-  # Higher values will allow more text before wrapping
-  # Default Minecraft text display width is 200
-  line-width: 200
-  # Makes the text display see-through
-  see-through: false
-  # Controls the opacity of the text (0-255)
-  text-opacity: 255
-  # Fine-tune the position offset
-  translate:
-    x: 0.0
-    y: 0.2 # Same as the gap option
-    z: 0.0
-  # Scale of the text display
-  scale:
-    x: 1.0
-    y: 1.0
-    z: 1.0 # Don't recommend changing this, it results in some strange results
-  # Override the brightness level
-  brightness: -1
-  # Text shadow configuration
-  shadow:
-    strength: 0.5
-    radius: 0.5
+  lines:
+    - text: "<white>%player_name%</white>"
+      # Background colour of the billboard.
+      # You can use AARRGGBB hex codes e.g '#FF00FF00'
+      # as well as RRGGBB hex codes e.g '#00FF00'
+      # Otherwise you can use named text colours e.g 'white',
+      # 'black' or 'red' as well as 'transparent'.
+      background: black
+      # Billboard display type.
+      # You can choose 'center', 'vertical' or 'horizontal
+      billboard: center
+      text-shadow: true
+      # Visual display range.
+      # You can specify range in blocks or use 'default'
+      # which will use the server's simulation distance.
+      range: default
+      # Gap above the head, closest to vanilla is 0.2
+      gap: 0.2
+      # Should the plugin remove any empty lines?
+      remove-empty-lines: false
+      # Controls when text should wrap to a new line
+      # Higher values will allow more text before wrapping
+      # Default Minecraft text display width is 200
+      line-width: 200
+      # Makes the text display see-through
+      see-through: false
+      # Controls the opacity of the text (0-255)
+      text-opacity: 255
+      # Fine-tune the position offset
+      translate:
+        x: 0.0
+        y: 0.2 # Same as the gap option
+        z: 0.0
+      # Scale of the text display
+      scale:
+        x: 1.0
+        y: 1.0
+        z: 1.0 # Don't recommend changing this, it results in some strange results
+      # Override the brightness level
+      brightness: -1
+      # Text shadow configuration
+      shadow:
+        strength: 0.5
+        radius: 0.5
+    - text: "<white>%player_ping%ms</white>"
+      scale: 0.75
 
 # Should the player see their own tag?
 # This is not entirely supported, but bug reports still help

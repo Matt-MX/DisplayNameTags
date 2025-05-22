@@ -8,31 +8,43 @@ import me.tofaa.entitylib.meta.display.TextDisplayMeta;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.stream.Stream;
 
 public class TextDisplayMetaConfiguration {
 
-    public static boolean applyTextMeta(@NotNull ConfigurationSection section, @NotNull TextDisplayMeta to, @NotNull Player self) {
-        Stream<Component> stream = section.getStringList("text")
-            .stream()
-            .map((line) -> convertToComponent(self, line));
+    public static boolean applyTextMeta(
+            int index,
+            @NotNull ConfigurationSection section,
+            @NotNull TextDisplayMeta to,
+            @NotNull Player self
+    ) {
+        List<String> lines;
+        if (section.get("text") instanceof String) {
+            lines = List.of(Objects.requireNonNull(section.getString("text")));
+        } else {
+            lines = section.getStringList("text");
+        }
+
+        Stream<Component> stream = lines
+                .stream()
+                .map((line) -> convertToComponent(self, line));
 
         if (NameTags.getInstance().getConfig().getBoolean("defaults.remove-empty-lines", false)) {
             stream = stream.filter(TextComponent.IS_NOT_EMPTY);
         }
 
         Component text = stream
-            .reduce((a, b) -> a.append(Component.newline()).append(b))
-            .orElse(null);
+                .reduce((a, b) -> a.append(Component.newline()).append(b))
+                .orElse(null);
 
         if (text == null) return false;
 
@@ -43,7 +55,7 @@ public class TextDisplayMetaConfiguration {
         return false;
     }
 
-    public static void applyMeta(@NotNull ConfigurationSection section, @NotNull TextDisplayMeta to) {
+    public static void applyMeta(int index, @NotNull ConfigurationSection section, @NotNull TextDisplayMeta to) {
 
         ConfigHelper.takeIfPresent(section, "background", section::getString, (backgroundColor) -> {
             int background;
@@ -80,8 +92,8 @@ public class TextDisplayMetaConfiguration {
 
         ConfigHelper.takeIfPresent(section, "billboard", section::getString, (billboardString) -> {
             AbstractDisplayMeta.BillboardConstraints billboard = ConfigHelper.getEnumByNameOrNull(
-                AbstractDisplayMeta.BillboardConstraints.class,
-                billboardString.toLowerCase(Locale.ROOT)
+                    AbstractDisplayMeta.BillboardConstraints.class,
+                    billboardString.toLowerCase(Locale.ROOT)
             );
 
             Objects.requireNonNull(billboard, "Unknown billboard type in section " + section.getCurrentPath() + " named " + billboardString);
@@ -129,23 +141,31 @@ public class TextDisplayMetaConfiguration {
 
         ConfigHelper.takeIfPresent(section, "gap", section::getString, (gap) -> {
             float finalGap = gap.equalsIgnoreCase("default")
-                ? 0.2f
-                : Float.parseFloat(gap);
+                    ? 0.2f
+                    : Float.parseFloat(gap);
             if (finalGap != to.getTranslation().y) {
                 to.setTranslation(to.getTranslation().withY(finalGap));
             }
         });
 
-        ConfigHelper.takeIfPresent(section, "scale", section::getConfigurationSection, (vector) -> {
-            double dx = vector.getDouble("x");
-            double dy = vector.getDouble("y");
-            double dz = vector.getDouble("z");
+        if (section.isDouble("scale")) {
+            ConfigHelper.takeIfPresent(section, "scale", section::getDouble, (scale) -> {
+                if (to.getScale().x != scale) {
+                    to.setScale(new Vector3f(scale.floatValue(), scale.floatValue(), scale.floatValue()));
+                }
+            });
+        } else {
+            ConfigHelper.takeIfPresent(section, "scale", section::getConfigurationSection, (vector) -> {
+                double dx = vector.getDouble("x");
+                double dy = vector.getDouble("y");
+                double dz = vector.getDouble("z");
 
-            Vector3f vec = new Vector3f((float) dx, (float) dy, (float) dz);
-            if (!Objects.equals(to.getScale(), vec)) {
-                to.setScale(vec);
-            }
-        });
+                Vector3f vec = new Vector3f((float) dx, (float) dy, (float) dz);
+                if (!Objects.equals(to.getScale(), vec)) {
+                    to.setScale(vec);
+                }
+            });
+        }
 
         ConfigHelper.takeIfPresent(section, "brightness", section::getInt, (brightness) -> {
             if (to.getBrightnessOverride() != brightness) {
@@ -168,8 +188,8 @@ public class TextDisplayMetaConfiguration {
 
         ConfigHelper.takeIfPresent(section, "range", section::getString, (range) -> {
             float finalRange = range.equalsIgnoreCase("default")
-                ? (Bukkit.getSimulationDistance() * 16f)
-                : Float.parseFloat(range);
+                    ? (Bukkit.getSimulationDistance() * 16f)
+                    : Float.parseFloat(range);
 
             if (finalRange != to.getViewRange()) {
                 to.setViewRange(finalRange);
@@ -187,8 +207,8 @@ public class TextDisplayMetaConfiguration {
         formatted = PapiHook.setPlaceholders(self, formatted);
 
         return NameTags.getInstance()
-            .getFormatter()
-            .format(formatted);
+                .getFormatter()
+                .format(formatted);
     }
 
 }
