@@ -1,12 +1,14 @@
 package com.mattmx.nametags.entity;
 
 import com.github.retrooper.packetevents.util.Vector3f;
+import com.mattmx.nametags.event.NameTagDestroyEvent;
 import com.mattmx.nametags.event.NameTagEntityCreateEvent;
 import me.tofaa.entitylib.meta.display.AbstractDisplayMeta;
 import me.tofaa.entitylib.meta.display.TextDisplayMeta;
 import me.tofaa.entitylib.wrapper.WrapperEntity;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
+import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -50,7 +52,12 @@ public class NameTagManager {
         final NameTagHolder nameTagHolder = nameTagEntityByPassengerEntityId.remove(entity.getEntityId());
 
         if (nameTagHolder != null) {
-            nameTagEntityByPassengerEntityId.remove(nameTagHolder.getPassenger().getEntityId());
+            Event event = new NameTagDestroyEvent(nameTagHolder);
+            event.callEvent();
+
+            for (WrapperEntity passenger : nameTagHolder.getPassengers()) {
+                nameTagEntityByPassengerEntityId.remove(passenger.getEntityId());
+            }
         }
 
         return nameTagByEntityUUID.remove(entity.getUniqueId());
