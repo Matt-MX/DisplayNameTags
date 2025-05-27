@@ -28,6 +28,8 @@ public class ConfigDefaultsListener implements Listener {
             .getEntityManager()
             .setDefaultProvider(((entity, meta) -> {
                 meta.setUseDefaultBackground(false);
+                meta.setTransformationInterpolationDuration(5);
+                meta.setPositionRotationInterpolationDuration(5);
                 TextDisplayMetaConfiguration.applyMeta(defaultSection(), meta);
             }));
     }

@@ -79,11 +79,11 @@ tasks {
         minecraftVersion(mcVersion)
 
         downloadPlugins {
-            hangar("ViaVersion", "5.3.1")
-            hangar("ViaBackwards", "5.3.1")
+            hangar("ViaVersion", "5.3.2")
+            hangar("ViaBackwards", "5.3.2")
 
             // For testing groups in config.yml
-            url("https://download.luckperms.net/1567/bukkit/loader/LuckPerms-Bukkit-5.4.150.jar")
+            modrinth("luckperms", "v5.4.145-bukkit")
         }
     }
 }

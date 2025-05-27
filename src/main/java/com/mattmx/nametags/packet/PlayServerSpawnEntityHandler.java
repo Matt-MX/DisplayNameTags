@@ -7,8 +7,9 @@ import com.mattmx.nametags.entity.NameTagEntity;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Responsible for appending the passenger packet with the
- * name tag entity when sending a [WrapperPlayServerSpawnEntity]
+ * Responsible for appending the name tag spawn packet and
+ * passenger packet with the name tag entity when sending
+ * a [WrapperPlayServerSpawnEntity]
  * packet to the client.
  */
 public class PlayServerSpawnEntityHandler {

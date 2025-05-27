@@ -12,6 +12,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.jetbrains.annotations.NotNull;
+import org.spigotmc.event.player.PlayerSpawnLocationEvent;
 
 import java.util.concurrent.TimeUnit;
 
@@ -25,7 +26,7 @@ public class EventsListener implements Listener {
 
     @EventHandler
     public void onPlayerJoin(@NotNull PlayerJoinEvent event) {
-        Bukkit.getAsyncScheduler().runDelayed(plugin, (task) -> {
+        Bukkit.getAsyncScheduler().runNow(plugin, (task) -> {
             if (!event.getPlayer().isOnline()) {
                 return;
             }
@@ -33,7 +34,7 @@ public class EventsListener implements Listener {
             plugin.getEntityManager()
                     .getOrCreateNameTagEntity(event.getPlayer())
                     .updateVisibility();
-        }, 50L, TimeUnit.MILLISECONDS);
+        });
 
     }
 
