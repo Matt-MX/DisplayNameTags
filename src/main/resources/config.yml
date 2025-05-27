@@ -61,6 +61,10 @@ defaults:
 # This is not entirely supported, but bug reports still help
 show-self: false
 
+# Disables vanilla name tag rendering through a scoreboard teams packet
+# sent to the client on joining the server.
+disable-vanilla: true
+
 sneak:
   # Should we modify the opacity of the tag's background when the player shifts?
   enabled: true
