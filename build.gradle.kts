@@ -3,14 +3,11 @@ import java.io.InputStreamReader
 
 plugins {
     id("java")
-    alias(libs.plugins.runPaper)
-    alias(libs.plugins.paperweight) apply false
-    alias(libs.plugins.shadow) apply true
+    alias(libs.plugins.run.paper)
+    alias(libs.plugins.shadow)
 
     `maven-publish`
 }
-
-runPaper.folia.registerTask()
 
 val id = findProperty("id").toString()
 val pluginName = findProperty("plugin_name")
@@ -21,7 +18,6 @@ repositories {
     maven("https://repo.papermc.io/repository/maven-public/")
     maven("https://maven.pvphub.me/releases")
     maven("https://repo.dmulloy2.net/repository/public/")
-    maven("https://jitpack.io")
     maven("https://repo.extendedclip.com/content/repositories/placeholderapi/")
     maven("https://repo.codemc.io/repository/maven-releases/")
     maven("https://maven.evokegames.gg/snapshots")
@@ -29,21 +25,43 @@ repositories {
     maven("https://repo.codemc.org/repository/maven-public/") {
         name = "codemc"
     }
+
+    // Always make sure to put JitPack at the end of the list for performance reasons
+    maven("https://jitpack.io")
 }
 
 dependencies {
-//    paperweight.paperDevBundle(libs.versions.paperApi.get())
-    compileOnly(libs.paper.api)
-
-    compileOnly(libs.placeholder.api)
-    compileOnly(libs.tab.api)
-    compileOnly(libs.packet.events)
-    implementation(libs.entity.lib)
-    testImplementation("org.junit.jupiter:junit-jupiter:5.7.1")
-    compileOnly("net.skinsrestorer:skinsrestorer-api:15.5.1")
+    compileOnly(libs.paper)
+    compileOnly(libs.placeholderapi)
+    compileOnly(libs.tab)
+    compileOnly(libs.packetevents)
+    compileOnly(libs.skinsrestorer)
+    implementation(libs.entitylib)
+    implementation(libs.bstats)
+    testImplementation(libs.junit.jupiter)
 }
 
 tasks {
+    jar {
+        enabled = false
+    }
+
+    shadowJar {
+        archiveFileName = "${rootProject.name}-${version}.jar"
+        archiveClassifier = null
+
+        mergeServiceFiles()
+        manifest {
+            attributes["paperweight-mappings-namespace"] = "mojang"
+        }
+
+        relocate("me.tofaa.entitylib", "com.mattmx.nametags.shaded.entitylib")
+        relocate("org.bstats", "com.mattmx.nametags.shaded.bstats")
+    }
+
+    assemble {
+        dependsOn(shadowJar)
+    }
 
     withType<ProcessResources> {
         val props = mapOf(
@@ -74,26 +92,27 @@ tasks {
         useJUnitPlatform()
     }
 
-//    assemble {
-//        dependsOn(reobfJar)
-//    }
-
     runServer {
-        val mcVersion = libs.versions.paperApi.get().split("-")[0]
+        val mcVersion = libs.versions.paper.get().split("-")[0]
         minecraftVersion(mcVersion)
 
         downloadPlugins {
             hangar("ViaVersion", "5.3.2")
             hangar("ViaBackwards", "5.3.2")
+            modrinth("packetevents","2HJtPM2W")
 
             // For testing groups in config.yml
             modrinth("luckperms", "v5.4.145-bukkit")
         }
+
+        jvmArgs("-Dcom.mojang.eula.agree=true")
     }
+
+    runPaper.folia.registerTask()
 }
 
 java {
-//    withJavadocJar()
+    //withJavadocJar()
     withSourcesJar()
 
     toolchain {
