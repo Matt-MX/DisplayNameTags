@@ -7,10 +7,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.player.PlayerChangedWorldEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.player.PlayerRespawnEvent;
-import org.bukkit.event.player.PlayerToggleSneakEvent;
+import org.bukkit.event.player.*;
 import org.jetbrains.annotations.NotNull;
 import org.spigotmc.event.player.PlayerSpawnLocationEvent;
 
@@ -23,7 +20,7 @@ public class EventsListener implements Listener {
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
-    public void onPlayerJoin(@NotNull PlayerSpawnLocationEvent event) {
+    public void onPlayerJoin(@NotNull PlayerJoinEvent event) {
         Bukkit.getAsyncScheduler().runNow(plugin, (task) -> {
             if (!event.getPlayer().isOnline()) {
                 return;
@@ -33,7 +30,6 @@ public class EventsListener implements Listener {
                     .getOrCreateNameTagEntity(event.getPlayer())
                     .updateVisibility();
         });
-
     }
 
 //    @EventHandler
@@ -53,8 +49,10 @@ public class EventsListener implements Listener {
         plugin.getEntityManager().removeLastSentPassengersCache(event.getPlayer().getEntityId());
 
         // Remove as a viewer from all entities
-        for (final NameTagEntity entity : plugin.getEntityManager().getAllEntities()) {
-            entity.getPassenger().removeViewer(event.getPlayer().getUniqueId());
+        synchronized (plugin.getEntityManager().getAllEntities()) {
+            for (final NameTagEntity entity : plugin.getEntityManager().getAllEntities()) {
+                entity.getPassenger().removeViewer(event.getPlayer().getUniqueId());
+            }
         }
 
         NameTagEntity entity = plugin.getEntityManager().removeEntity(event.getPlayer());
@@ -66,8 +64,7 @@ public class EventsListener implements Listener {
 
     @EventHandler
     public void onPlayerChangeWorld(@NotNull PlayerChangedWorldEvent event) {
-        NameTagEntity nameTagEntity = plugin.getEntityManager()
-                .getNameTagEntity(event.getPlayer());
+        NameTagEntity nameTagEntity = plugin.getEntityManager().getNameTagEntity(event.getPlayer());
 
         if (nameTagEntity == null) return;
 

@@ -14,11 +14,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 
 public class NameTagEntityManager {
-    private final @NotNull Map<UUID, NameTagEntity> nameTagByEntityUUID = Collections.synchronizedMap(new HashMap<>());
-    private final @NotNull Map<Integer, NameTagEntity> nameTagEntityByEntityId = Collections.synchronizedMap(new WeakHashMap<>());
-    private final @NotNull Map<Integer, NameTagEntity> nameTagEntityByPassengerEntityId = Collections.synchronizedMap(new WeakHashMap<>());
+    public final @NotNull Map<UUID, NameTagEntity> nameTagByEntityUUID = Collections.synchronizedMap(new HashMap<>());
+    public final @NotNull Map<Integer, NameTagEntity> nameTagEntityByEntityId = Collections.synchronizedMap(new HashMap<>());
+    public final @NotNull Map<Integer, NameTagEntity> nameTagEntityByPassengerEntityId = Collections.synchronizedMap(new HashMap<>());
 
-    private final Map<Integer, int[]> lastSentPassengers = new ConcurrentHashMap<>();
+    public final Map<Integer, int[]> lastSentPassengers = new ConcurrentHashMap<>();
     private @NotNull BiConsumer<Entity, TextDisplayMeta> defaultProvider = (entity, meta) -> {
         // Default minecraft name-tag appearance
         meta.setText(entity.name());
@@ -77,6 +77,10 @@ public class NameTagEntityManager {
 
     public @Nullable NameTagEntity getNameTagEntityByTagEntityId(int entityId) {
         return nameTagEntityByPassengerEntityId.get(entityId);
+    }
+
+    public @NotNull Map<UUID, NameTagEntity> getMappedEntities() {
+        return this.nameTagByEntityUUID;
     }
 
     public @NotNull Collection<NameTagEntity> getAllEntities() {

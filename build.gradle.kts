@@ -66,6 +66,10 @@ tasks {
         mergeServiceFiles()
     }
 
+    build {
+        dependsOn(shadowJar)
+    }
+
     test {
         useJUnitPlatform()
     }
