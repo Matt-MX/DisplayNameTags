@@ -1,35 +1,30 @@
 [versions]
+shadow = "8.3.6"
+runPaper = "2.3.1"
 
-paperweight = "1.7.1"
-kotlin = "2.0.0"
-updateVersions = "0.51.0"
-shadow = "8.1.8"
-paperApi = "1.21.5-R0.1-SNAPSHOT"
+paper = "1.21.5-R0.1-SNAPSHOT"
+
 placeholderapi = "2.11.6"
-ktgui = "2.4.2-alpha"
-runPaper = "2.2.4"
+packetevents = "2.8.0"
+entitylib = "+1f4aeef-SNAPSHOT"
+tab = "5.2.0"
+skinsrestorer = "15.6.4"
+bstats = "3.1.0"
 
-packetEvents = "2.7.0"
-entityLib = "3.0.3-SNAPSHOT"
-tab = "4.1.8"
-viaversion = "5.0.0"
+junit-jupiter = "5.13.0"
 
 [libraries]
+paper = { module = "io.papermc.paper:paper-api", version.ref = "paper" }
 
-kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
-kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
-paper-api = { module = "io.papermc.paper:paper-api", version.ref = "paperApi" }
-placeholder-api = { module = "me.clip:placeholderapi", version.ref = "placeholderapi" }
-ktgui = { module = "com.mattmx:ktgui", version.ref = "ktgui" }
-packet-events = { module = "com.github.retrooper:packetevents-spigot", version.ref = "packetEvents" }
-entity-lib = { module = "me.tofaa.entitylib:spigot", version.ref = "entityLib" }
-tab-api = { module = "com.github.NEZNAMY:TAB-API", version.ref = "tab" }
-via-version = { module = "com.viaversion:viaversion-api", version.ref = "viaversion" }
+placeholderapi = { module = "me.clip:placeholderapi", version.ref = "placeholderapi" }
+packetevents = { module = "com.github.retrooper:packetevents-spigot", version.ref = "packetevents" }
+entitylib = { module = "me.tofaa.entitylib:spigot", version.ref = "entitylib" }
+tab = { module = "com.github.NEZNAMY:TAB-API", version.ref = "tab" }
+skinsrestorer = { module = "net.skinsrestorer:skinsrestorer-api", version.ref = "skinsrestorer" }
+bstats = { group = "org.bstats", name = "bstats-bukkit", version.ref = "bstats" }
+
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit-jupiter" }
 
 [plugins]
-
-kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
-updateDeps = { id = "com.github.ben-manes.versions", version.ref = "updateVersions" }
-shadow = { id = "io.github.goooler.shadow", version.ref = "shadow" }
-paperweight = { id = "io.papermc.paperweight.userdev", version.ref = "paperweight" }
-runPaper = { id = "xyz.jpenilla.run-paper", version.ref = "runPaper" }
+shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
+run-paper = { id = "xyz.jpenilla.run-paper", version.ref = "runPaper" }

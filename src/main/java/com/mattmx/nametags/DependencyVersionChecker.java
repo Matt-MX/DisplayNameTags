@@ -11,19 +11,21 @@ public class DependencyVersionChecker {
     public static void checkPacketEventsVersion() {
         final PacketEventsAPI<?> api = PacketEvents.getAPI();
 
-        boolean isOutdated = api.getVersion().isOlderThan(PEVersion.fromString("2.7.0"));
-        boolean isUnsupported = api.getServerManager().getVersion().isNewerThan(ServerVersion.V_1_21_4);
+        PEVersion currentPEVersion = api.getVersion();
+        ServerVersion outdatedMCVersion = ServerVersion.V_1_21_4;
+
+        boolean isOutdated = currentPEVersion.isOlderThan(new PEVersion(2, 8, 0));
+        boolean isUnsupported = api.getServerManager().getVersion().isNewerThan(outdatedMCVersion);
 
         if (isOutdated && isUnsupported) {
-            NameTags.getInstance().getComponentLogger().warn(Component.text("""
+            NameTags.getInstance().getComponentLogger().warn(Component.text(String.format("""
                     
-                    ⚠ PacketEvents version 2.7.0 does not support versions newer than 1.21.4!
+                    ⚠ Detected PacketEvents version %s, which does not support Minecraft versions newer than %s!
                     
-                    Please update to a development 2.8.0 build that adds 1.21.5+ support.
-                    https://ci.codemc.io/job/retrooper/job/packetevents/
+                    Please update to the latest PacketEvents release to ensure compatibility.
+                    Download it here: https://modrinth.com/plugin/packetevents
                     
-                    """));
+                    """, currentPEVersion.toStringWithoutSnapshot(), outdatedMCVersion.getReleaseName())));
         }
     }
-
 }

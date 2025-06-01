@@ -25,7 +25,7 @@ public class NameTagsLoader implements PluginLoader {
                 .resolve(".override")
                 .toFile();
 
-        String entityLibVersion = "3.0.3-SNAPSHOT";
+        String entityLibVersion = "+1f4aeef-SNAPSHOT";
         if (override.exists()) {
             try(BufferedReader reader = new BufferedReader(new FileReader(override))) {
                 entityLibVersion = reader.readLine();
