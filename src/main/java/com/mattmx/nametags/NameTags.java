@@ -5,6 +5,7 @@ import com.github.retrooper.packetevents.PacketEventsAPI;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.mattmx.nametags.config.ConfigDefaultsListener;
 import com.mattmx.nametags.config.TextFormatter;
+import com.mattmx.nametags.entity.NameTagEntity;
 import com.mattmx.nametags.entity.NameTagEntityManager;
 import com.mattmx.nametags.hook.NeznamyTABHook;
 import com.mattmx.nametags.hook.SkinRestorerHook;
@@ -16,6 +17,8 @@ import org.bstats.charts.DrilldownPie;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -25,8 +28,10 @@ import org.jetbrains.annotations.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class NameTags extends JavaPlugin {
     public static final int TRANSPARENT = Color.fromARGB(0).asARGB();
@@ -78,7 +83,22 @@ public class NameTags extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(eventsListener, this);
         Bukkit.getScheduler().runTaskLater(this, DependencyVersionChecker::checkPacketEventsVersion, 10L);
 
-        Objects.requireNonNull(Bukkit.getPluginCommand("nametags-reload")).setExecutor(new NameTagsCommand(this));
+        Objects.requireNonNull(Bukkit.getPluginCommand("nametags")).setExecutor(new NameTagsCommand(this));
+
+        // Gross sanity check for invalid entities or players
+        Bukkit.getAsyncScheduler().runAtFixedRate(this, (task) ->{
+            synchronized (entityManager.getMappedEntities()) {
+                for (Map.Entry<UUID, NameTagEntity> entry : entityManager.getMappedEntities().entrySet()) {
+                    Entity entity = entry.getValue().getBukkitEntity();
+
+                    if (entity instanceof Player player && !player.isOnline()) {
+                        entityManager.removeEntity(player);
+                    } else if (!entity.isValid()) {
+                        entityManager.removeEntity(entity);
+                    }
+                }
+            }
+        }, 10L, 10L, TimeUnit.SECONDS);
     }
 
     @Override

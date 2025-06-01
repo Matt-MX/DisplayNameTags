@@ -80,6 +80,14 @@ tasks {
         }
     }
 
+    shadowJar {
+        mergeServiceFiles()
+    }
+
+    build {
+        dependsOn(shadowJar)
+    }
+
     test {
         useJUnitPlatform()
     }
