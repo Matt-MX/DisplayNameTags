@@ -40,7 +40,7 @@ public class NameTagsCommand implements CommandExecutor, TabCompleter {
                     Component.text("NameTags debug")
                             .appendNewline()
                             .append(
-                                    Component.text("Total NameTags: " + plugin.getEntityManager().getMappedEntities().size())
+                                    Component.text("Total NameTags: " + plugin.getEntityManager().getCacheSize())
                                             .hoverEvent(HoverEvent.showText(
                                                     Component.text("By Entity UUID: " + plugin.getEntityManager().getCacheSize())
                                                             .appendNewline()
@@ -54,6 +54,22 @@ public class NameTagsCommand implements CommandExecutor, TabCompleter {
                             .append(
                                     Component.text("Cached last sent passengers: " + plugin.getEntityManager().getLastSentPassengersSize())
                                             .color(NamedTextColor.WHITE)
+                            )
+                            .appendNewline()
+                            .append(
+                                    Component.text("Viewers:")
+                                            .appendNewline()
+                                            .append(
+                                                    Component.text(
+                                                            String.join("\n",
+                                                                    plugin.getEntityManager()
+                                                                            .getAllEntities()
+                                                                            .stream()
+                                                                            .map((nameTag) -> " - " + nameTag.getBukkitEntity().getUniqueId() + ": " + nameTag.getPassenger().getViewers())
+                                                                            .toList()
+                                                            )
+                                                    )
+                                            )
                             )
                             .color(NamedTextColor.GOLD)
             );

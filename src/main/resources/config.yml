@@ -9,7 +9,8 @@ defaults:
   # overwriting the vanilla implementation provided yourself.
   enabled: true
   # How often should we refresh tags (in milliseconds)
-  refresh-every: 1
+  # Do not go lower than 50ms (1 tick) or clients may be kicked.
+  refresh-every: 500
   # Lines of text to display.
   text:
     - "<white>%player_name%</white>"

@@ -55,12 +55,12 @@ public enum TextFormatter {
 
             return MINI_MESSAGE.format(mutableLine);
         }
-    )
-    ;
+    );
 
     // Converts legacy hex format &x&9&0&0&c&3&f -> &#900c3f modern hex format
     // https://github.com/Matt-MX/DisplayNameTags/issues/32#issuecomment-2509403581
     private static final Pattern LEGACY_HEX_PATTERN = Pattern.compile("&x(&[0-9a-fA-F]){6}");
+
     public static String convertLegacyHex(String input) {
         Matcher matcher = LEGACY_HEX_PATTERN.matcher(input);
 
