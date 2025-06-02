@@ -42,17 +42,17 @@ public class NameTagsCommand implements CommandExecutor, TabCompleter {
                             .append(
                                     Component.text("Total NameTags: " + plugin.getEntityManager().getMappedEntities().size())
                                             .hoverEvent(HoverEvent.showText(
-                                                    Component.text("By Entity UUID: " + plugin.getEntityManager().nameTagByEntityUUID.size())
+                                                    Component.text("By Entity UUID: " + plugin.getEntityManager().getCacheSize())
                                                             .appendNewline()
-                                                            .append(Component.text("By Entity ID: " + plugin.getEntityManager().nameTagEntityByEntityId.size()))
+                                                            .append(Component.text("By Entity ID: " + plugin.getEntityManager().getEntityIdMapSize()))
                                                             .appendNewline()
-                                                            .append(Component.text("By Passenger ID: " + plugin.getEntityManager().nameTagEntityByPassengerEntityId.size()))
+                                                            .append(Component.text("By Passenger ID: " + plugin.getEntityManager().getPassengerIdMapSize()))
                                             ))
                                             .color(NamedTextColor.WHITE)
                             )
                             .appendNewline()
                             .append(
-                                    Component.text("Cached last sent passengers: " + plugin.getEntityManager().lastSentPassengers.size())
+                                    Component.text("Cached last sent passengers: " + plugin.getEntityManager().getLastSentPassengersSize())
                                             .color(NamedTextColor.WHITE)
                             )
                             .color(NamedTextColor.GOLD)
