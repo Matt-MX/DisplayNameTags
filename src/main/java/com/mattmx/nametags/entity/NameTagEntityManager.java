@@ -117,13 +117,11 @@ public class NameTagEntityManager {
     }
 
     private void handleRemoval(UUID uuid, NameTagEntity tagEntity, RemovalCause cause) {
-        if (cause == RemovalCause.EXPIRED && tagEntity != null) {
-            Entity entity = tagEntity.getBukkitEntity();
-            if (entity instanceof Player player && !player.isOnline()) {
-                removeEntity(player);
-            } else if (!entity.isValid()) {
-                removeEntity(entity);
-            }
+        if (cause != RemovalCause.EXPIRED || tagEntity == null) return;
+
+        Entity entity = tagEntity.getBukkitEntity();
+        if ((entity instanceof Player player && !player.isOnline()) || !entity.isValid()) {
+            removeEntity(entity);
         }
     }
 }
