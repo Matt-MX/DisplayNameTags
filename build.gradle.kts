@@ -31,13 +31,20 @@ repositories {
 }
 
 dependencies {
+    // Provided
     compileOnly(libs.paper)
     compileOnly(libs.placeholderapi)
     compileOnly(libs.tab)
     compileOnly(libs.packetevents)
     compileOnly(libs.skinsrestorer)
+
+    // Downloaded during runtime
+    compileOnly(libs.caffeine)
+
+    // Shaded
     implementation(libs.entitylib)
     implementation(libs.bstats)
+
     testImplementation(libs.junit.jupiter)
 }
 

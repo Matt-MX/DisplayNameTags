@@ -6,9 +6,10 @@ paper = "1.21.5-R0.1-SNAPSHOT"
 
 placeholderapi = "2.11.6"
 packetevents = "2.8.0"
-entitylib = "+1f4aeef-SNAPSHOT"
 tab = "5.2.0"
 skinsrestorer = "15.6.4"
+caffeine = "3.2.0"
+entitylib = "+1f4aeef-SNAPSHOT"
 bstats = "3.1.0"
 
 junit-jupiter = "5.13.0"
@@ -18,9 +19,10 @@ paper = { module = "io.papermc.paper:paper-api", version.ref = "paper" }
 
 placeholderapi = { module = "me.clip:placeholderapi", version.ref = "placeholderapi" }
 packetevents = { module = "com.github.retrooper:packetevents-spigot", version.ref = "packetevents" }
-entitylib = { module = "me.tofaa.entitylib:spigot", version.ref = "entitylib" }
 tab = { module = "com.github.NEZNAMY:TAB-API", version.ref = "tab" }
 skinsrestorer = { module = "net.skinsrestorer:skinsrestorer-api", version.ref = "skinsrestorer" }
+caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version.ref = "caffeine" }
+entitylib = { module = "me.tofaa.entitylib:spigot", version.ref = "entitylib" }
 bstats = { group = "org.bstats", name = "bstats-bukkit", version.ref = "bstats" }
 
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit-jupiter" }

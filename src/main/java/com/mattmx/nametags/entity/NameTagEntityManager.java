@@ -1,26 +1,35 @@
 package com.mattmx.nametags.entity;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.RemovalCause;
 import com.github.retrooper.packetevents.util.Vector3f;
 import com.mattmx.nametags.event.NameTagEntityCreateEvent;
 import me.tofaa.entitylib.meta.display.AbstractDisplayMeta;
 import me.tofaa.entitylib.meta.display.TextDisplayMeta;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 
 public class NameTagEntityManager {
-    public final @NotNull Map<UUID, NameTagEntity> nameTagByEntityUUID = Collections.synchronizedMap(new HashMap<>());
-    public final @NotNull Map<Integer, NameTagEntity> nameTagEntityByEntityId = Collections.synchronizedMap(new HashMap<>());
-    public final @NotNull Map<Integer, NameTagEntity> nameTagEntityByPassengerEntityId = Collections.synchronizedMap(new HashMap<>());
 
-    public final Map<Integer, int[]> lastSentPassengers = new ConcurrentHashMap<>();
+    private final Cache<UUID, NameTagEntity> nameTagCache = Caffeine.newBuilder()
+            .expireAfterAccess(Duration.ofMinutes(1))
+            .removalListener(this::handleRemoval)
+            .build();
+
+    private final ConcurrentHashMap<Integer, NameTagEntity> nameTagEntityByEntityId = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Integer, NameTagEntity> nameTagEntityByPassengerEntityId = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Integer, int[]> lastSentPassengers = new ConcurrentHashMap<>();
+
     private @NotNull BiConsumer<Entity, TextDisplayMeta> defaultProvider = (entity, meta) -> {
-        // Default minecraft name-tag appearance
         meta.setText(entity.name());
         meta.setTranslation(new Vector3f(0f, 0.2f, 0f));
         meta.setBillboardConstraints(AbstractDisplayMeta.BillboardConstraints.CENTER);
@@ -28,63 +37,51 @@ public class NameTagEntityManager {
     };
 
     public @NotNull NameTagEntity getOrCreateNameTagEntity(@NotNull Entity entity) {
-        NameTagEntity nameTagEntity;
-        synchronized (nameTagByEntityUUID) {
-            if (nameTagByEntityUUID.containsKey(entity.getUniqueId())) {
-                return nameTagByEntityUUID.get(entity.getUniqueId());
-            }
-
-            nameTagEntity = new NameTagEntity(entity);
-            nameTagByEntityUUID.put(entity.getUniqueId(), nameTagEntity);
-        }
-
-        nameTagEntity.getPassenger().consumeEntityMeta(TextDisplayMeta.class, (meta) -> defaultProvider.accept(entity, meta));
-
-        Bukkit.getPluginManager().callEvent(new NameTagEntityCreateEvent(nameTagEntity));
-
-        nameTagEntityByEntityId.put(entity.getEntityId(), nameTagEntity);
-        nameTagEntityByPassengerEntityId.put(nameTagEntity.getPassenger().getEntityId(), nameTagEntity);
-
-        return nameTagEntity;
+        NameTagEntity tagEntity = nameTagCache.get(entity.getUniqueId(), uuid -> {
+            NameTagEntity newlyCreated = new NameTagEntity(entity);
+            newlyCreated.getPassenger().consumeEntityMeta(TextDisplayMeta.class, meta ->
+                    defaultProvider.accept(entity, meta)
+            );
+            Bukkit.getPluginManager().callEvent(new NameTagEntityCreateEvent(newlyCreated));
+            nameTagEntityByEntityId.put(entity.getEntityId(), newlyCreated);
+            nameTagEntityByPassengerEntityId.put(newlyCreated.getPassenger().getEntityId(), newlyCreated);
+            return newlyCreated;
+        });
+        return Objects.requireNonNull(tagEntity, "Cache.get(…) unexpectedly returned null for UUID " + entity.getUniqueId());
     }
 
     public @Nullable NameTagEntity removeEntity(@NotNull Entity entity) {
-        final NameTagEntity nameTagEntity;
-        synchronized (nameTagByEntityUUID) {
-            nameTagEntity = nameTagByEntityUUID.remove(entity.getUniqueId());
+        NameTagEntity removed = nameTagCache.getIfPresent(entity.getUniqueId());
+        nameTagCache.invalidate(entity.getUniqueId());
+        if (removed != null) {
+            nameTagEntityByEntityId.remove(entity.getEntityId());
+            nameTagEntityByPassengerEntityId.remove(removed.getPassenger().getEntityId());
         }
-
-        nameTagEntityByEntityId.remove(entity.getEntityId());
-
-        if (nameTagEntity != null) {
-            nameTagEntityByPassengerEntityId.remove(nameTagEntity.getPassenger().getEntityId());
-        }
-
-        return nameTagEntity;
+        return removed;
     }
 
     public @Nullable NameTagEntity getNameTagEntity(@NotNull Entity entity) {
-        return nameTagByEntityUUID.get(entity.getUniqueId());
+        return nameTagCache.getIfPresent(entity.getUniqueId());
     }
 
     public @Nullable NameTagEntity getNameTagEntityByUUID(UUID uuid) {
-        return nameTagByEntityUUID.get(uuid);
+        return nameTagCache.getIfPresent(uuid);
     }
 
     public @Nullable NameTagEntity getNameTagEntityById(int entityId) {
         return nameTagEntityByEntityId.get(entityId);
     }
 
-    public @Nullable NameTagEntity getNameTagEntityByTagEntityId(int entityId) {
-        return nameTagEntityByPassengerEntityId.get(entityId);
+    public @Nullable NameTagEntity getNameTagEntityByTagEntityId(int tagEntityId) {
+        return nameTagEntityByPassengerEntityId.get(tagEntityId);
     }
 
     public @NotNull Map<UUID, NameTagEntity> getMappedEntities() {
-        return this.nameTagByEntityUUID;
+        return nameTagCache.asMap();
     }
 
     public @NotNull Collection<NameTagEntity> getAllEntities() {
-        return this.nameTagByEntityUUID.values();
+        return nameTagCache.asMap().values();
     }
 
     public void setDefaultProvider(@NotNull BiConsumer<Entity, TextDisplayMeta> consumer) {
@@ -101,5 +98,30 @@ public class NameTagEntityManager {
 
     public @NotNull Optional<int[]> getLastSentPassengers(int entityId) {
         return Optional.ofNullable(this.lastSentPassengers.get(entityId));
+    }
+
+    public int getCacheSize() {
+        return nameTagCache.asMap().size();
+    }
+
+    public int getEntityIdMapSize() {
+        return nameTagEntityByEntityId.size();
+    }
+
+    public int getPassengerIdMapSize() {
+        return nameTagEntityByPassengerEntityId.size();
+    }
+
+    public int getLastSentPassengersSize() {
+        return lastSentPassengers.size();
+    }
+
+    private void handleRemoval(UUID uuid, NameTagEntity tagEntity, RemovalCause cause) {
+        if (cause != RemovalCause.EXPIRED || tagEntity == null) return;
+
+        Entity entity = tagEntity.getBukkitEntity();
+        if ((entity instanceof Player player && !player.isOnline()) || !entity.isValid()) {
+            removeEntity(entity);
+        }
     }
 }
