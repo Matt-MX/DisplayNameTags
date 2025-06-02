@@ -59,11 +59,11 @@ public class NameTags extends JavaPlugin {
         registerMetrics();
 
         executor = Executors.newFixedThreadPool(
-                getConfig().getInt("options.threads", 2),
-                new ThreadFactoryBuilder()
-                        .setPriority(Thread.NORM_PRIORITY + 1)
-                        .setNameFormat("NameTags-Processor")
-                        .build()
+            getConfig().getInt("options.threads", 2),
+            new ThreadFactoryBuilder()
+                .setPriority(Thread.NORM_PRIORITY + 1)
+                .setNameFormat("NameTags-Processor")
+                .build()
         );
 
         SpigotEntityLibPlatform platform = new SpigotEntityLibPlatform(this);
@@ -103,7 +103,7 @@ public class NameTags extends JavaPlugin {
 
         String textFormatterIdentifier = getConfig().getString("formatter", "minimessage");
         formatter = TextFormatter.getById(textFormatterIdentifier)
-                .orElse(TextFormatter.MINI_MESSAGE);
+            .orElse(TextFormatter.MINI_MESSAGE);
 
         getLogger().info("Using " + formatter.name() + " as text formatter.");
 
@@ -139,8 +139,8 @@ public class NameTags extends JavaPlugin {
         HandlerList.unregisterAll(this.eventsListener);
 
         PacketEvents.getAPI()
-                .getEventManager()
-                .unregisterListener(this.packetListener);
+            .getEventManager()
+            .unregisterListener(this.packetListener);
     }
 
     public Executor getExecutor() {

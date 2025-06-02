@@ -4,6 +4,7 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.RemovalCause;
 import com.github.retrooper.packetevents.util.Vector3f;
+import com.mattmx.nametags.NameTags;
 import com.mattmx.nametags.event.NameTagEntityCreateEvent;
 import me.tofaa.entitylib.meta.display.AbstractDisplayMeta;
 import me.tofaa.entitylib.meta.display.TextDisplayMeta;
@@ -21,9 +22,9 @@ import java.util.function.BiConsumer;
 public class NameTagEntityManager {
 
     private final Cache<UUID, NameTagEntity> nameTagCache = Caffeine.newBuilder()
-            .expireAfterAccess(Duration.ofMinutes(1))
-            .removalListener(this::handleRemoval)
-            .build();
+        .expireAfterAccess(Duration.ofMinutes(1))
+        .removalListener(this::handleRemoval)
+        .build();
 
     private final ConcurrentHashMap<Integer, NameTagEntity> nameTagEntityByEntityId = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<Integer, NameTagEntity> nameTagEntityByPassengerEntityId = new ConcurrentHashMap<>();
@@ -39,24 +40,32 @@ public class NameTagEntityManager {
     public @NotNull NameTagEntity getOrCreateNameTagEntity(@NotNull Entity entity) {
         NameTagEntity tagEntity = nameTagCache.get(entity.getUniqueId(), uuid -> {
             NameTagEntity newlyCreated = new NameTagEntity(entity);
+
             newlyCreated.getPassenger().consumeEntityMeta(TextDisplayMeta.class, meta ->
-                    defaultProvider.accept(entity, meta)
+                defaultProvider.accept(entity, meta)
             );
+
             Bukkit.getPluginManager().callEvent(new NameTagEntityCreateEvent(newlyCreated));
+
             nameTagEntityByEntityId.put(entity.getEntityId(), newlyCreated);
             nameTagEntityByPassengerEntityId.put(newlyCreated.getPassenger().getEntityId(), newlyCreated);
+
             return newlyCreated;
         });
         return Objects.requireNonNull(tagEntity, "Cache.get(…) unexpectedly returned null for UUID " + entity.getUniqueId());
     }
 
     public @Nullable NameTagEntity removeEntity(@NotNull Entity entity) {
-        NameTagEntity removed = nameTagCache.getIfPresent(entity.getUniqueId());
+        lastSentPassengers.remove(entity.getEntityId());
         nameTagCache.invalidate(entity.getUniqueId());
+
+        final NameTagEntity removed = nameTagEntityByEntityId.remove(entity.getEntityId());
         if (removed != null) {
-            nameTagEntityByEntityId.remove(entity.getEntityId());
             nameTagEntityByPassengerEntityId.remove(removed.getPassenger().getEntityId());
+        } else {
+            throw new IllegalArgumentException("No cached NameTag by the passenger entity ID, this could be a memory leak.");
         }
+
         return removed;
     }
 
@@ -120,8 +129,21 @@ public class NameTagEntityManager {
         if (cause != RemovalCause.EXPIRED || tagEntity == null) return;
 
         Entity entity = tagEntity.getBukkitEntity();
-        if ((entity instanceof Player player && !player.isOnline()) || !entity.isValid()) {
-            removeEntity(entity);
+
+        if (entity instanceof Player player) {
+            if (!player.isOnline()) {
+                removeEntity(entity);
+            } else {
+                this.nameTagCache.put(uuid, tagEntity);
+            }
+        } else {
+            Bukkit.getScheduler().runTask(NameTags.getInstance(), () -> {
+                if (Bukkit.getEntity(uuid) == null) {
+                    removeEntity(entity);
+                } else {
+                    this.nameTagCache.put(uuid, tagEntity);
+                }
+            });
         }
     }
 }

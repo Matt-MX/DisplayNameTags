@@ -27,8 +27,8 @@ public class EventsListener implements Listener {
             }
 
             plugin.getEntityManager()
-                    .getOrCreateNameTagEntity(event.getPlayer())
-                    .updateVisibility();
+                .getOrCreateNameTagEntity(event.getPlayer())
+                .updateVisibility();
         });
     }
 
@@ -49,10 +49,8 @@ public class EventsListener implements Listener {
         plugin.getEntityManager().removeLastSentPassengersCache(event.getPlayer().getEntityId());
 
         // Remove as a viewer from all entities
-        synchronized (plugin.getEntityManager().getAllEntities()) {
-            for (final NameTagEntity entity : plugin.getEntityManager().getAllEntities()) {
-                entity.getPassenger().removeViewer(event.getPlayer().getUniqueId());
-            }
+        for (final NameTagEntity entity : plugin.getEntityManager().getAllEntities()) {
+            entity.getPassenger().removeViewer(event.getPlayer().getUniqueId());
         }
 
         NameTagEntity entity = plugin.getEntityManager().removeEntity(event.getPlayer());
@@ -81,7 +79,7 @@ public class EventsListener implements Listener {
     @EventHandler
     public void onPlayerDeath(@NotNull PlayerDeathEvent event) {
         NameTagEntity nameTagEntity = plugin.getEntityManager()
-                .getNameTagEntity(event.getPlayer());
+            .getNameTagEntity(event.getPlayer());
 
         if (nameTagEntity == null) return;
 
@@ -94,7 +92,7 @@ public class EventsListener implements Listener {
     @EventHandler
     public void onPlayerRespawn(@NotNull PlayerRespawnEvent event) {
         NameTagEntity nameTagEntity = plugin.getEntityManager()
-                .getNameTagEntity(event.getPlayer());
+            .getNameTagEntity(event.getPlayer());
 
         if (nameTagEntity == null) return;
 
@@ -125,12 +123,12 @@ public class EventsListener implements Listener {
         if (event.getPlayer().isInsideVehicle()) return;
 
         NameTagEntity nameTagEntity = plugin.getEntityManager()
-                .getNameTagEntity(event.getPlayer());
+            .getNameTagEntity(event.getPlayer());
 
         if (nameTagEntity == null) return;
 
         nameTagEntity.getTraits()
-                .getOrAddTrait(SneakTrait.class, SneakTrait::new)
-                .updateSneak(event.isSneaking());
+            .getOrAddTrait(SneakTrait.class, SneakTrait::new)
+            .updateSneak(event.isSneaking());
     }
 }

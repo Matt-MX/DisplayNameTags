@@ -19,13 +19,13 @@ public class DependencyVersionChecker {
 
         if (isOutdated && isUnsupported) {
             NameTags.getInstance().getComponentLogger().warn(Component.text(String.format("""
-                    
-                    ⚠ Detected PacketEvents version %s, which does not support Minecraft versions newer than %s!
-                    
-                    Please update to the latest PacketEvents release to ensure compatibility.
-                    Download it here: https://modrinth.com/plugin/packetevents
-                    
-                    """, currentPEVersion.toStringWithoutSnapshot(), outdatedMCVersion.getReleaseName())));
+                
+                ⚠ Detected PacketEvents version %s, which does not support Minecraft versions newer than %s!
+                
+                Please update to the latest PacketEvents release to ensure compatibility.
+                Download it here: https://modrinth.com/plugin/packetevents
+                
+                """, currentPEVersion.toStringWithoutSnapshot(), outdatedMCVersion.getReleaseName())));
         }
     }
 }
