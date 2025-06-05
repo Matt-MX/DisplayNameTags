@@ -21,13 +21,13 @@ public class NameTagsLoader implements PluginLoader {
 
         // File to override version
         final File override = classpathBuilder.getContext()
-                .getDataDirectory()
-                .resolve(".override")
-                .toFile();
+            .getDataDirectory()
+            .resolve(".override")
+            .toFile();
 
         String entityLibVersion = "+1f4aeef-SNAPSHOT";
         if (override.exists()) {
-            try(BufferedReader reader = new BufferedReader(new FileReader(override))) {
+            try (BufferedReader reader = new BufferedReader(new FileReader(override))) {
                 entityLibVersion = reader.readLine();
             } catch (Exception error) {
                 error.printStackTrace();
@@ -36,17 +36,17 @@ public class NameTagsLoader implements PluginLoader {
 
         MavenLibraryResolver resolver = new MavenLibraryResolver();
         resolver.addRepository(
-                new RemoteRepository.Builder(
-                        "evoke-games",
-                        "default",
-                        "https://maven.evokegames.gg/snapshots"
-                ).build()
+            new RemoteRepository.Builder(
+                "evoke-games",
+                "default",
+                "https://maven.evokegames.gg/snapshots"
+            ).build()
         );
         resolver.addDependency(
-                new Dependency(
-                        new DefaultArtifact("me.tofaa.entitylib:spigot:" + entityLibVersion),
-                        null
-                ).setOptional(false)
+            new Dependency(
+                new DefaultArtifact("me.tofaa.entitylib:spigot:" + entityLibVersion),
+                null
+            ).setOptional(false)
         );
 
         classpathBuilder.addLibrary(resolver);

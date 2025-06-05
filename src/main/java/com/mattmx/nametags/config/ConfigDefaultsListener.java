@@ -6,15 +6,12 @@ import com.mattmx.nametags.entity.trait.RefreshTrait;
 import com.mattmx.nametags.entity.trait.SneakTrait;
 import com.mattmx.nametags.event.NameTagEntityCreateEvent;
 import me.tofaa.entitylib.meta.display.AbstractDisplayMeta;
-import org.bukkit.Color;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -65,50 +62,48 @@ public class ConfigDefaultsListener implements Listener {
                 plugin,
                 refreshMillis,
                 (entity) -> {
-                    synchronized (entity) {
-                        TextDisplayMetaConfiguration.applyMeta(defaultSection(), entity.getMeta());
-                        TextDisplayMetaConfiguration.applyTextMeta(defaultSection(), entity.getMeta(), player);
+                    TextDisplayMetaConfiguration.applyMeta(defaultSection(), entity.getMeta());
+                    TextDisplayMetaConfiguration.applyTextMeta(defaultSection(), entity.getMeta(), player);
 
-                        // TODO we should cache this stuff
-                        List<Map.Entry<String, ConfigurationSection>> groups = plugin.getGroups()
-                            .entrySet()
-                            .stream()
-                            .filter((e) -> player.hasPermission(e.getKey()))
-                            .sorted(GroupPriorityComparator.get())
-                            .toList();
+                    // TODO we should cache this stuff
+                    List<Map.Entry<String, ConfigurationSection>> groups = plugin.getGroups()
+                        .entrySet()
+                        .stream()
+                        .filter((e) -> player.hasPermission(e.getKey()))
+                        .sorted(GroupPriorityComparator.get())
+                        .toList();
 
-                        long recentRefreshEvery = plugin.getConfig().getLong("defaults.refresh-every", 50);
-                        if (!groups.isEmpty()) {
-                            Map.Entry<String, ConfigurationSection> highest = groups.getLast();
+                    long recentRefreshEvery = plugin.getConfig().getLong("defaults.refresh-every", 50);
+                    if (!groups.isEmpty()) {
+                        Map.Entry<String, ConfigurationSection> highest = groups.getLast();
 
-                            TextDisplayMetaConfiguration.applyMeta(highest.getValue(), entity.getMeta());
-                            TextDisplayMetaConfiguration.applyTextMeta(highest.getValue(), entity.getMeta(), player);
+                        TextDisplayMetaConfiguration.applyMeta(highest.getValue(), entity.getMeta());
+                        TextDisplayMetaConfiguration.applyTextMeta(highest.getValue(), entity.getMeta(), player);
 
-                            long groupRefresh = highest.getValue().getLong("refresh-every", -1);
-                            if (groupRefresh > 0) {
-                                recentRefreshEvery = groupRefresh;
-                            }
+                        long groupRefresh = highest.getValue().getLong("refresh-every", -1);
+                        if (groupRefresh > 0) {
+                            recentRefreshEvery = groupRefresh;
                         }
-
-                        if (recentRefreshEvery != refreshMillis) {
-                            entity.getTraits().removeTrait(RefreshTrait.class);
-                            registerDefaultRefreshListener(tag, recentRefreshEvery);
-                        }
-
-                        if (entity.getMeta().getBillboardConstraints() == AbstractDisplayMeta.BillboardConstraints.CENTER) {
-                            // Look passenger down to remove debug getting in the way
-                            entity.getPassenger().rotateHead(0f, 90f);
-                        }
-
-                        // Preserve background color for sneaking
-                        // Maybe we should introduce an `afterRefresh` callback?
-                        entity.getTraits()
-                            .getTrait(SneakTrait.class)
-                            .ifPresent(SneakTrait::manuallyUpdateSneakingOpacity);
-
-                        entity.updateVisibility();
-                        entity.getPassenger().refresh();
                     }
+
+                    if (recentRefreshEvery != refreshMillis) {
+                        entity.getTraits().removeTrait(RefreshTrait.class);
+                        registerDefaultRefreshListener(tag, recentRefreshEvery);
+                    }
+
+                    if (entity.getMeta().getBillboardConstraints() == AbstractDisplayMeta.BillboardConstraints.CENTER) {
+                        // Look passenger down to remove debug getting in the way
+                        entity.getPassenger().rotateHead(0f, 90f);
+                    }
+
+                    // Preserve background color for sneaking
+                    // Maybe we should introduce an `afterRefresh` callback?
+                    entity.getTraits()
+                        .getTrait(SneakTrait.class)
+                        .ifPresent(SneakTrait::manuallyUpdateSneakingOpacity);
+
+                    entity.updateVisibility();
+                    entity.getPassenger().refresh();
                 }
             )
         );

@@ -13,31 +13,38 @@ val id = findProperty("id").toString()
 val pluginName = findProperty("plugin_name")
 
 repositories {
-    mavenLocal()
-    mavenCentral()
-    maven("https://repo.papermc.io/repository/maven-public/")
     maven("https://maven.pvphub.me/releases")
-    maven("https://repo.dmulloy2.net/repository/public/")
-    maven("https://repo.extendedclip.com/content/repositories/placeholderapi/")
-    maven("https://repo.codemc.io/repository/maven-releases/")
-    maven("https://maven.evokegames.gg/snapshots")
     maven("https://repo.viaversion.com")
     maven("https://repo.codemc.org/repository/maven-public/") {
         name = "codemc"
     }
+    maven("https://repo.papermc.io/repository/maven-public/")
+    maven("https://repo.dmulloy2.net/repository/public/")
+    maven("https://repo.extendedclip.com/content/repositories/placeholderapi/")
+    maven("https://repo.codemc.io/repository/maven-releases/")
+    maven("https://maven.evokegames.gg/snapshots")
 
+    mavenLocal()
+    mavenCentral()
     // Always make sure to put JitPack at the end of the list for performance reasons
     maven("https://jitpack.io")
 }
 
 dependencies {
+    // Provided
     compileOnly(libs.paper)
     compileOnly(libs.placeholderapi)
     compileOnly(libs.tab)
     compileOnly(libs.packetevents)
     compileOnly(libs.skinsrestorer)
+
+    // Downloaded during runtime
+    compileOnly(libs.caffeine)
+
+    // Shaded
     implementation(libs.entitylib)
     implementation(libs.bstats)
+
     testImplementation(libs.junit.jupiter)
 }
 

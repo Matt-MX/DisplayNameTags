@@ -40,11 +40,11 @@ public class PlayServerEntityMetaDataHandler {
 
     private static final Vector3f PRE_1_20_2_TRANSLATION_OFFSET = new Vector3f(0f, 0.4f, 0f);
     private static final byte ENTITY_OFFSET_INDEX = PacketEvents.getAPI()
-            .getServerManager()
-            .getVersion()
-            .is(VersionComparison.OLDER_THAN, ServerVersion.V_1_20_2)
-            ? PRE_1_20_2_TRANSLATION_INDEX
-            : POST_1_20_2_TRANSLATION_INDEX;
+        .getServerManager()
+        .getVersion()
+        .is(VersionComparison.OLDER_THAN, ServerVersion.V_1_20_2)
+        ? PRE_1_20_2_TRANSLATION_INDEX
+        : POST_1_20_2_TRANSLATION_INDEX;
 
     private static final TextComponent RELATIVE_ARG_PREFIX = Component.text("%rel_");
 
@@ -67,8 +67,8 @@ public class PlayServerEntityMetaDataHandler {
         // This could prove a concurrency issue, maybe we should keep track of if there is a newer packet processing?
         plugin.getExecutor().execute(() -> {
             boolean isOldClient = eventClone.getUser()
-                    .getClientVersion()
-                    .isOlderThan(ClientVersion.V_1_20_2);
+                .getClientVersion()
+                .isOlderThan(ClientVersion.V_1_20_2);
 
             boolean containsEntityOffset = false;
             @Nullable EntityData textEntry = null;
@@ -94,16 +94,16 @@ public class PlayServerEntityMetaDataHandler {
             if (isOldClient && !containsEntityOffset) {
                 // If there was no offset found then add one ourselves for the offset.
                 packet.getEntityMetadata().add(new EntityData(
-                        ENTITY_OFFSET_INDEX,
-                        EntityDataTypes.VECTOR3F,
-                        PRE_1_20_2_TRANSLATION_OFFSET
+                    ENTITY_OFFSET_INDEX,
+                    EntityDataTypes.VECTOR3F,
+                    PRE_1_20_2_TRANSLATION_OFFSET
                 ));
             }
 
             // Apply relational placeholders to the text of an outgoing display entity
             if (plugin.getConfig().getBoolean("options.relative-placeholders-support") &&
-                    nameTagEntity.getBukkitEntity() instanceof Player from &&
-                    textEntry != null
+                nameTagEntity.getBukkitEntity() instanceof Player from &&
+                textEntry != null
             ) {
                 final TextComponent originalText = (TextComponent) textEntry.getValue();
                 final Player to = eventClone.getPlayer();
