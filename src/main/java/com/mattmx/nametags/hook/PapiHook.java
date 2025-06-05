@@ -1,5 +1,6 @@
 package com.mattmx.nametags.hook;
 
+import com.mattmx.nametags.NameTags;
 import me.clip.placeholderapi.PlaceholderAPI;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextReplacementConfig;
@@ -49,7 +50,7 @@ public class PapiHook {
             .replacement((match, ctx) -> {
                 String matchedText = match.group();
                 String parsed = PlaceholderAPI.setRelationalPlaceholders(one, two, matchedText);
-                return Component.text(parsed);
+                return NameTags.getInstance().getFormatter().format(parsed);
             })
             .build()
         );
