@@ -20,7 +20,7 @@ public class EventsListener implements Listener {
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
-    public void onPlayerJoin(@NotNull PlayerSpawnLocationEvent event) {
+    public void onPlayerJoin(@NotNull PlayerJoinEvent event) {
         Bukkit.getAsyncScheduler().runNow(plugin, (task) -> {
             if (!event.getPlayer().isConnected()) {
                 return;
