@@ -11,6 +11,8 @@ import org.bukkit.event.player.*;
 import org.jetbrains.annotations.NotNull;
 import org.spigotmc.event.player.PlayerSpawnLocationEvent;
 
+import java.util.UUID;
+
 public class EventsListener implements Listener {
 
     private final @NotNull NameTags plugin;
@@ -47,6 +49,7 @@ public class EventsListener implements Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerQuit(@NotNull PlayerQuitEvent event) {
         plugin.getEntityManager().removeLastSentPassengersCache(event.getPlayer().getEntityId());
+        // TODO(matt): might not be sending de-spawn packet to viewers all the time?
 
         // Remove as a viewer from all entities
         for (final NameTagEntity entity : plugin.getEntityManager().getAllEntities()) {

@@ -132,6 +132,7 @@ public class NameTagEntityManager {
 
         if (entity instanceof Player player) {
             if (!player.isOnline()) {
+                tagEntity.destroy();
                 removeEntity(entity);
             } else {
                 this.nameTagCache.put(uuid, tagEntity);
@@ -139,6 +140,7 @@ public class NameTagEntityManager {
         } else {
             Bukkit.getScheduler().runTask(NameTags.getInstance(), () -> {
                 if (Bukkit.getEntity(uuid) == null) {
+                    tagEntity.destroy();
                     removeEntity(entity);
                 } else {
                     this.nameTagCache.put(uuid, tagEntity);
