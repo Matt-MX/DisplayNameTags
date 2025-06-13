@@ -108,7 +108,7 @@ public class PlayServerEntityMetaDataHandler {
                 final TextComponent originalText = (TextComponent) textEntry.getValue();
                 final Player to = eventClone.getPlayer();
 
-                boolean containsRelativePlaceholder = ComponentUtils.startsWith(originalText, RELATIVE_ARG_PREFIX);
+                boolean containsRelativePlaceholder = ComponentUtils.contains(originalText, RELATIVE_ARG_PREFIX);
 
                 // If it doesn't have any placeholders in then stop
                 if (!containsRelativePlaceholder) {
