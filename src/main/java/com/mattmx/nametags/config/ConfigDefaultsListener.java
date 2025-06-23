@@ -6,6 +6,7 @@ import com.mattmx.nametags.entity.trait.RefreshTrait;
 import com.mattmx.nametags.entity.trait.SneakTrait;
 import com.mattmx.nametags.event.NameTagEntityCreateEvent;
 import me.tofaa.entitylib.meta.display.AbstractDisplayMeta;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -25,8 +26,22 @@ public class ConfigDefaultsListener implements Listener {
             .getEntityManager()
             .setDefaultProvider(((entity, meta) -> {
                 meta.setUseDefaultBackground(false);
-                meta.setTransformationInterpolationDuration(5);
-                meta.setPositionRotationInterpolationDuration(5);
+                
+                // Version-specific interpolation handling
+                String version = Bukkit.getMinecraftVersion();
+                int defaultTransformation = 10;
+                int defaultPositionRotation = 10;
+                
+                // For 1.21.5+ use higher interpolation values for smoother movement
+                if (isVersion1215OrLater(version)) {
+                    defaultTransformation = 15;
+                    defaultPositionRotation = 15;
+                }
+                
+                int transformationDuration = plugin.getConfig().getInt("options.interpolation.transformation-duration", defaultTransformation);
+                int positionRotationDuration = plugin.getConfig().getInt("options.interpolation.position-rotation-duration", defaultPositionRotation);
+                meta.setTransformationInterpolationDuration(transformationDuration);
+                meta.setPositionRotationInterpolationDuration(positionRotationDuration);
                 TextDisplayMetaConfiguration.applyMeta(defaultSection(), meta);
             }));
     }
@@ -107,6 +122,26 @@ public class ConfigDefaultsListener implements Listener {
                 }
             )
         );
+    }
+
+    private boolean isVersion1215OrLater(String version) {
+        try {
+            // Parse version string like "1.21.5" or "1.21"
+            String[] parts = version.split("\\.");
+            if (parts.length >= 2) {
+                int major = Integer.parseInt(parts[0]);
+                int minor = Integer.parseInt(parts[1]);
+                int patch = parts.length > 2 ? Integer.parseInt(parts[2]) : 0;
+                
+                if (major > 1) return true;
+                if (major == 1 && minor > 21) return true;
+                if (major == 1 && minor == 21 && patch >= 5) return true;
+            }
+        } catch (NumberFormatException e) {
+            // If we can't parse the version, assume it's a newer version
+            return true;
+        }
+        return false;
     }
 
 }
