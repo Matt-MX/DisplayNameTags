@@ -1,6 +1,14 @@
 options:
   threads: 2
   relative-placeholders-support: true
+  # Interpolation settings for smoother movement (1.21.5+)
+  # Minecraft 1.21.5 changed how text display entities handle interpolation
+  # Higher values = smoother movement but slightly more delayed updates
+  # Lower values = more responsive but potentially choppy movement
+  # Recommended: 15-20 for 1.21.5+, 5-10 for older versions
+  interpolation:
+    transformation-duration: 15
+    position-rotation-duration: 15
 
 # Base default options applied first
 defaults:
@@ -10,7 +18,8 @@ defaults:
   enabled: true
   # How often should we refresh tags (in milliseconds)
   # Do not go lower than 50ms (1 tick) or clients may be kicked.
-  refresh-every: 500
+  # For 1.21.5+, consider using 250ms for smoother movement
+  refresh-every: 250
   # Lines of text to display.
   text:
     - "<white>%player_name%</white>"
