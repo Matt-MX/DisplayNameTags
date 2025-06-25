@@ -4,11 +4,14 @@ import com.github.retrooper.packetevents.util.Vector3f;
 import com.mattmx.nametags.event.NameTagEntityCreateEvent;
 import me.tofaa.entitylib.meta.display.AbstractDisplayMeta;
 import me.tofaa.entitylib.meta.display.TextDisplayMeta;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
+import org.bukkit.Color;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.awt.*;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
@@ -22,6 +25,7 @@ public class NameTagEntityManager {
     private @NotNull BiConsumer<Entity, TextDisplayMeta> defaultProvider = (entity, meta) -> {
         // Default minecraft name-tag appearance
         meta.setText(entity.name());
+        meta.setBackgroundColor(0x40000000);
         meta.setTranslation(new Vector3f(0f, 0.2f, 0f));
         meta.setBillboardConstraints(AbstractDisplayMeta.BillboardConstraints.CENTER);
         meta.setViewRange(50f);
