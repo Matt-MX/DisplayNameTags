@@ -126,10 +126,6 @@ fun onItemSpawn(event: ItemSpawnEvent) = event.apply {
 
 ## Roadmap
 
-- `/feat/rel_placeholders`
-    Currently the plugin does not support PlaceholderAPI's
-    relational placeholders.
-
 - `/feat/customization`
     Extension plugin to give players ability to customize their own
     name tags by using a command and customizable GUI interface.
