@@ -32,6 +32,7 @@ public class NameTagEntityManager {
 
     private @NotNull BiConsumer<Entity, TextDisplayMeta> defaultProvider = (entity, meta) -> {
         meta.setText(entity.name());
+        meta.setBackgroundColor(0x40000000);
         meta.setTranslation(new Vector3f(0f, 0.2f, 0f));
         meta.setBillboardConstraints(AbstractDisplayMeta.BillboardConstraints.CENTER);
         meta.setViewRange(50f);
