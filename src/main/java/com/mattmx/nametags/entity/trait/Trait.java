@@ -1,19 +1,18 @@
 package com.mattmx.nametags.entity.trait;
 
-import com.mattmx.nametags.entity.NameTagEntity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public abstract class Trait {
-    private @Nullable NameTagEntity nameTag;
+public abstract class Trait<T> {
+    private @Nullable T holder;
 
-    public void setNameTag(@NotNull NameTagEntity tag) {
-        this.nameTag = tag;
+    public void setHolder(@NotNull T tag) {
+        this.holder = tag;
     }
 
-    public @NotNull NameTagEntity getTag() {
-        assert nameTag != null;
-        return nameTag;
+    public @NotNull T getOwner() {
+        assert holder != null;
+        return holder;
     }
 
     public void onEnable() {

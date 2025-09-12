@@ -8,11 +8,11 @@ import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
 
 @Getter
-public class NameTagEntityCreateEvent extends Event {
+public class NameTagCreateEvent extends Event {
     private static final HandlerList HANDLERS = new HandlerList();
     private final @NotNull NameTagHolder nameTag;
 
-    public NameTagEntityCreateEvent(@NotNull NameTagHolder holder) {
+    public NameTagCreateEvent(@NotNull NameTagHolder holder) {
         super(!Bukkit.isPrimaryThread());
 
         this.nameTag = holder;

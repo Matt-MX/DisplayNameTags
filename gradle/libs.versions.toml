@@ -10,6 +10,7 @@ tab = "5.2.0"
 skinsrestorer = "15.6.4"
 caffeine = "3.2.0"
 entitylib = "+1f4aeef-SNAPSHOT"
+luckperms = "5.4"
 bstats = "3.1.0"
 
 junit-jupiter = "5.13.0"
@@ -23,6 +24,8 @@ tab = { module = "com.github.NEZNAMY:TAB-API", version.ref = "tab" }
 skinsrestorer = { module = "net.skinsrestorer:skinsrestorer-api", version.ref = "skinsrestorer" }
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version.ref = "caffeine" }
 entitylib = { module = "me.tofaa.entitylib:spigot", version.ref = "entitylib" }
+luckperms = { group = "net.luckperms", name = "api", version.ref = "luckperms" }
+lombok = { group = "org.projectlombok", name = "lombok", version = "1.18.36" }
 bstats = { group = "org.bstats", name = "bstats-bukkit", version.ref = "bstats" }
 
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit-jupiter" }

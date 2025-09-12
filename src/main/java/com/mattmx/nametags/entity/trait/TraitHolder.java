@@ -1,42 +1,41 @@
 package com.mattmx.nametags.entity.trait;
 
-import com.mattmx.nametags.entity.NameTagEntity;
+import com.mattmx.nametags.entity.NameTagHolder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
-public class TraitHolder {
-    private final @NotNull NameTagEntity owner;
-    private final @NotNull Map<Class<?>, Trait> map = new ConcurrentHashMap<>();
+public class TraitHolder<T> {
+    private final @NotNull T owner;
+    private final @NotNull Map<Class<?>, Trait<T>> map = new ConcurrentHashMap<>();
 
-    public TraitHolder(@NotNull NameTagEntity owner) {
+    public TraitHolder(@NotNull T owner) {
         this.owner = owner;
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends Trait> @Nullable T getTraitOrNull(@NotNull Class<T> traitClazz) {
-        Trait trait = map.get(traitClazz);
+    public <K extends Trait<T>> @Nullable K getTraitOrNull(@NotNull Class<K> traitClazz) {
+        Trait<T> trait = map.get(traitClazz);
 
         if (trait != null) {
-            return (T) trait;
+            return (K) trait;
         }
         return null;
     }
 
-    public <T extends Trait> @NotNull Optional<T> getTrait(@NotNull Class<T> traitClazz) {
+    public <K extends Trait<T>> @NotNull Optional<K> getTrait(@NotNull Class<K> traitClazz) {
         return Optional.ofNullable(getTraitOrNull(traitClazz));
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends Trait> @NotNull T getOrAddTrait(@NotNull Class<T> traitClazz, @NotNull Supplier<T> supplier) {
-        return (T) map.computeIfAbsent(traitClazz, (k) -> {
-            T trait = supplier.get();
-            trait.setNameTag(owner);
+    public <K extends Trait<T>> @NotNull K getOrAddTrait(@NotNull Class<K> traitClazz, @NotNull Supplier<K> supplier) {
+        return (K) map.computeIfAbsent(traitClazz, (k) -> {
+            K trait = supplier.get();
+            trait.setHolder(owner);
 
             trait.onEnable();
 
@@ -45,23 +44,23 @@ public class TraitHolder {
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends Trait> @Nullable T removeTrait(@NotNull Class<T> traitClazz) {
-        Trait trait = map.remove(traitClazz);
+    public <K extends Trait<T>> @Nullable K removeTrait(@NotNull Class<K> traitClazz) {
+        Trait<T> trait = map.remove(traitClazz);
 
         if (trait != null) {
             trait.onDestroy();
-            return (T) trait;
+            return (K) trait;
         }
 
         return null;
     }
 
-    public <T extends Trait> boolean hasTrait(@NotNull Class<T> traitClazz) {
+    public <K extends Trait<T>> boolean hasTrait(@NotNull Class<T> traitClazz) {
         return map.containsKey(traitClazz);
     }
 
     public void destroy() {
-        for (Trait trait : map.values()) {
+        for (Trait<T> trait : map.values()) {
             trait.onDestroy();
         }
         map.clear();

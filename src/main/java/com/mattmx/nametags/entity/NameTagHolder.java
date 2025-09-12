@@ -1,5 +1,6 @@
 package com.mattmx.nametags.entity;
 
+import com.mattmx.nametags.entity.trait.TraitHolder;
 import lombok.Getter;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
@@ -13,6 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Getter
 public class NameTagHolder {
     private @NotNull Entity owner;
+    private final TraitHolder<NameTagHolder> traits = new TraitHolder<>(this);
     private @NotNull Map<Integer, NameTagEntity> entities = new ConcurrentHashMap<>();
     private float cachedViewRange = -1f;
 

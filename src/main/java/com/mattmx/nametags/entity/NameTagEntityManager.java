@@ -5,7 +5,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.RemovalCause;
 import com.mattmx.nametags.NameTagHolderDefaults;
 import com.mattmx.nametags.NameTags;
-import com.mattmx.nametags.event.NameTagEntityCreateEvent;
+import com.mattmx.nametags.event.NameTagCreateEvent;
 import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
@@ -37,7 +37,7 @@ public class NameTagEntityManager {
 
             defaultProvider.applyDefaults(holder);
 
-            Bukkit.getPluginManager().callEvent(new NameTagEntityCreateEvent(holder));
+            Bukkit.getPluginManager().callEvent(new NameTagCreateEvent(holder));
 
             registerEntities(holder);
 

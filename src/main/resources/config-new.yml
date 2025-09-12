@@ -5,8 +5,8 @@ options:
 # Base default options applied first
 defaults:
   # If not enabled then plugin simulates vanilla name tags
-  # Generally only use this option if you are a developer and are
-  # overwriting the vanilla implementation provided yourself.
+  # Only use this option if you are a developer and are
+  # overriding the default implementation yourself using the API.
   enabled: true
   lines:
     - # How often should we refresh tags (in milliseconds)

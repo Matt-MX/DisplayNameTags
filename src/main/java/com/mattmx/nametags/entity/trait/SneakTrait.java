@@ -12,7 +12,7 @@ public class SneakTrait extends Trait {
     public void manuallyUpdateSneakingOpacity() {
         if (!isSneaking()) return;
 
-        getTag().modify((tag) -> {
+        getOwner().modify((tag) -> {
             Color currentColor = Color.fromARGB(tag.getBackgroundColor());
             tag.setBackgroundColor(withCustomSneakOpacity(currentColor).asARGB());
             tag.setTextOpacity((byte) getCustomOpacity());
@@ -21,7 +21,7 @@ public class SneakTrait extends Trait {
 
     public void updateSneak(boolean sneaking) {
         this.isSneaking = sneaking;
-        getTag().modify((meta) -> {
+        getOwner().modify((meta) -> {
             Color color = Color.fromARGB(meta.getBackgroundColor());
 
             if (sneaking) {
@@ -36,7 +36,7 @@ public class SneakTrait extends Trait {
                 meta.setTextOpacity(previousTextOpacity);
             }
         });
-        getTag().getWrapperEntity().refresh();
+        getOwner().getWrapperEntity().refresh();
     }
 
     public Color withCustomSneakOpacity(@NotNull Color previous) {

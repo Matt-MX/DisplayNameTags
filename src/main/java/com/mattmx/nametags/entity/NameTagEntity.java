@@ -23,7 +23,7 @@ import java.util.function.Consumer;
 
 @Getter
 public class NameTagEntity {
-    private final @NotNull TraitHolder traits = new TraitHolder(this);
+    private final @NotNull TraitHolder<NameTagEntity> traits = new TraitHolder<>(this);
     private final @NotNull WrapperEntity wrapperEntity;
     private final @NotNull NameTagHolder holder;
     private float cachedViewRange = -1f;

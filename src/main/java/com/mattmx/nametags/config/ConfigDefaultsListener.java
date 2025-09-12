@@ -4,7 +4,7 @@ import com.mattmx.nametags.NameTags;
 import com.mattmx.nametags.entity.NameTagEntity;
 import com.mattmx.nametags.entity.trait.RefreshTrait;
 import com.mattmx.nametags.entity.trait.SneakTrait;
-import com.mattmx.nametags.event.NameTagEntityCreateEvent;
+import com.mattmx.nametags.event.NameTagCreateEvent;
 import me.tofaa.entitylib.meta.display.AbstractDisplayMeta;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
@@ -36,7 +36,7 @@ public class ConfigDefaultsListener implements Listener {
     }
 
     @EventHandler
-    public void onCreate(@NotNull NameTagEntityCreateEvent event) {
+    public void onCreate(@NotNull NameTagCreateEvent event) {
         if (!(event.getNameTag().getBukkitEntity() instanceof Player player)) return;
 
         // By default, we shouldn't notify until we have finished processing.

@@ -9,6 +9,7 @@ import com.mattmx.nametags.entity.NameTagEntityManager;
 import com.mattmx.nametags.hook.NeznamyTABHook;
 import com.mattmx.nametags.hook.SkinRestorerHook;
 import com.mattmx.nametags.utils.Metrics;
+import lombok.Getter;
 import me.tofaa.entitylib.APIConfig;
 import me.tofaa.entitylib.EntityLib;
 import me.tofaa.entitylib.spigot.SpigotEntityLibPlatform;
@@ -32,6 +33,7 @@ public class NameTags extends JavaPlugin {
     public static final char LEGACY_CHAR = (char) 167;
     private static @Nullable NameTags instance;
     private @Nullable Executor executor = null;
+    @Getter
     private final HashMap<String, ConfigurationSection> groups = new HashMap<>();
     private @NotNull TextFormatter formatter = TextFormatter.MINI_MESSAGE;
     private NameTagEntityManager entityManager;
@@ -159,10 +161,6 @@ public class NameTags extends JavaPlugin {
 
     public @NotNull NameTagEntityManager getEntityManager() {
         return this.entityManager;
-    }
-
-    public HashMap<String, ConfigurationSection> getGroups() {
-        return groups;
     }
 
     public @NotNull TextFormatter getFormatter() {
