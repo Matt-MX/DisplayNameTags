@@ -4,6 +4,7 @@ import com.github.retrooper.packetevents.event.PacketSendEvent;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSpawnEntity;
 import com.mattmx.nametags.NameTags;
 import com.mattmx.nametags.entity.NameTagEntity;
+import com.mattmx.nametags.entity.NameTagHolder;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -22,9 +23,17 @@ public class PlayServerSpawnEntityHandler {
 
         if (packet.getUUID().isEmpty()) return;
 
-        final NameTagEntity nameTagEntity = plugin.getEntityManager().getNameTagHolderByUUID(packet.getUUID().get());
+        final NameTagHolder holder = plugin.getEntityManager().getNameTagHolderById(packet.getEntityId());
 
-        if (nameTagEntity == null) return;
+        if (holder == null) {
+            return;
+        }
+
+        final NameTagEntity nameTagEntity = holder.entityByEntityId(packet.getEntityId());
+
+        if (nameTagEntity == null) {
+            return;
+        }
 
         // Add passenger and send to player after (off the netty thread)
         final PacketSendEvent clone = event.clone();

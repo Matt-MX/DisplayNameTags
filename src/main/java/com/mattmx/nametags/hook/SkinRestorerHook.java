@@ -2,6 +2,7 @@ package com.mattmx.nametags.hook;
 
 import com.mattmx.nametags.NameTags;
 import com.mattmx.nametags.entity.NameTagEntity;
+import com.mattmx.nametags.entity.NameTagHolder;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.skinsrestorer.api.SkinsRestorer;
@@ -46,23 +47,26 @@ public class SkinRestorerHook {
 
                 plugin.getEntityManager().removeLastSentPassengersCache(player.getEntityId());
 
-                NameTagEntity entity = plugin.getEntityManager().removeEntity(player);
+                final NameTagHolder holder = plugin.getEntityManager().removeEntity(player);
 
-                if (entity != null) {
-                    entity.destroy();
+                if (holder != null) {
+                    holder.destroy();
                 }
 
-                NameTagEntity newEntity = plugin.getEntityManager().getOrCreateNameTagEntity(player);
-                newEntity.updateVisibility();
-                newEntity.updateLocation();
+                // Re-trigger creation event
+                NameTagHolder newTag = plugin.getEntityManager().getOrCreateNameTagHolder(player);
 
-                if (plugin.getConfig().getBoolean("show-self", false)) {
-                    newEntity.getWrapperEntity().removeViewer(newEntity.getOwner().getUniqueId());
-                    newEntity.getWrapperEntity().addViewer(newEntity.getOwner().getUniqueId());
-                    newEntity.sendPassengerPacket(event.getPlayer(Player.class));
-
-                    player.sendMessage(Component.text("Please re-join for update your nametag!").color(NamedTextColor.GREEN));
-                }
+//                NameTagEntity newEntity = plugin.getEntityManager().getOrCreateNameTagEntity(player);
+//                newEntity.updateVisibility();
+//                newEntity.updateLocation();
+//
+//                if (plugin.getConfig().getBoolean("show-self", false)) {
+//                    newEntity.getWrapperEntity().removeViewer(newEntity.getOwner().getUniqueId());
+//                    newEntity.getWrapperEntity().addViewer(newEntity.getOwner().getUniqueId());
+//                    newEntity.sendPassengerPacket(event.getPlayer(Player.class));
+//
+//                    player.sendMessage(Component.text("Please re-join for update your nametag!").color(NamedTextColor.GREEN));
+//                }
             }
         }.runTask(NameTags.getInstance());
     }

@@ -11,6 +11,7 @@ import com.github.retrooper.packetevents.util.Vector3f;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityMetadata;
 import com.mattmx.nametags.NameTags;
 import com.mattmx.nametags.entity.NameTagEntity;
+import com.mattmx.nametags.entity.NameTagHolder;
 import com.mattmx.nametags.hook.PapiHook;
 import com.mattmx.nametags.utils.ComponentUtils;
 import net.kyori.adventure.text.Component;
@@ -58,7 +59,13 @@ public class PlayServerEntityMetaDataHandler {
             ? new WrapperPlayServerEntityMetadata(event)
             : (WrapperPlayServerEntityMetadata) event.getLastUsedWrapper();
 
-        final NameTagEntity nameTagEntity = plugin.getEntityManager().getNameTagHolderByTagEntityId(packet0.getEntityId());
+        final NameTagHolder holder = plugin.getEntityManager().getNameTagHolderByTagEntityId(packet0.getEntityId());
+
+        if (holder == null) {
+            return;
+        }
+
+        final NameTagEntity nameTagEntity = holder.entityByEntityId(packet0.getEntityId());
 
         if (nameTagEntity == null) {
             eventClone.cleanUp();
