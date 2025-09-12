@@ -9,6 +9,7 @@ import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
 import com.github.retrooper.packetevents.protocol.player.ClientVersion;
 import com.github.retrooper.packetevents.util.Vector3f;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityMetadata;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSpawnEntity;
 import com.mattmx.nametags.NameTags;
 import com.mattmx.nametags.entity.NameTagEntity;
 import com.mattmx.nametags.hook.PapiHook;
@@ -52,7 +53,11 @@ public class PlayServerEntityMetaDataHandler {
         final NameTags plugin = NameTags.getInstance();
 
         final PacketSendEvent eventClone = event.clone();
-        final WrapperPlayServerEntityMetadata packet0 = new WrapperPlayServerEntityMetadata(event);
+
+
+        final WrapperPlayServerEntityMetadata packet0 = event.getLastUsedWrapper() == null
+            ? new WrapperPlayServerEntityMetadata(event)
+            : (WrapperPlayServerEntityMetadata) event.getLastUsedWrapper();
 
         final NameTagEntity nameTagEntity = plugin.getEntityManager().getNameTagEntityByTagEntityId(packet0.getEntityId());
 
@@ -62,7 +67,9 @@ public class PlayServerEntityMetaDataHandler {
         }
 
         event.setCancelled(true);
-        final WrapperPlayServerEntityMetadata packet = new WrapperPlayServerEntityMetadata(eventClone);
+
+        // Cheeky hack
+        packet0.buffer = event.getByteBuf();
 
         // This could prove a concurrency issue, maybe we should keep track of if there is a newer packet processing?
         plugin.getExecutor().execute(() -> {
@@ -73,7 +80,7 @@ public class PlayServerEntityMetaDataHandler {
             boolean containsEntityOffset = false;
             @Nullable EntityData textEntry = null;
 
-            for (final EntityData entry : packet.getEntityMetadata()) {
+            for (final EntityData entry : packet0.getEntityMetadata()) {
                 if (containsEntityOffset && textEntry != null) {
                     break;
                 }
@@ -93,10 +100,10 @@ public class PlayServerEntityMetaDataHandler {
             // Mojank changed the passenger origin point when riding an entity so the tag appears inside their head.
             if (isOldClient && !containsEntityOffset) {
                 // If there was no offset found then add one ourselves for the offset.
-                packet.getEntityMetadata().add(new EntityData(
-                        ENTITY_OFFSET_INDEX,
-                        EntityDataTypes.VECTOR3F,
-                        PRE_1_20_2_TRANSLATION_OFFSET
+                packet0.getEntityMetadata().add(new EntityData(
+                    ENTITY_OFFSET_INDEX,
+                    EntityDataTypes.VECTOR3F,
+                    PRE_1_20_2_TRANSLATION_OFFSET
                 ));
             }
 
@@ -112,16 +119,23 @@ public class PlayServerEntityMetaDataHandler {
 
                 // If it doesn't have any placeholders in then stop
                 if (!containsRelativePlaceholder) {
-                    eventClone.getUser().sendPacketSilently(packet);
+                    eventClone.getUser().sendPacketSilently(packet0);
                     return;
                 }
 
-                final Component textWithRelativeApplied = PapiHook.setRelationalPlaceholders(from, to, originalText);
+                Component textWithRelativeApplied = PapiHook.setRelationalPlaceholders(to, from, originalText);
+
+                // Remove any empty lines
+                // TODO(matt): This should check for the players' "group" instead of just defaults
+                if (plugin.getConfig().getBoolean("defaults.enabled")
+                    && plugin.getConfig().getBoolean("defaults.remove-empty-lines")) {
+                    textWithRelativeApplied = ComponentUtils.removeEmptyLines0(originalText);
+                }
 
                 textEntry.setValue(textWithRelativeApplied);
-                eventClone.getUser().sendPacketSilently(packet);
+                eventClone.getUser().sendPacketSilently(packet0);
             } else {
-                eventClone.getUser().sendPacketSilently(packet);
+                eventClone.getUser().sendPacketSilently(packet0);
             }
         });
     }

@@ -16,7 +16,9 @@ public class PlayServerSpawnEntityHandler {
 
     public static void handlePacket(@NotNull PacketSendEvent event) {
         final NameTags plugin = NameTags.getInstance();
-        final WrapperPlayServerSpawnEntity packet = new WrapperPlayServerSpawnEntity(event);
+        final WrapperPlayServerSpawnEntity packet = event.getLastUsedWrapper() == null
+            ? new WrapperPlayServerSpawnEntity(event)
+            : (WrapperPlayServerSpawnEntity) event.getLastUsedWrapper();
 
         if (packet.getUUID().isEmpty()) return;
 

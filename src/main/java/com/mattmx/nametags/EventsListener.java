@@ -5,16 +5,15 @@ import com.mattmx.nametags.entity.trait.SneakTrait;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityPotionEffectEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
+import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
-import org.spigotmc.event.player.PlayerSpawnLocationEvent;
-
-import java.util.concurrent.TimeUnit;
 
 public class EventsListener implements Listener {
 
@@ -137,5 +136,22 @@ public class EventsListener implements Listener {
         nameTagEntity.getTraits()
                 .getOrAddTrait(SneakTrait.class, SneakTrait::new)
                 .updateSneak(event.isSneaking());
+    }
+
+    @EventHandler
+    public void onPlayerEffect(@NotNull EntityPotionEffectEvent event) {
+        final NameTagEntity tag = plugin.getEntityManager()
+            .getNameTagEntity(event.getEntity());
+
+        if (tag == null) {
+            return;
+        }
+
+        if (event.getNewEffect() == null && event.getOldEffect() != null && event.getOldEffect().getType() == PotionEffectType.INVISIBILITY) {
+            // If losing the effect and its invisibility
+            tag.updateVisibility(false);
+        } else if (event.getNewEffect() != null && event.getNewEffect().getType() == PotionEffectType.INVISIBILITY) {
+            tag.updateVisibility(true);
+        }
     }
 }

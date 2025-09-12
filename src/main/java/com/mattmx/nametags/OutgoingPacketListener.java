@@ -1,6 +1,7 @@
 package com.mattmx.nametags;
 
 import com.github.retrooper.packetevents.event.PacketListenerAbstract;
+import com.github.retrooper.packetevents.event.PacketListenerPriority;
 import com.github.retrooper.packetevents.event.PacketSendEvent;
 import com.github.retrooper.packetevents.protocol.packettype.PacketType;
 import com.github.retrooper.packetevents.protocol.potion.PotionTypes;
@@ -20,6 +21,7 @@ public class OutgoingPacketListener extends PacketListenerAbstract {
     private final @NotNull NameTags plugin;
 
     public OutgoingPacketListener(@NotNull NameTags plugin) {
+        super(PacketListenerPriority.NORMAL);
         this.plugin = plugin;
     }
 
@@ -30,7 +32,9 @@ public class OutgoingPacketListener extends PacketListenerAbstract {
             case PacketType.Play.Server.ENTITY_METADATA -> PlayServerEntityMetaDataHandler.handlePacket(event);
             case PacketType.Play.Server.SET_PASSENGERS -> PlayServerSetPassengersHandler.handlePacket(event);
             case PacketType.Play.Server.DESTROY_ENTITIES -> {
-                WrapperPlayServerDestroyEntities packet = new WrapperPlayServerDestroyEntities(event);
+                WrapperPlayServerDestroyEntities packet = event.getLastUsedWrapper() == null
+                    ? new WrapperPlayServerDestroyEntities(event)
+                    : (WrapperPlayServerDestroyEntities) event.getLastUsedWrapper();
 
                 for (int entityId : packet.getEntityIds()) {
                     NameTagEntity nameTagEntity = plugin.getEntityManager().getNameTagEntityById(entityId);
@@ -39,30 +43,6 @@ public class OutgoingPacketListener extends PacketListenerAbstract {
 
                     nameTagEntity.getPassenger().removeViewer(event.getUser());
                 }
-            }
-            case PacketType.Play.Server.ENTITY_EFFECT -> {
-                // TODO per-player impl (teams may be able to see invisible players)
-                final WrapperPlayServerEntityEffect packet = new WrapperPlayServerEntityEffect(event);
-
-                if (packet.getPotionType() != PotionTypes.INVISIBILITY) return;
-
-                final NameTagEntity nameTagEntity = plugin.getEntityManager().getNameTagEntityById(packet.getEntityId());
-
-                if (nameTagEntity == null) return;
-
-                nameTagEntity.updateVisibility(true);
-            }
-            case PacketType.Play.Server.REMOVE_ENTITY_EFFECT -> {
-                // TODO per-player impl (teams may be able to see invisible players)
-                final WrapperPlayServerRemoveEntityEffect packet = new WrapperPlayServerRemoveEntityEffect(event);
-
-                if (packet.getPotionType() != PotionTypes.INVISIBILITY) return;
-
-                final NameTagEntity nameTagEntity = plugin.getEntityManager().getNameTagEntityById(packet.getEntityId());
-
-                if (nameTagEntity == null) return;
-
-                nameTagEntity.updateVisibility(false);
             }
             default -> {
             }

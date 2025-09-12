@@ -1,6 +1,7 @@
 package com.mattmx.nametags.packet;
 
 import com.github.retrooper.packetevents.event.PacketSendEvent;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityMetadata;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSetPassengers;
 import com.mattmx.nametags.NameTags;
 import com.mattmx.nametags.entity.NameTagEntity;
@@ -12,7 +13,9 @@ public class PlayServerSetPassengersHandler {
 
     public static void handlePacket(@NotNull PacketSendEvent event) {
         final NameTags plugin = NameTags.getInstance();
-        final WrapperPlayServerSetPassengers packet = new WrapperPlayServerSetPassengers(event);
+        final WrapperPlayServerSetPassengers packet = event.getLastUsedWrapper() == null
+            ? new WrapperPlayServerSetPassengers(event)
+            : (WrapperPlayServerSetPassengers) event.getLastUsedWrapper();
 
         final NameTagEntity nameTagEntity = plugin.getEntityManager().getNameTagEntityById(packet.getEntityId());
 
