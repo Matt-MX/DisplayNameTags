@@ -115,11 +115,10 @@ public class NameTagEntity {
     }
 
     public @NotNull Location updateLocation() {
-        Location location = SpigotConversionUtil.fromBukkitLocation(
-            bukkitEntity.getLocation()
-                .clone()
-                .add(0.0, bukkitEntity.getBoundingBox().getMaxY(), 0.0)
-        );
+        org.bukkit.Location bukkitLocation = bukkitEntity.getLocation();
+        bukkitLocation.setY(bukkitEntity.getBoundingBox().getMaxY());
+
+        Location location = SpigotConversionUtil.fromBukkitLocation(bukkitLocation);
 
         location.setYaw(0f);
         location.setPitch(0f);

@@ -4,17 +4,14 @@ import com.mattmx.nametags.entity.NameTagEntity;
 import com.mattmx.nametags.entity.trait.SneakTrait;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.player.PlayerChangedWorldEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.player.PlayerRespawnEvent;
-import org.bukkit.event.player.PlayerToggleSneakEvent;
+import org.bukkit.event.player.*;
 import org.jetbrains.annotations.NotNull;
 import org.spigotmc.event.player.PlayerSpawnLocationEvent;
 
-import java.util.concurrent.TimeUnit;
+import java.util.UUID;
 
 public class EventsListener implements Listener {
 
@@ -24,18 +21,17 @@ public class EventsListener implements Listener {
         this.plugin = plugin;
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     public void onPlayerJoin(@NotNull PlayerJoinEvent event) {
         Bukkit.getAsyncScheduler().runNow(plugin, (task) -> {
-            if (!event.getPlayer().isOnline()) {
+            if (!event.getPlayer().isConnected()) {
                 return;
             }
 
             plugin.getEntityManager()
-                    .getOrCreateNameTagEntity(event.getPlayer())
-                    .updateVisibility();
+                .getOrCreateNameTagEntity(event.getPlayer())
+                .updateVisibility();
         });
-
     }
 
 //    @EventHandler
@@ -50,9 +46,10 @@ public class EventsListener implements Listener {
 //        }
 //    }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerQuit(@NotNull PlayerQuitEvent event) {
         plugin.getEntityManager().removeLastSentPassengersCache(event.getPlayer().getEntityId());
+        // TODO(matt): might not be sending de-spawn packet to viewers all the time?
 
         // Remove as a viewer from all entities
         for (final NameTagEntity entity : plugin.getEntityManager().getAllEntities()) {
@@ -68,8 +65,7 @@ public class EventsListener implements Listener {
 
     @EventHandler
     public void onPlayerChangeWorld(@NotNull PlayerChangedWorldEvent event) {
-        NameTagEntity nameTagEntity = plugin.getEntityManager()
-                .getNameTagEntity(event.getPlayer());
+        NameTagEntity nameTagEntity = plugin.getEntityManager().getNameTagEntity(event.getPlayer());
 
         if (nameTagEntity == null) return;
 
@@ -86,7 +82,7 @@ public class EventsListener implements Listener {
     @EventHandler
     public void onPlayerDeath(@NotNull PlayerDeathEvent event) {
         NameTagEntity nameTagEntity = plugin.getEntityManager()
-                .getNameTagEntity(event.getPlayer());
+            .getNameTagEntity(event.getPlayer());
 
         if (nameTagEntity == null) return;
 
@@ -99,7 +95,7 @@ public class EventsListener implements Listener {
     @EventHandler
     public void onPlayerRespawn(@NotNull PlayerRespawnEvent event) {
         NameTagEntity nameTagEntity = plugin.getEntityManager()
-                .getNameTagEntity(event.getPlayer());
+            .getNameTagEntity(event.getPlayer());
 
         if (nameTagEntity == null) return;
 
@@ -130,12 +126,12 @@ public class EventsListener implements Listener {
         if (event.getPlayer().isInsideVehicle()) return;
 
         NameTagEntity nameTagEntity = plugin.getEntityManager()
-                .getNameTagEntity(event.getPlayer());
+            .getNameTagEntity(event.getPlayer());
 
         if (nameTagEntity == null) return;
 
         nameTagEntity.getTraits()
-                .getOrAddTrait(SneakTrait.class, SneakTrait::new)
-                .updateSneak(event.isSneaking());
+            .getOrAddTrait(SneakTrait.class, SneakTrait::new)
+            .updateSneak(event.isSneaking());
     }
 }

@@ -8,10 +8,12 @@ import com.mattmx.nametags.config.TextFormatter;
 import com.mattmx.nametags.entity.NameTagEntityManager;
 import com.mattmx.nametags.hook.NeznamyTABHook;
 import com.mattmx.nametags.hook.SkinRestorerHook;
-import com.mattmx.nametags.utils.Metrics;
+import com.mattmx.nametags.utils.test.TestPlaceholderExpansion;
 import me.tofaa.entitylib.APIConfig;
 import me.tofaa.entitylib.EntityLib;
 import me.tofaa.entitylib.spigot.SpigotEntityLibPlatform;
+import org.bstats.bukkit.Metrics;
+import org.bstats.charts.DrilldownPie;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.configuration.ConfigurationSection;
@@ -31,14 +33,18 @@ public class NameTags extends JavaPlugin {
     public static final int TRANSPARENT = Color.fromARGB(0).asARGB();
     public static final char LEGACY_CHAR = (char) 167;
     private static @Nullable NameTags instance;
-    private @Nullable Executor executor = null;
     private final HashMap<String, ConfigurationSection> groups = new HashMap<>();
+    private @Nullable Executor executor = null;
     private @NotNull TextFormatter formatter = TextFormatter.MINI_MESSAGE;
     private NameTagEntityManager entityManager;
     private EventsListener eventsListener;
     private OutgoingPacketListener packetListener;
     private Metrics metrics;
     private @Nullable ConfigDefaultsListener defaultsListener = null;
+
+    public static @NotNull NameTags getInstance() {
+        return Objects.requireNonNull(instance, "NameTags plugin has not initialized yet! Did you forget to depend?");
+    }
 
     @Override
     public void onEnable() {
@@ -54,11 +60,11 @@ public class NameTags extends JavaPlugin {
         registerMetrics();
 
         executor = Executors.newFixedThreadPool(
-                getConfig().getInt("options.threads", 2),
-                new ThreadFactoryBuilder()
-                        .setPriority(Thread.NORM_PRIORITY + 1)
-                        .setNameFormat("NameTags-Processor")
-                        .build()
+            getConfig().getInt("options.threads", 2),
+            new ThreadFactoryBuilder()
+                .setPriority(Thread.NORM_PRIORITY + 1)
+                .setNameFormat("NameTags-Processor")
+                .build()
         );
 
         SpigotEntityLibPlatform platform = new SpigotEntityLibPlatform(this);
@@ -77,7 +83,11 @@ public class NameTags extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(eventsListener, this);
         Bukkit.getScheduler().runTaskLater(this, DependencyVersionChecker::checkPacketEventsVersion, 10L);
 
-        Objects.requireNonNull(Bukkit.getPluginCommand("nametags-reload")).setExecutor(new NameTagsCommand(this));
+        Objects.requireNonNull(Bukkit.getPluginCommand("nametags")).setExecutor(new NameTagsCommand(this));
+
+        if (false) {
+            new TestPlaceholderExpansion().register();
+        }
     }
 
     public void reload() {
@@ -109,7 +119,7 @@ public class NameTags extends JavaPlugin {
 
         String textFormatterIdentifier = getConfig().getString("formatter", "minimessage");
         formatter = TextFormatter.getById(textFormatterIdentifier)
-                .orElse(TextFormatter.MINI_MESSAGE);
+            .orElse(TextFormatter.MINI_MESSAGE);
 
         getLogger().info("Using " + formatter.name() + " as text formatter.");
 
@@ -135,7 +145,7 @@ public class NameTags extends JavaPlugin {
     }
 
     public void registerMetrics() {
-        metrics.addCustomChart(new Metrics.DrilldownPie("serverName", () -> Map.of(Bukkit.getName(), Map.of(Bukkit.getName(), 1))));
+        metrics.addCustomChart(new DrilldownPie("serverName", () -> Map.of(Bukkit.getName(), Map.of(Bukkit.getName(), 1))));
     }
 
     @Override
@@ -145,8 +155,8 @@ public class NameTags extends JavaPlugin {
         HandlerList.unregisterAll(this.eventsListener);
 
         PacketEvents.getAPI()
-                .getEventManager()
-                .unregisterListener(this.packetListener);
+            .getEventManager()
+            .unregisterListener(this.packetListener);
     }
 
     public Executor getExecutor() {
@@ -167,9 +177,5 @@ public class NameTags extends JavaPlugin {
 
     public @NotNull TextFormatter getFormatter() {
         return this.formatter;
-    }
-
-    public static @NotNull NameTags getInstance() {
-        return Objects.requireNonNull(instance, "NameTags plugin has not initialized yet! Did you forget to depend?");
     }
 }

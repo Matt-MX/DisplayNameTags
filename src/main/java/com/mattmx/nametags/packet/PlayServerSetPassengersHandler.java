@@ -36,8 +36,8 @@ public class PlayServerSetPassengersHandler {
             packet.setPassengers(passengers);
 
             NameTags.getInstance()
-                    .getEntityManager()
-                    .setLastSentPassengers(packet.getEntityId(), passengers);
+                .getEntityManager()
+                .setLastSentPassengers(packet.getEntityId(), passengers);
 
             event.markForReEncode(true);
         }

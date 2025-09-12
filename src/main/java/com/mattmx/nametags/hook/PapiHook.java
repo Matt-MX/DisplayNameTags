@@ -1,5 +1,6 @@
 package com.mattmx.nametags.hook;
 
+import com.mattmx.nametags.NameTags;
 import me.clip.placeholderapi.PlaceholderAPI;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextReplacementConfig;
@@ -31,13 +32,13 @@ public class PapiHook {
         if (!isPapi()) return text;
 
         return text.replaceText(TextReplacementConfig.builder()
-                .match(PLACEHOLDER_REGEX)
-                .replacement((match, ctx) -> {
-                    String matchedText = match.group();
-                    String parsed = PlaceholderAPI.setPlaceholders(one, matchedText);
-                    return Component.text(parsed);
-                })
-                .build()
+            .match(PLACEHOLDER_REGEX)
+            .replacement((match, ctx) -> {
+                String matchedText = match.group();
+                String parsed = PlaceholderAPI.setPlaceholders(one, matchedText);
+                return Component.text(parsed);
+            })
+            .build()
         );
     }
 
@@ -45,13 +46,13 @@ public class PapiHook {
         if (!isPapi()) return text;
 
         return text.replaceText(TextReplacementConfig.builder()
-                .match(RELATIVE_PLACEHOLDER_REGEX)
-                .replacement((match, ctx) -> {
-                    String matchedText = match.group();
-                    String parsed = PlaceholderAPI.setRelationalPlaceholders(one, two, matchedText);
-                    return Component.text(parsed);
-                })
-                .build()
+            .match(RELATIVE_PLACEHOLDER_REGEX)
+            .replacement((match, ctx) -> {
+                String matchedText = match.group();
+                String parsed = PlaceholderAPI.setRelationalPlaceholders(one, two, matchedText);
+                return NameTags.getInstance().getFormatter().format(parsed);
+            })
+            .build()
         );
     }
 
