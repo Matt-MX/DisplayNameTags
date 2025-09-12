@@ -90,9 +90,20 @@ public class NameTags extends JavaPlugin {
         }
     }
 
+    public void reload() {
+        HandlerList.unregisterAll(this);
+        reloadConfig();
+
+        Bukkit.getPluginManager().registerEvents(eventsListener, this);
+    }
+
     @Override
     public void reloadConfig() {
         super.reloadConfig();
+
+        if (getConfig().getBoolean("disable-vanilla", true)) {
+            Bukkit.getPluginManager().registerEvents(new ScoreboardTeams(this), this);
+        }
 
         ConfigurationSection defaults = getConfig().getConfigurationSection("defaults");
         if (defaults != null && defaults.getBoolean("enabled")) {
