@@ -19,7 +19,7 @@ public class GlowingEffectHook extends PacketListenerAbstract {
 
         final NameTagEntity entity = NameTags.getInstance()
             .getEntityManager()
-            .getNameTagEntityById(packet.getEntityId());
+            .getNameTagHolderById(packet.getEntityId());
 
         if (entity == null) return;
 

@@ -8,6 +8,8 @@ import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSe
 import com.mattmx.nametags.NameTags;
 import com.mattmx.nametags.entity.trait.TraitHolder;
 import io.github.retrooper.packetevents.util.SpigotConversionUtil;
+import lombok.Getter;
+import me.tofaa.entitylib.meta.display.AbstractDisplayMeta;
 import me.tofaa.entitylib.meta.display.TextDisplayMeta;
 import me.tofaa.entitylib.wrapper.WrapperEntity;
 import org.bukkit.entity.Entity;
@@ -19,28 +21,45 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Arrays;
 import java.util.function.Consumer;
 
+@Getter
 public class NameTagEntity {
     private final @NotNull TraitHolder traits = new TraitHolder(this);
-    private final @NotNull Entity bukkitEntity;
-    private final @NotNull WrapperEntity passenger;
+    private final @NotNull WrapperEntity wrapperEntity;
+    private final @NotNull NameTagHolder holder;
     private float cachedViewRange = -1f;
 
-    public NameTagEntity(@NotNull Entity entity) {
-        this.bukkitEntity = entity;
-        this.passenger = new WrapperEntity(EntityTypes.TEXT_DISPLAY);
+    public NameTagEntity(@NotNull NameTagHolder holder) {
+        this.holder = holder;
+        this.wrapperEntity = new WrapperEntity(EntityTypes.TEXT_DISPLAY);
 
         initialize();
+    }
+
+    public void notifyChanges(boolean state) {
+        wrapperEntity.getEntityMeta().setNotifyAboutChanges(state);
+    }
+
+    public void updateTextMeta(@NotNull Consumer<TextDisplayMeta> consumer) {
+        this.updateMeta(TextDisplayMeta.class, consumer);
+    }
+
+    public <T extends AbstractDisplayMeta> void updateMeta(@NotNull Class<T> clazz, @NotNull Consumer<T> consumer) {
+        // Introduce lock?
+
+        notifyChanges(false);
+        wrapperEntity.consumeEntityMeta(clazz, consumer);
+        notifyChanges(true);
     }
 
     public void initialize() {
         Location location = updateLocation();
 
-        this.passenger.spawn(location);
+        this.wrapperEntity.spawn(location);
 
         if (NameTags.getInstance().getConfig().getBoolean("show-self", false)) {
 
-            if (this.bukkitEntity instanceof Player self) {
-                this.passenger.addViewer(self.getUniqueId());
+            if (holder.getOwner() instanceof Player self) {
+                this.wrapperEntity.addViewer(self.getUniqueId());
                 sendPassengerPacket(self);
             }
 
@@ -48,10 +67,10 @@ public class NameTagEntity {
     }
 
     public boolean isInvisible() {
-        boolean hasInvisibilityEffect = bukkitEntity instanceof LivingEntity e
+        boolean hasInvisibilityEffect = holder.getOwner() instanceof LivingEntity e
             && e.hasPotionEffect(PotionEffectType.INVISIBILITY);
 
-        return bukkitEntity.isInvisible() || hasInvisibilityEffect;
+        return holder.getOwner().isInvisible() || hasInvisibilityEffect;
     }
 
     public void updateVisibility() {
@@ -74,11 +93,11 @@ public class NameTagEntity {
     }
 
     public void modify(Consumer<TextDisplayMeta> consumer) {
-        this.passenger.consumeEntityMeta(TextDisplayMeta.class, consumer);
+        this.wrapperEntity.consumeEntityMeta(TextDisplayMeta.class, consumer);
     }
 
     public @NotNull TextDisplayMeta getMeta() {
-        return this.passenger.getEntityMeta(TextDisplayMeta.class);
+        return this.wrapperEntity.getEntityMeta(TextDisplayMeta.class);
     }
 
     public void sendPassengerPacket(Player target) {
@@ -90,47 +109,47 @@ public class NameTagEntity {
     public PacketWrapper<?> getPassengersPacket() {
         int[] previousPackets = NameTags.getInstance()
             .getEntityManager()
-            .getLastSentPassengers(getBukkitEntity().getEntityId())
+            .getLastSentPassengers(getOwner().getEntityId())
             .orElseGet(() -> {
-                int[] bukkitPassengers = this.bukkitEntity.getPassengers()
+                int[] bukkitPassengers = getOwner().getPassengers()
                     .stream()
                     .mapToInt(Entity::getEntityId)
                     .toArray();
 
                 int[] passengers = Arrays.copyOf(bukkitPassengers, bukkitPassengers.length + 1);
-                passengers[passengers.length - 1] = getPassenger().getEntityId();
+                passengers[passengers.length - 1] = getWrapperEntity().getEntityId();
 
                 return passengers;
             });
 
-        return new WrapperPlayServerSetPassengers(bukkitEntity.getEntityId(), previousPackets);
+        return new WrapperPlayServerSetPassengers(getOwner().getEntityId(), previousPackets);
     }
 
-    public @NotNull Entity getBukkitEntity() {
-        return bukkitEntity;
+    public @NotNull Entity getOwner() {
+        return holder.getOwner();
     }
 
-    public @NotNull WrapperEntity getPassenger() {
-        return passenger;
+    public @NotNull WrapperEntity getWrapperEntity() {
+        return wrapperEntity;
     }
 
     public @NotNull Location updateLocation() {
         Location location = SpigotConversionUtil.fromBukkitLocation(
-            bukkitEntity.getLocation()
+            getOwner().getLocation()
                 .clone()
-                .add(0.0, bukkitEntity.getBoundingBox().getMaxY(), 0.0)
+                .add(0.0, getOwner().getBoundingBox().getMaxY(), 0.0)
         );
 
         location.setYaw(0f);
         location.setPitch(0f);
 
-        this.passenger.setLocation(location);
+        this.wrapperEntity.setLocation(location);
 
         return location;
     }
 
     public void destroy() {
-        this.passenger.despawn();
         this.getTraits().destroy();
+        this.wrapperEntity.despawn();
     }
 }

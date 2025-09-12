@@ -3,11 +3,10 @@ package com.mattmx.nametags.entity;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.RemovalCause;
-import com.github.retrooper.packetevents.util.Vector3f;
+import com.mattmx.nametags.NameTagHolderDefaults;
 import com.mattmx.nametags.NameTags;
 import com.mattmx.nametags.event.NameTagEntityCreateEvent;
-import me.tofaa.entitylib.meta.display.AbstractDisplayMeta;
-import me.tofaa.entitylib.meta.display.TextDisplayMeta;
+import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -17,88 +16,86 @@ import org.jetbrains.annotations.Nullable;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.BiConsumer;
 
 public class NameTagEntityManager {
 
-    private final Cache<UUID, NameTagEntity> nameTagCache = Caffeine.newBuilder()
+    private final Cache<UUID, NameTagHolder> nameTagCache = Caffeine.newBuilder()
         .expireAfterAccess(Duration.ofMinutes(1))
         .removalListener(this::handleRemoval)
         .build();
 
-    private final ConcurrentHashMap<Integer, NameTagEntity> nameTagEntityByEntityId = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<Integer, NameTagEntity> nameTagEntityByPassengerEntityId = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Integer, NameTagHolder> nameTagEntityByEntityId = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Integer, NameTagHolder> nameTagEntityByPassengerEntityId = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<Integer, int[]> lastSentPassengers = new ConcurrentHashMap<>();
 
-    private @NotNull BiConsumer<Entity, TextDisplayMeta> defaultProvider = (entity, meta) -> {
-        meta.setText(entity.name());
-        meta.setTranslation(new Vector3f(0f, 0.2f, 0f));
-        meta.setBillboardConstraints(AbstractDisplayMeta.BillboardConstraints.CENTER);
-        meta.setViewRange(50f);
-    };
+    @Setter
+    private @NotNull NameTagHolderDefaults defaultProvider = NameTagHolderDefaults.vanilla();
 
-    public @NotNull NameTagEntity getOrCreateNameTagEntity(@NotNull Entity entity) {
-        NameTagEntity tagEntity = nameTagCache.get(entity.getUniqueId(), uuid -> {
-            NameTagEntity newlyCreated = new NameTagEntity(entity);
+    public @NotNull NameTagHolder getOrCreateNameTagHolder(@NotNull Entity entity) {
+        NameTagHolder tagEntity = nameTagCache.get(entity.getUniqueId(), uuid -> {
+            NameTagHolder holder = new NameTagHolder(entity);
 
-            newlyCreated.getPassenger().consumeEntityMeta(TextDisplayMeta.class, meta ->
-                defaultProvider.accept(entity, meta)
-            );
+            defaultProvider.applyDefaults(holder);
 
-            Bukkit.getPluginManager().callEvent(new NameTagEntityCreateEvent(newlyCreated));
+            Bukkit.getPluginManager().callEvent(new NameTagEntityCreateEvent(holder));
 
-            nameTagEntityByEntityId.put(entity.getEntityId(), newlyCreated);
-            nameTagEntityByPassengerEntityId.put(newlyCreated.getPassenger().getEntityId(), newlyCreated);
+            registerEntities(holder);
 
-            return newlyCreated;
+            return holder;
         });
         return Objects.requireNonNull(tagEntity, "Cache.get(…) unexpectedly returned null for UUID " + entity.getUniqueId());
     }
 
-    public @Nullable NameTagEntity removeEntity(@NotNull Entity entity) {
-        final NameTagEntity nameTagEntity = nameTagCache.getIfPresent(entity.getUniqueId());
+    public void registerEntities(@NotNull NameTagHolder holder) {
+        for (NameTagEntity entity : holder.getEntitiesList()) {
+            nameTagEntityByEntityId.put(entity.getWrapperEntity().getEntityId(), holder);
+        }
+
+        nameTagEntityByPassengerEntityId.put(holder.getOwner().getEntityId(), holder);
+    }
+
+    public @Nullable NameTagHolder removeEntity(@NotNull Entity entity) {
+        final NameTagHolder holder = nameTagCache.getIfPresent(entity.getUniqueId());
 
         nameTagCache.invalidate(entity.getUniqueId());
 
-        return nameTagEntity;
+        return holder;
     }
 
     private void removeEntirely(@NotNull Entity entity) {
         lastSentPassengers.remove(entity.getEntityId());
         nameTagCache.invalidate(entity.getUniqueId());
 
-        final NameTagEntity removed = nameTagEntityByEntityId.remove(entity.getEntityId());
+        final NameTagHolder removed = nameTagEntityByEntityId.remove(entity.getEntityId());
         if (removed != null) {
-            nameTagEntityByPassengerEntityId.remove(removed.getPassenger().getEntityId());
+            for (NameTagEntity tag : removed.getEntitiesList()) {
+                nameTagEntityByPassengerEntityId.remove(tag.getWrapperEntity().getEntityId());
+            }
         }
     }
 
-    public @Nullable NameTagEntity getNameTagEntity(@NotNull Entity entity) {
+    public @Nullable NameTagHolder getNameTagHolder(@NotNull Entity entity) {
         return nameTagCache.getIfPresent(entity.getUniqueId());
     }
 
-    public @Nullable NameTagEntity getNameTagEntityByUUID(UUID uuid) {
+    public @Nullable NameTagHolder getNameTagHolderByUUID(UUID uuid) {
         return nameTagCache.getIfPresent(uuid);
     }
 
-    public @Nullable NameTagEntity getNameTagEntityById(int entityId) {
+    public @Nullable NameTagHolder getNameTagHolderById(int entityId) {
         return nameTagEntityByEntityId.get(entityId);
     }
 
-    public @Nullable NameTagEntity getNameTagEntityByTagEntityId(int tagEntityId) {
+    public @Nullable NameTagHolder getNameTagHolderByTagEntityId(int tagEntityId) {
         return nameTagEntityByPassengerEntityId.get(tagEntityId);
     }
 
-    public @NotNull Map<UUID, NameTagEntity> getMappedEntities() {
+    public @NotNull Map<UUID, NameTagHolder> getMappedEntities() {
         return nameTagCache.asMap();
     }
 
-    public @NotNull Collection<NameTagEntity> getAllEntities() {
+    public @NotNull Collection<NameTagHolder> getAllHolders() {
         return nameTagCache.asMap().values();
-    }
-
-    public void setDefaultProvider(@NotNull BiConsumer<Entity, TextDisplayMeta> consumer) {
-        this.defaultProvider = consumer;
     }
 
     public void setLastSentPassengers(int entityId, int[] passengers) {
@@ -129,31 +126,31 @@ public class NameTagEntityManager {
         return lastSentPassengers.size();
     }
 
-    private void handleRemoval(UUID uuid, NameTagEntity tagEntity, RemovalCause cause) {
-        if (uuid == null || tagEntity == null) {
+    private void handleRemoval(UUID uuid, NameTagHolder holder, RemovalCause cause) {
+        if (uuid == null || holder == null) {
             return;
         }
 
-        Entity entity = tagEntity.getBukkitEntity();
+        Entity owner = holder.getOwner();
 
-        if (entity instanceof Player player) {
+        if (owner instanceof Player player) {
             if (!player.isOnline() || !player.isConnected()) {
-                tagEntity.destroy();
-                removeEntirely(entity);
+                holder.destroy();
+                removeEntirely(owner);
                 // Actually remove from map
                 this.nameTagCache.cleanUp();
             } else {
-                this.nameTagCache.put(uuid, tagEntity);
+                this.nameTagCache.put(uuid, holder);
             }
         } else {
             // Must be run on the main thread, so sync this call
             Bukkit.getScheduler().runTask(NameTags.getInstance(), () -> {
                 if (Bukkit.getEntity(uuid) == null) {
-                    tagEntity.destroy();
-                    removeEntirely(entity);
+                    holder.destroy();
+                    removeEntirely(owner);
                     this.nameTagCache.cleanUp();
                 } else {
-                    this.nameTagCache.put(uuid, tagEntity);
+                    this.nameTagCache.put(uuid, holder);
                 }
             });
         }

@@ -57,8 +57,8 @@ public class SkinRestorerHook {
                 newEntity.updateLocation();
 
                 if (plugin.getConfig().getBoolean("show-self", false)) {
-                    newEntity.getPassenger().removeViewer(newEntity.getBukkitEntity().getUniqueId());
-                    newEntity.getPassenger().addViewer(newEntity.getBukkitEntity().getUniqueId());
+                    newEntity.getWrapperEntity().removeViewer(newEntity.getOwner().getUniqueId());
+                    newEntity.getWrapperEntity().addViewer(newEntity.getOwner().getUniqueId());
                     newEntity.sendPassengerPacket(event.getPlayer(Player.class));
 
                     player.sendMessage(Component.text("Please re-join for update your nametag!").color(NamedTextColor.GREEN));

@@ -22,7 +22,7 @@ public class PlayServerSpawnEntityHandler {
 
         if (packet.getUUID().isEmpty()) return;
 
-        final NameTagEntity nameTagEntity = plugin.getEntityManager().getNameTagEntityByUUID(packet.getUUID().get());
+        final NameTagEntity nameTagEntity = plugin.getEntityManager().getNameTagHolderByUUID(packet.getUUID().get());
 
         if (nameTagEntity == null) return;
 
@@ -33,8 +33,8 @@ public class PlayServerSpawnEntityHandler {
             nameTagEntity.updateLocation();
 
             // Refreshes as viewer (crusty fix)
-            nameTagEntity.getPassenger().removeViewer(clone.getUser());
-            nameTagEntity.getPassenger().addViewer(clone.getUser());
+            nameTagEntity.getWrapperEntity().removeViewer(clone.getUser());
+            nameTagEntity.getWrapperEntity().addViewer(clone.getUser());
 
             clone.getUser().sendPacket(nameTagEntity.getPassengersPacket());
         }));

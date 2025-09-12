@@ -54,8 +54,8 @@ public class EventsListener implements Listener {
         plugin.getEntityManager().removeLastSentPassengersCache(event.getPlayer().getEntityId());
 
         // Remove as a viewer from all entities
-        for (final NameTagEntity entity : plugin.getEntityManager().getAllEntities()) {
-            entity.getPassenger().removeViewer(event.getPlayer().getUniqueId());
+        for (final NameTagEntity entity : plugin.getEntityManager().getAllHolders()) {
+            entity.getWrapperEntity().removeViewer(event.getPlayer().getUniqueId());
         }
 
         NameTagEntity entity = plugin.getEntityManager().removeEntity(event.getPlayer());
@@ -68,15 +68,15 @@ public class EventsListener implements Listener {
     @EventHandler
     public void onPlayerChangeWorld(@NotNull PlayerChangedWorldEvent event) {
         NameTagEntity nameTagEntity = plugin.getEntityManager()
-                .getNameTagEntity(event.getPlayer());
+                .getNameTagHolder(event.getPlayer());
 
         if (nameTagEntity == null) return;
 
         nameTagEntity.updateLocation();
 
         if (plugin.getConfig().getBoolean("show-self", false)) {
-            nameTagEntity.getPassenger().removeViewer(nameTagEntity.getBukkitEntity().getUniqueId());
-            nameTagEntity.getPassenger().addViewer(nameTagEntity.getBukkitEntity().getUniqueId());
+            nameTagEntity.getWrapperEntity().removeViewer(nameTagEntity.getOwner().getUniqueId());
+            nameTagEntity.getWrapperEntity().addViewer(nameTagEntity.getOwner().getUniqueId());
             nameTagEntity.sendPassengerPacket(event.getPlayer());
         }
     }
@@ -85,20 +85,20 @@ public class EventsListener implements Listener {
     @EventHandler
     public void onPlayerDeath(@NotNull PlayerDeathEvent event) {
         NameTagEntity nameTagEntity = plugin.getEntityManager()
-                .getNameTagEntity(event.getPlayer());
+                .getNameTagHolder(event.getPlayer());
 
         if (nameTagEntity == null) return;
 
         if (plugin.getConfig().getBoolean("show-self", false)) {
             // Hides/removes tag on death/respawn screen
-            nameTagEntity.getPassenger().removeViewer(nameTagEntity.getBukkitEntity().getUniqueId());
+            nameTagEntity.getWrapperEntity().removeViewer(nameTagEntity.getOwner().getUniqueId());
         }
     }
 
     @EventHandler
     public void onPlayerRespawn(@NotNull PlayerRespawnEvent event) {
         NameTagEntity nameTagEntity = plugin.getEntityManager()
-                .getNameTagEntity(event.getPlayer());
+                .getNameTagHolder(event.getPlayer());
 
         if (nameTagEntity == null) return;
 
@@ -113,7 +113,7 @@ public class EventsListener implements Listener {
                 // Update entity location.
                 nameTagEntity.updateLocation();
                 // Add player back as viewer
-                nameTagEntity.getPassenger().addViewer(nameTagEntity.getBukkitEntity().getUniqueId());
+                nameTagEntity.getWrapperEntity().addViewer(nameTagEntity.getOwner().getUniqueId());
                 // Send passenger packet
                 nameTagEntity.sendPassengerPacket(event.getPlayer());
             });
@@ -129,7 +129,7 @@ public class EventsListener implements Listener {
         if (event.getPlayer().isInsideVehicle()) return;
 
         NameTagEntity nameTagEntity = plugin.getEntityManager()
-                .getNameTagEntity(event.getPlayer());
+                .getNameTagHolder(event.getPlayer());
 
         if (nameTagEntity == null) return;
 
@@ -141,7 +141,7 @@ public class EventsListener implements Listener {
     @EventHandler
     public void onPlayerEffect(@NotNull EntityPotionEffectEvent event) {
         final NameTagEntity tag = plugin.getEntityManager()
-            .getNameTagEntity(event.getEntity());
+            .getNameTagHolder(event.getEntity());
 
         if (tag == null) {
             return;

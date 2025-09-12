@@ -6,15 +6,12 @@ import com.mattmx.nametags.entity.trait.RefreshTrait;
 import com.mattmx.nametags.entity.trait.SneakTrait;
 import com.mattmx.nametags.event.NameTagEntityCreateEvent;
 import me.tofaa.entitylib.meta.display.AbstractDisplayMeta;
-import org.bukkit.Color;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -44,7 +41,7 @@ public class ConfigDefaultsListener implements Listener {
 
         // By default, we shouldn't notify until we have finished processing.
         event.getNameTag()
-            .getPassenger()
+            .getWrapperEntity()
             .getEntityMeta()
             .setNotifyAboutChanges(false);
 
@@ -58,7 +55,7 @@ public class ConfigDefaultsListener implements Listener {
     }
 
     public void registerDefaultRefreshListener(@NotNull NameTagEntity tag, long refreshMillis) {
-        Player player = (Player) tag.getBukkitEntity();
+        Player player = (Player) tag.getOwner();
 
         tag.getTraits().getOrAddTrait(RefreshTrait.class, () ->
             RefreshTrait.ofMillis(
@@ -97,7 +94,7 @@ public class ConfigDefaultsListener implements Listener {
 
                         if (entity.getMeta().getBillboardConstraints() == AbstractDisplayMeta.BillboardConstraints.CENTER) {
                             // Look passenger down to remove debug getting in the way
-                            entity.getPassenger().rotateHead(0f, 90f);
+                            entity.getWrapperEntity().rotateHead(0f, 90f);
                         }
 
                         // Preserve background color for sneaking
@@ -107,7 +104,7 @@ public class ConfigDefaultsListener implements Listener {
                             .ifPresent(SneakTrait::manuallyUpdateSneakingOpacity);
 
                         entity.updateVisibility();
-                        entity.getPassenger().refresh();
+                        entity.getWrapperEntity().refresh();
                     }
                 }
             )

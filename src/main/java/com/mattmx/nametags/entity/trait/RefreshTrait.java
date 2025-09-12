@@ -2,6 +2,8 @@ package com.mattmx.nametags.entity.trait;
 
 import com.mattmx.nametags.entity.NameTagEntity;
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
+import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
@@ -15,7 +17,10 @@ public class RefreshTrait extends Trait {
     private final JavaPlugin plugin;
     private final long period;
     private final TimeUnit unit;
+    @Getter
     private final Consumer<NameTagEntity> update;
+    @Getter
+    @Setter
     private boolean paused = false;
 
     public RefreshTrait(@NotNull JavaPlugin plugin, long period, TimeUnit unit, Consumer<NameTagEntity> update) {
@@ -34,7 +39,7 @@ public class RefreshTrait extends Trait {
                 if (!this.isPaused()) {
 
                     // If the tag is not currently spawned in then we shouldn't process
-                    if (!getTag().getPassenger().isSpawned()) {
+                    if (!getTag().getWrapperEntity().isSpawned()) {
                         return;
                     }
 
@@ -44,20 +49,8 @@ public class RefreshTrait extends Trait {
             }, 0L, period, unit);
     }
 
-    public Consumer<NameTagEntity> getUpdate() {
-        return this.update;
-    }
-
     public void forceUpdate() {
         this.update.accept(getTag());
-    }
-
-    public void setPaused(boolean paused) {
-        this.paused = paused;
-    }
-
-    public boolean isPaused() {
-        return this.paused;
     }
 
     @Override
