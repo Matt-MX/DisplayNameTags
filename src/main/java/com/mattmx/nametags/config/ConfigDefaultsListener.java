@@ -63,8 +63,8 @@ public class ConfigDefaultsListener implements Listener {
                 refreshMillis,
                 (entity) -> {
                     synchronized (entity) {
-                        TextDisplayMetaConfiguration.applyMeta(defaultSection(), entity.getMeta());
-                        TextDisplayMetaConfiguration.applyTextMeta(defaultSection(), entity.getMeta(), player);
+                        TextDisplayMetaConfiguration.applyMeta(defaultSection(), entity.getTextMeta());
+                        TextDisplayMetaConfiguration.applyTextMeta(defaultSection(), entity.getTextMeta(), player);
 
                         // TODO we should cache this stuff
                         List<Map.Entry<String, ConfigurationSection>> groups = plugin.getGroups()
@@ -78,8 +78,8 @@ public class ConfigDefaultsListener implements Listener {
                         if (!groups.isEmpty()) {
                             Map.Entry<String, ConfigurationSection> highest = groups.getLast();
 
-                            TextDisplayMetaConfiguration.applyMeta(highest.getValue(), entity.getMeta());
-                            TextDisplayMetaConfiguration.applyTextMeta(highest.getValue(), entity.getMeta(), player);
+                            TextDisplayMetaConfiguration.applyMeta(highest.getValue(), entity.getTextMeta());
+                            TextDisplayMetaConfiguration.applyTextMeta(highest.getValue(), entity.getTextMeta(), player);
 
                             long groupRefresh = highest.getValue().getLong("refresh-every", -1);
                             if (groupRefresh > 0) {
@@ -92,7 +92,7 @@ public class ConfigDefaultsListener implements Listener {
                             registerDefaultRefreshListener(tag, recentRefreshEvery);
                         }
 
-                        if (entity.getMeta().getBillboardConstraints() == AbstractDisplayMeta.BillboardConstraints.CENTER) {
+                        if (entity.getTextMeta().getBillboardConstraints() == AbstractDisplayMeta.BillboardConstraints.CENTER) {
                             // Look passenger down to remove debug getting in the way
                             entity.getWrapperEntity().rotateHead(0f, 90f);
                         }

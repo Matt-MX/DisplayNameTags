@@ -14,6 +14,9 @@ import java.util.function.Function;
 public class ConfigurableEntry<T, E extends AbstractDisplayMeta> {
     public static final Map<String, ConfigurableEntry<?, ?>> ENTRIES = new HashMap<>();
 
+    public static final String REFRESH_KEY = "refresh";
+    public static final String PRIORITY_KEY = "priority";
+
     static {
         addEntries(
             new ConfigurableEntry<>(
@@ -55,8 +58,8 @@ public class ConfigurableEntry<T, E extends AbstractDisplayMeta> {
                 List.of("line-width", "width", "linewidth"),
                 ConfigValueSupplier.integer(),
                 TextDisplayMeta.class,
-                TextDisplayMeta::getBackgroundColor,
-                TextDisplayMeta::setBackgroundColor
+                TextDisplayMeta::getLineWidth,
+                TextDisplayMeta::setLineWidth
             ),
             new ConfigurableEntry<>(
                 List.of("see-through", "see-thru"),
@@ -75,16 +78,23 @@ public class ConfigurableEntry<T, E extends AbstractDisplayMeta> {
         );
     }
 
-    public static Map<String, ConfigurableEntry<?, ?>> filterEntries(ConfigurationSection section) {
-        Map<String, ConfigurableEntry<?, ?>> map = new HashMap<>();
+    public static List<BoundConfigValue<?>> bindEntries(ConfigurationSection section) {
+        List<BoundConfigValue<?>> list = new LinkedList<>();
 
+        // Find relevant configuration entries
         for (Map.Entry<String, ConfigurableEntry<?, ?>> mapEntry : ENTRIES.entrySet()) {
             if (section.get(mapEntry.getKey()) != null) {
-                map.put(mapEntry.getKey(), mapEntry.getValue());
+                Object value = mapEntry.getValue().valueSupplier.getValue(mapEntry.getKey(), section);
+
+                if (value == null) {
+                    continue;
+                }
+
+                list.add(new BoundConfigValue<>(value, mapEntry.getValue()));
             }
         }
 
-        return map;
+        return list;
     }
 
     public static Map<String, ConfigurableEntry<?, ?>> addEntries(ConfigurableEntry<?, ?>... entries) {
@@ -97,6 +107,12 @@ public class ConfigurableEntry<T, E extends AbstractDisplayMeta> {
         }
 
         return map;
+    }
+
+    public static void updateIfChanged(List<ConfigurableEntry<?, ?>> changes, final NameTagEntity entity, Object newValue) {
+        for (ConfigurableEntry<?, ?> change : changes) {
+            change.updateIfChanged(entity, newValue);
+        }
     }
 
     private final Set<String> aliases;
@@ -119,12 +135,14 @@ public class ConfigurableEntry<T, E extends AbstractDisplayMeta> {
         this.setter = setter;
     }
 
+
     public void updateIfChanged(final NameTagEntity entity, Object newValue) {
         if (!metaClass.isInstance(entity.getWrapperEntity().getEntityMeta())) {
             return;
         }
 
-        T existingValue = getter.apply(entity.getWrapperEntity().getEntityMeta(metaClass));
+        E entityMeta = entity.getWrapperEntity().getEntityMeta(metaClass);
+        T existingValue = getter.apply(entityMeta);
 
         // Ensure values are the same type.
         if (!existingValue.getClass().isInstance(newValue)) {
@@ -136,9 +154,7 @@ public class ConfigurableEntry<T, E extends AbstractDisplayMeta> {
             return;
         }
 
-        entity.updateMeta(metaClass, (meta) -> {
-            //noinspection unchecked
-            setter.accept(meta, (T) newValue);
-        });
+        //noinspection unchecked
+        setter.accept(entityMeta, (T) newValue);
     }
 }

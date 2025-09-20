@@ -44,7 +44,7 @@ public class DefaultsHook implements Listener {
         }
 
         holder.getTraits().removeTrait(DefaultsTrait.class);
-        holder.getTraits().getOrAddTrait(DefaultsTrait.class, DefaultsTrait::new);
+        holder.getTraits().getOrAddTrait(DefaultsTrait.class, DefaultsTrait::new).updatePermissions();
     }
 
 }

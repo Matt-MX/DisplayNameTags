@@ -55,6 +55,10 @@ public interface ConfigValueSupplier<T> {
         };
     }
 
+    static ConfigValueSupplier<Long> longA() {
+        return (key, section) -> section.getLong(key);
+    }
+
     static ConfigValueSupplier<Double> doubleA() {
         return (key, section) -> section.getDouble(key);
     }

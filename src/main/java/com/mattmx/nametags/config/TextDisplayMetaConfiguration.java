@@ -12,17 +12,19 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.stream.Stream;
 
 public class TextDisplayMetaConfiguration {
 
-    public static boolean applyTextMeta(@NotNull ConfigurationSection section, @NotNull TextDisplayMeta to, @NotNull Player self) {
-        Stream<Component> stream = section.getStringList("text")
+    public static boolean applyTextMeta(@NotNull ConfigurationSection section, @NotNull TextDisplayMeta to, @NotNull Entity self) {
+        Stream<Component> stream = getTextLines(section)
             .stream()
             .map((line) -> convertToComponent(self, line));
 
@@ -41,6 +43,51 @@ public class TextDisplayMetaConfiguration {
             return true;
         }
         return false;
+    }
+
+    private static @NotNull List<String> getTextLines(@NotNull ConfigurationSection section) {
+        String single = section.getString("text");
+        if (single == null) {
+            return section.getStringList("text");
+        } else {
+            return List.of(single);
+        }
+    }
+
+    public static void applyBackground(@NotNull ConfigurationSection section, @NotNull TextDisplayMeta to) {
+        String backgroundColor = section.getString("background", "transparent");
+        int background;
+
+        if (backgroundColor.equalsIgnoreCase("transparent")) {
+            background = NameTags.TRANSPARENT;
+        } else if (NamedTextColor.NAMES.value(backgroundColor) != null) {
+            background = 0x40000000 | Objects.requireNonNull(NamedTextColor.NAMES.value(backgroundColor)).value();
+        } else if (backgroundColor.startsWith("#")) {
+            String hex = backgroundColor.replace("#", "");
+
+            int rgb;
+            int a;
+            if (hex.length() == 6) {
+                rgb = Integer.parseInt(hex, 16);
+                // Set a default alpha of 0x40 (minecraft's internal default)
+                a = 0x40;
+            } else if (hex.length() == 8) {
+                rgb = Integer.parseInt(hex.substring(2), 16);
+                a = Integer.parseInt(hex.substring(0, 2), 16);
+            } else {
+                throw new RuntimeException(String.format("Invalid hex string '#%s'!", hex));
+            }
+
+            Color color = Color.fromARGB(rgb).setAlpha(a);
+
+            background = color.asARGB();
+        } else {
+            background = NameTags.TRANSPARENT;
+        }
+
+        if (background != to.getBackgroundColor()) {
+            to.setBackgroundColor(background);
+        }
     }
 
     public static void applyMeta(@NotNull ConfigurationSection section, @NotNull TextDisplayMeta to) {
@@ -181,10 +228,12 @@ public class TextDisplayMetaConfiguration {
         String pitch = section.getString("pitch");
     }
 
-    private static Component convertToComponent(Player self, String line) {
+    private static Component convertToComponent(Entity self, String line) {
         String formatted = line;
 
-        formatted = PapiHook.setPlaceholders(self, formatted);
+        if (self instanceof Player player) {
+            formatted = PapiHook.setPlaceholders(player, formatted);
+        }
 
         return NameTags.getInstance()
             .getFormatter()

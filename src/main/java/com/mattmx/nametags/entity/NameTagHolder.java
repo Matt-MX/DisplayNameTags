@@ -6,16 +6,18 @@ import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Getter
 public class NameTagHolder {
     private @NotNull Entity owner;
-    private final TraitHolder<NameTagHolder> traits = new TraitHolder<>(this);
-    private @NotNull Map<Integer, NameTagEntity> entities = new ConcurrentHashMap<>();
+    private final @NotNull TraitHolder<NameTagHolder> traits = new TraitHolder<>(this);
+    private @NotNull List<NameTagEntity> entities = new LinkedList<>();
+    private final @NotNull Map<Integer, NameTagEntity> entitiesById = new ConcurrentHashMap<>();
     private float cachedViewRange = -1f;
 
     public NameTagHolder(@NotNull Entity owner) {
@@ -24,26 +26,37 @@ public class NameTagHolder {
 
     public @NotNull NameTagEntity createEntity() {
         NameTagEntity entity = new NameTagEntity(this);
-        entities.put(entity.getWrapperEntity().getEntityId(), entity);
+
+        // TODO: add config option for direction?
+        // Face downwards to hide debug lines
+        entity.getWrapperEntity().rotateHead(0f, 90f);
+
+        entities.add(entity);
+        entitiesById.put(entity.getWrapperEntity().getEntityId(), entity);
 
         return entity;
     }
 
-    public @NotNull Collection<NameTagEntity> getEntitiesList() {
-        return entities.values();
+    public void removeEntity(@NotNull NameTagEntity entity) {
+        entities.remove(entity);
+        entitiesById.remove(entity.getWrapperEntity().getEntityId());
+    }
+
+    public @NotNull List<NameTagEntity> getEntitiesList() {
+        return entities;
     }
 
     public @Nullable NameTagEntity entityByEntityId(int entityId) {
-        return entities.get(entityId);
+        return entitiesById.get(entityId);
     }
 
     public void destroy() {
-        Iterator<Map.Entry<Integer, NameTagEntity>> iterator = entities.entrySet().iterator();
+        entitiesById.clear();
+
+        Iterator<NameTagEntity> iterator = entities.iterator();
         while (iterator.hasNext()) {
-            Map.Entry<Integer, NameTagEntity> entry = iterator.next();
-
-            entry.getValue().destroy();
-
+            final NameTagEntity entry = iterator.next();
+            entry.destroy();
             iterator.remove();
         }
     }

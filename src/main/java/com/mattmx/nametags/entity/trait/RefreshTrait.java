@@ -39,18 +39,18 @@ public class RefreshTrait extends Trait {
                 if (!this.isPaused()) {
 
                     // If the tag is not currently spawned in then we shouldn't process
-                    if (!getOwner().getWrapperEntity().isSpawned()) {
+                    if (!getTag().getWrapperEntity().isSpawned()) {
                         return;
                     }
 
-                    update.accept(getOwner());
+                    update.accept(getTag());
                 }
 
             }, 0L, period, unit);
     }
 
     public void forceUpdate() {
-        this.update.accept(getOwner());
+        this.update.accept(getTag());
     }
 
     @Override

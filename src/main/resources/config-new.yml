@@ -2,6 +2,17 @@ options:
   threads: 2
   relative-placeholders-support: true
 
+# Disables vanilla name tag rendering through a scoreboard teams packet
+# sent to the client on joining the server.
+disable-vanilla: true
+
+# Select a text formatter, default is smart.
+# Options:
+# - minimessage
+# - legacy
+# - smart (Attempts to format legacy -> minimessage)
+formatter: smart
+
 # Base default options applied first
 defaults:
   # If not enabled then plugin simulates vanilla name tags
@@ -66,19 +77,6 @@ defaults:
         z: 1.0
       gap: 0.2
 
-# Should the player see their own tag?
-# This is not entirely supported, but bug reports still help
-show-self: true
-
-# Disables vanilla name tag rendering through a scoreboard teams packet
-# sent to the client on joining the server.
-disable-vanilla: true
-
-sneak:
-  # Should we modify the opacity of the tag's background when the player shifts?
-  enabled: true
-  opacity: 70
-
 # Permission based groups.
 # Will only work if you have the "defaults" section enabled.
 # Specify sub-groups that override the defaults.
@@ -91,17 +89,25 @@ sneak:
 # Here, you would grant a user the permission "nametags.groups.vip"
 # to receive a red background
 groups:
+  vip:
+    lines:
+      - text: "&aVIP &f%player_name%"
+        background: green
 
-# Formatting.
-# Select a formatter for your text, default is minimessage.
-# Options:
-# - minimessage
-# - legacy
-# - smart (Attempts to format legacy -> minimessage)
-formatter: minimessage
+      - text: "&f%player_ping%"
+        background: transparent
 
 # Extra features
-# These will likely not work yet since they're experimental.
+# These are uncategorized and will add some other features to the plugin
 extra:
+  # Should the player see their own tag?
+  # This is not entirely supported, but bug reports still help
+  show-self: true
+
+  sneak:
+    # Should we modify the opacity of the tag's background when the player shifts?
+    enabled: true
+    opacity: 70
+
   # Should the name-tag be see-through if the player is glowing?
   glowing-feature: false

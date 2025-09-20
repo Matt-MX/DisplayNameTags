@@ -96,7 +96,7 @@ public class NameTagEntity {
         this.wrapperEntity.consumeEntityMeta(TextDisplayMeta.class, consumer);
     }
 
-    public @NotNull TextDisplayMeta getMeta() {
+    public @NotNull TextDisplayMeta getTextMeta() {
         return this.wrapperEntity.getEntityMeta(TextDisplayMeta.class);
     }
 

@@ -5,6 +5,7 @@ import com.github.retrooper.packetevents.PacketEventsAPI;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.mattmx.nametags.config.ConfigDefaultsListener;
 import com.mattmx.nametags.config.TextFormatter;
+import com.mattmx.nametags.config.groups.ConfigGroup;
 import com.mattmx.nametags.entity.NameTagEntityManager;
 import com.mattmx.nametags.hook.NeznamyTABHook;
 import com.mattmx.nametags.hook.SkinRestorerHook;
@@ -22,9 +23,10 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -34,8 +36,12 @@ public class NameTags extends JavaPlugin {
     private static @Nullable NameTags instance;
     private @Nullable Executor executor = null;
     @Getter
-    private final HashMap<String, ConfigurationSection> groups = new HashMap<>();
+    private final Set<ConfigGroup> groups = ConcurrentHashMap.newKeySet();
+    @Getter
+    private ConfigGroup defaultGroup = null;
+    @Getter
     private @NotNull TextFormatter formatter = TextFormatter.MINI_MESSAGE;
+    @Getter
     private NameTagEntityManager entityManager;
     private EventsListener eventsListener;
     private OutgoingPacketListener packetListener;
@@ -56,11 +62,11 @@ public class NameTags extends JavaPlugin {
         registerMetrics();
 
         executor = Executors.newFixedThreadPool(
-                getConfig().getInt("options.threads", 2),
-                new ThreadFactoryBuilder()
-                        .setPriority(Thread.NORM_PRIORITY + 1)
-                        .setNameFormat("NameTags-Processor")
-                        .build()
+            getConfig().getInt("options.threads", 2),
+            new ThreadFactoryBuilder()
+                .setPriority(Thread.NORM_PRIORITY + 1)
+                .setNameFormat("NameTags-Processor-%d")
+                .build()
         );
 
         SpigotEntityLibPlatform platform = new SpigotEntityLibPlatform(this);
@@ -107,17 +113,19 @@ public class NameTags extends JavaPlugin {
 
             defaultsListener = new ConfigDefaultsListener(this);
             Bukkit.getPluginManager().registerEvents(defaultsListener, this);
+
+            this.defaultGroup = new ConfigGroup("default", defaults);
         }
 
         String textFormatterIdentifier = getConfig().getString("formatter", "minimessage");
-        formatter = TextFormatter.getById(textFormatterIdentifier)
-                .orElse(TextFormatter.MINI_MESSAGE);
+        formatter = TextFormatter.getById(textFormatterIdentifier).orElse(TextFormatter.MINI_MESSAGE);
 
         getLogger().info("Using " + formatter.name() + " as text formatter.");
 
-        for (String permissionNode : groups.keySet()) {
-            Bukkit.getPluginManager().removePermission(permissionNode);
+        for (ConfigGroup group : groups) {
+            Bukkit.getPluginManager().removePermission(group.getPermissionNode());
         }
+
         groups.clear();
 
         ConfigurationSection groups = getConfig().getConfigurationSection("groups");
@@ -125,14 +133,13 @@ public class NameTags extends JavaPlugin {
         if (groups == null) return;
 
         for (String key : groups.getKeys(false)) {
-            String permissionNode = "nametags.groups." + key;
             ConfigurationSection sub = groups.getConfigurationSection(key);
 
             if (sub == null) continue;
+            ConfigGroup group = new ConfigGroup(key, sub);
 
-            this.groups.put(permissionNode, sub);
-
-            Bukkit.getPluginManager().addPermission(new Permission(permissionNode));
+            this.groups.add(group);
+            Bukkit.getPluginManager().addPermission(new Permission(group.getPermissionNode()));
         }
     }
 
@@ -147,8 +154,8 @@ public class NameTags extends JavaPlugin {
         HandlerList.unregisterAll(this.eventsListener);
 
         PacketEvents.getAPI()
-                .getEventManager()
-                .unregisterListener(this.packetListener);
+            .getEventManager()
+            .unregisterListener(this.packetListener);
     }
 
     public Executor getExecutor() {
@@ -157,14 +164,6 @@ public class NameTags extends JavaPlugin {
         }
 
         return this.executor;
-    }
-
-    public @NotNull NameTagEntityManager getEntityManager() {
-        return this.entityManager;
-    }
-
-    public @NotNull TextFormatter getFormatter() {
-        return this.formatter;
     }
 
     public static @NotNull NameTags getInstance() {
