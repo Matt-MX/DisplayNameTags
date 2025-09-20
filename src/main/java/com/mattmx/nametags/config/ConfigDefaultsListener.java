@@ -97,12 +97,6 @@ public class ConfigDefaultsListener implements Listener {
                             entity.getWrapperEntity().rotateHead(0f, 90f);
                         }
 
-                        // Preserve background color for sneaking
-                        // Maybe we should introduce an `afterRefresh` callback?
-                        entity.getTraits()
-                            .getTrait(SneakTrait.class)
-                            .ifPresent(SneakTrait::manuallyUpdateSneakingOpacity);
-
                         entity.updateVisibility();
                         entity.getWrapperEntity().refresh();
                     }

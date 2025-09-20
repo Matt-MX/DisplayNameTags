@@ -6,17 +6,14 @@ import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Getter
 public class NameTagHolder {
     private @NotNull Entity owner;
     private final @NotNull TraitHolder<NameTagHolder> traits = new TraitHolder<>(this);
-    private @NotNull List<NameTagEntity> entities = new LinkedList<>();
+    private final @NotNull List<NameTagEntity> entities = new LinkedList<>();
     private final @NotNull Map<Integer, NameTagEntity> entitiesById = new ConcurrentHashMap<>();
     private float cachedViewRange = -1f;
 
@@ -58,6 +55,24 @@ public class NameTagHolder {
             final NameTagEntity entry = iterator.next();
             entry.destroy();
             iterator.remove();
+        }
+    }
+
+    public void setVisible(boolean visible) {
+        for (NameTagEntity entity : entities) {
+            entity.setVisible(visible);
+        }
+    }
+
+    public void removeViewer(UUID viewer) {
+        for (NameTagEntity entity : entities) {
+            entity.getWrapperEntity().removeViewer(viewer);
+        }
+    }
+
+    public void addViewer(UUID viewer) {
+        for (NameTagEntity entity : entities) {
+            entity.getWrapperEntity().addViewer(viewer);
         }
     }
 }

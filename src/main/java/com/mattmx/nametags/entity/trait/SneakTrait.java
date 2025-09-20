@@ -1,42 +1,54 @@
 package com.mattmx.nametags.entity.trait;
 
 import com.mattmx.nametags.NameTags;
+import com.mattmx.nametags.entity.NameTagEntity;
+import com.mattmx.nametags.entity.NameTagHolder;
+import lombok.Getter;
+import me.tofaa.entitylib.meta.display.TextDisplayMeta;
 import org.bukkit.Color;
 import org.jetbrains.annotations.NotNull;
 
-public class SneakTrait extends Trait {
-    private int previousBackgroundOpacity = 0;
-    private byte previousTextOpacity = Byte.MAX_VALUE;
-    private boolean isSneaking = false;
+public class SneakTrait extends Trait<NameTagHolder> {
+    private final byte sneakingOpacity = (byte) NameTags.getInstance()
+        .getConfig()
+        .getInt("sneak.opacity", 70);
 
-    public void manuallyUpdateSneakingOpacity() {
-        if (!isSneaking()) return;
+    private int preSneakingBackgroundColor = 0;
+    private byte preSneakingTextOpacity = 0;
 
-        getTag().modify((tag) -> {
-            Color currentColor = Color.fromARGB(tag.getBackgroundColor());
-            tag.setBackgroundColor(withCustomSneakOpacity(currentColor).asARGB());
-            tag.setTextOpacity((byte) getCustomOpacity());
-        });
-    }
+    @Getter
+    private boolean isCurrentlySneaking = false;
 
-    public void updateSneak(boolean sneaking) {
-        this.isSneaking = sneaking;
-        getTag().modify((meta) -> {
-            Color color = Color.fromARGB(meta.getBackgroundColor());
+    public void setSneaking(boolean sneaking) {
+        if (this.isCurrentlySneaking == sneaking) {
+            return;
+        }
 
-            if (sneaking) {
-                previousBackgroundOpacity = color.getAlpha();
-                previousTextOpacity = meta.getTextOpacity();
+        this.isCurrentlySneaking = sneaking;
 
-                // Not sure if this is vanilla behavior? Does only text opacity change??
-                meta.setBackgroundColor(withCustomSneakOpacity(color).asARGB());
-                meta.setTextOpacity((byte) getCustomOpacity());
+        NameTagHolder holder = getOwner();
+
+        for (NameTagEntity entity : holder.getEntitiesList()) {
+            entity.notifyChanges(false);
+
+            TextDisplayMeta meta = entity.getTextMeta();
+
+            int backgroundColorInt = meta.getBackgroundColor();
+            Color backgroundColor = Color.fromARGB(backgroundColorInt);
+
+            if (isCurrentlySneaking) {
+                this.preSneakingBackgroundColor = backgroundColorInt;
+                this.preSneakingTextOpacity = meta.getTextOpacity();
+
+                meta.setBackgroundColor(withCustomSneakOpacity(backgroundColor).asARGB());
+                meta.setTextOpacity(sneakingOpacity);
             } else {
-                meta.setBackgroundColor(color.setAlpha(previousBackgroundOpacity).asARGB());
-                meta.setTextOpacity(previousTextOpacity);
+                meta.setBackgroundColor(this.preSneakingBackgroundColor);
+                meta.setTextOpacity(this.preSneakingTextOpacity);
             }
-        });
-        getTag().getWrapperEntity().refresh();
+
+            entity.notifyChanges(true);
+        }
     }
 
     public Color withCustomSneakOpacity(@NotNull Color previous) {
@@ -44,16 +56,6 @@ public class SneakTrait extends Trait {
             return previous;
         }
 
-        return previous.setAlpha(getCustomOpacity());
-    }
-
-    public int getCustomOpacity() {
-        return NameTags.getInstance()
-            .getConfig()
-            .getInt("sneak.opacity", 70);
-    }
-
-    public boolean isSneaking() {
-        return isSneaking;
+        return previous.setAlpha(sneakingOpacity);
     }
 }

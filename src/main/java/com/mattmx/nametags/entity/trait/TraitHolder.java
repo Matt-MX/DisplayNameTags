@@ -1,6 +1,5 @@
 package com.mattmx.nametags.entity.trait;
 
-import com.mattmx.nametags.entity.NameTagHolder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

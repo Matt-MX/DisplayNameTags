@@ -90,7 +90,7 @@ public class ConfigGroup {
     }
 
     public @NotNull String getPermissionNode() {
-        return "nametags.group." + name;
+        return "nametags.groups." + name;
     }
 
     public record UpdatableLine(List<BoundConfigValue<?>> updates, ConfigurationSection section) {

@@ -73,19 +73,24 @@ public class NameTagEntity {
         return holder.getOwner().isInvisible() || hasInvisibilityEffect;
     }
 
-    public void updateVisibility() {
-        updateVisibility(isInvisible());
-    }
+    public void setVisible(boolean visible) {
+        notifyChanges(false);
 
-    public void updateVisibility(final boolean isInvisible) {
-        modify((meta) -> {
-            if (isInvisible && !meta.isInvisible()) {
-                this.cachedViewRange = meta.getViewRange();
-                meta.setViewRange(0f);
-            } else if (!isInvisible && meta.isInvisible()) {
-                meta.setViewRange(this.cachedViewRange);
-            }
-        });
+        TextDisplayMeta meta = getTextMeta();
+
+        // If not changed then do not continue
+        if (visible == meta.isInvisible()) {
+            return;
+        }
+
+        if (visible) {
+            this.cachedViewRange = meta.getViewRange();
+            meta.setViewRange(0f);
+        } else {
+            meta.setViewRange(this.cachedViewRange);
+        }
+
+        notifyChanges(true);
     }
 
     public @NotNull TraitHolder getTraits() {
@@ -93,7 +98,9 @@ public class NameTagEntity {
     }
 
     public void modify(Consumer<TextDisplayMeta> consumer) {
+        notifyChanges(false);
         this.wrapperEntity.consumeEntityMeta(TextDisplayMeta.class, consumer);
+        notifyChanges(true);
     }
 
     public @NotNull TextDisplayMeta getTextMeta() {
@@ -135,9 +142,7 @@ public class NameTagEntity {
 
     public @NotNull Location updateLocation() {
         Location location = SpigotConversionUtil.fromBukkitLocation(
-            getOwner().getLocation()
-                .clone()
-                .add(0.0, getOwner().getBoundingBox().getMaxY(), 0.0)
+            getOwner().getLocation().clone().add(0.0, getOwner().getBoundingBox().getMaxY(), 0.0)
         );
 
         location.setYaw(0f);

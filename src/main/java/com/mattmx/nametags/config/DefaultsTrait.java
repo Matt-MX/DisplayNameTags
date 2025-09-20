@@ -10,7 +10,6 @@ import me.tofaa.entitylib.meta.display.TextDisplayMeta;
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class DefaultsTrait extends Trait<NameTagHolder> {
@@ -20,7 +19,7 @@ public class DefaultsTrait extends Trait<NameTagHolder> {
 
     @Override
     public void onEnable() {
-        updatePermissions();
+        updateGroup();
 
         // Create repeating task to update the tag members
         scheduleTask();
@@ -49,16 +48,16 @@ public class DefaultsTrait extends Trait<NameTagHolder> {
 
     public void update() {
         // Should be the base then the group (nothing else)
-        group.apply(getTag());
+        group.apply(getOwner());
 
         // Here we should update the text and bg colors (lines should be the same length now)
         for (int i = 0; i < group.getLines().size(); i++) {
-            final NameTagEntity entity = getTag().getEntities().get(i);
+            final NameTagEntity entity = getOwner().getEntities().get(i);
             final ConfigGroup.UpdatableLine line = group.getLines().get(i);
 
             TextDisplayMeta meta = entity.getTextMeta();
 
-            TextDisplayMetaConfiguration.applyTextMeta(line.section(), meta, getTag().getOwner());
+            TextDisplayMetaConfiguration.applyTextMeta(line.section(), meta, getOwner().getOwner());
             TextDisplayMetaConfiguration.applyBackground(line.section(), meta);
 
             // Now we can emit changes
@@ -66,20 +65,25 @@ public class DefaultsTrait extends Trait<NameTagHolder> {
         }
     }
 
-    public void updatePermissions() {
+    public void updateGroup() {
         final ConfigGroup previousGroup = this.group;
 
-        List<ConfigGroup> groups = NameTags.getInstance()
-            .getGroups()
-            .stream()
-            .filter((e) -> getTag().getOwner().hasPermission(e.getName()))
-            .sorted(GroupPriorityComparator.get())
-            .toList();
+        ConfigGroup newGroup = null;
+        int groupPriority = Integer.MIN_VALUE;
 
-        if (groups.isEmpty()) {
+        for (ConfigGroup group : NameTags.getInstance().getGroups()) {
+            boolean hasPermission = getOwner().getOwner().hasPermission(group.getPermissionNode());
+
+            if (hasPermission && group.getPriority() > groupPriority) {
+                newGroup = group;
+                groupPriority = group.getPriority();
+            }
+        }
+
+        if (newGroup == null) {
             this.group = NameTags.getInstance().getDefaultGroup();
         } else {
-            this.group = groups.getFirst();
+            this.group = newGroup;
         }
 
         // If the group changed, then restart the repeating task

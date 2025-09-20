@@ -29,7 +29,7 @@ public class DefaultsHook implements Listener {
                 final UUID uniqueId = event.getUser().getUniqueId();
                 final NameTagHolder holder = plugin.getEntityManager().getNameTagHolderByUUID(uniqueId);
                 if (holder != null) {
-                    holder.getTraits().getTrait(DefaultsTrait.class).ifPresent(DefaultsTrait::updatePermissions);
+                    holder.getTraits().getTrait(DefaultsTrait.class).ifPresent(DefaultsTrait::updateGroup);
                 }
             });
         }
@@ -44,7 +44,7 @@ public class DefaultsHook implements Listener {
         }
 
         holder.getTraits().removeTrait(DefaultsTrait.class);
-        holder.getTraits().getOrAddTrait(DefaultsTrait.class, DefaultsTrait::new).updatePermissions();
+        holder.getTraits().getOrAddTrait(DefaultsTrait.class, DefaultsTrait::new).updateGroup();
     }
 
 }

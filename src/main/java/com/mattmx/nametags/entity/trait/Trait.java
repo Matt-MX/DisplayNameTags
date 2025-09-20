@@ -10,7 +10,7 @@ public abstract class Trait<T> {
         this.holder = tag;
     }
 
-    public @NotNull T getTag() {
+    public @NotNull T getOwner() {
         assert holder != null;
         return holder;
     }
