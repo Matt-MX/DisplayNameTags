@@ -10,6 +10,7 @@ import me.tofaa.entitylib.meta.display.TextDisplayMeta;
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 public class DefaultsTrait extends Trait<NameTagHolder> {
@@ -47,22 +48,7 @@ public class DefaultsTrait extends Trait<NameTagHolder> {
     }
 
     public void update() {
-        // Should be the base then the group (nothing else)
         group.apply(getOwner());
-
-        // Here we should update the text and bg colors (lines should be the same length now)
-        for (int i = 0; i < group.getLines().size(); i++) {
-            final NameTagEntity entity = getOwner().getEntities().get(i);
-            final ConfigGroup.UpdatableLine line = group.getLines().get(i);
-
-            TextDisplayMeta meta = entity.getTextMeta();
-
-            TextDisplayMetaConfiguration.applyTextMeta(line.section(), meta, getOwner().getOwner());
-            TextDisplayMetaConfiguration.applyBackground(line.section(), meta);
-
-            // Now we can emit changes
-            entity.notifyChanges(true);
-        }
     }
 
     public void updateGroup() {
@@ -71,7 +57,8 @@ public class DefaultsTrait extends Trait<NameTagHolder> {
         ConfigGroup newGroup = null;
         int groupPriority = Integer.MIN_VALUE;
 
-        for (ConfigGroup group : NameTags.getInstance().getGroups()) {
+        DefaultsHook hook = Objects.requireNonNull(NameTags.getInstance().getDefaults());
+        for (ConfigGroup group : hook.getGroups()) {
             boolean hasPermission = getOwner().getOwner().hasPermission(group.getPermissionNode());
 
             if (hasPermission && group.getPriority() > groupPriority) {
@@ -81,7 +68,7 @@ public class DefaultsTrait extends Trait<NameTagHolder> {
         }
 
         if (newGroup == null) {
-            this.group = NameTags.getInstance().getDefaultGroup();
+            this.group = hook.getDefaultGroup();
         } else {
             this.group = newGroup;
         }

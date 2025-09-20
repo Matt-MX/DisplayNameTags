@@ -1,6 +1,7 @@
 package com.mattmx.nametags;
 
 import com.mattmx.nametags.entity.NameTagEntity;
+import com.mattmx.nametags.entity.NameTagHolder;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
@@ -10,6 +11,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public class NameTagsCommand implements CommandExecutor {
@@ -22,38 +26,45 @@ public class NameTagsCommand implements CommandExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         for (final Player player : Bukkit.getOnlinePlayers()) {
-            final NameTagEntity tag = plugin.getEntityManager().getNameTagHolder(player);
+            final NameTagHolder holder = plugin.getEntityManager().getNameTagHolder(player);
 
-            if (tag != null) {
-                tag.getTraits().destroy();
+            if (holder != null) {
+                holder.getTraits().destroy();
             }
         }
 
         this.plugin.reload();
 
         for (final Player player : Bukkit.getOnlinePlayers()) {
-            final NameTagEntity tag = plugin.getEntityManager().removeEntity(player);
+            final NameTagHolder old = plugin.getEntityManager().removeEntity(player);
 
-            if (tag != null) {
-                tag.destroy();
+            Set<UUID> viewers = Collections.emptySet();
+            if (old != null) {
+                NameTagEntity first = old.getEntities().getFirst();
+
+                if (first != null) {
+                    viewers = first.getWrapperEntity().getViewers();
+                }
+
+                old.destroy();
             }
 
-            final NameTagEntity newTag = plugin.getEntityManager().getOrCreateNameTagEntity(player);
+            final NameTagHolder holder = plugin.getEntityManager().getOrCreateNameTagHolder(player);
 
             // Add existing viewers
-            if (tag != null) {
-                for (final UUID viewer : tag.getWrapperEntity().getViewers()) {
-                    newTag.getWrapperEntity().addViewer(viewer);
+            if (old != null) {
+                for (final UUID viewer : viewers) {
+                    holder.addViewer(viewer);
 
                     // Send passenger packet
                     Player playerViewer = Bukkit.getPlayer(viewer);
                     if (playerViewer != null) {
-                        newTag.sendPassengerPacket(playerViewer);
+                        holder.sendPassengerPacket(playerViewer);
                     }
                 }
             }
 
-            newTag.updateVisibility();
+            holder.manuallyUpdateVisibility();
         }
 
         sender.sendMessage(Component.text("Reloaded!").color(NamedTextColor.GREEN));

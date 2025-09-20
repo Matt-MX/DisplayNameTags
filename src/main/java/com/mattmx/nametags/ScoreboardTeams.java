@@ -7,6 +7,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.jetbrains.annotations.NotNull;
@@ -21,13 +22,13 @@ import java.util.concurrent.TimeUnit;
  */
 public class ScoreboardTeams implements Listener {
     public static final WrapperPlayServerTeams.ScoreBoardTeamInfo TEAM_INFO = new WrapperPlayServerTeams.ScoreBoardTeamInfo(
-            Component.empty(),
-            Component.empty(),
-            Component.empty(),
-            WrapperPlayServerTeams.NameTagVisibility.NEVER,
-            WrapperPlayServerTeams.CollisionRule.ALWAYS,
-            NamedTextColor.WHITE,
-            WrapperPlayServerTeams.OptionData.NONE
+        Component.empty(),
+        Component.empty(),
+        Component.empty(),
+        WrapperPlayServerTeams.NameTagVisibility.NEVER,
+        WrapperPlayServerTeams.CollisionRule.ALWAYS,
+        NamedTextColor.WHITE,
+        WrapperPlayServerTeams.OptionData.NONE
     );
     public static final String TEAM_NAME = "NameTagsHider";
 
@@ -37,7 +38,7 @@ public class ScoreboardTeams implements Listener {
         this.plugin = plugin;
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     public void onPlayerJoin(@NotNull PlayerJoinEvent event) {
         Bukkit.getAsyncScheduler().runDelayed(this.plugin, (task) -> {
             if (!event.getPlayer().isOnline()) {
@@ -52,30 +53,30 @@ public class ScoreboardTeams implements Listener {
             usernames.add(event.getPlayer().getName());
 
             final WrapperPlayServerTeams teamsPacketCreate = new WrapperPlayServerTeams(
-                    TEAM_NAME,
-                    WrapperPlayServerTeams.TeamMode.CREATE,
-                    TEAM_INFO,
-                    usernames
+                TEAM_NAME,
+                WrapperPlayServerTeams.TeamMode.CREATE,
+                TEAM_INFO,
+                usernames
             );
 
             PacketEvents.getAPI()
-                    .getPlayerManager()
-                    .sendPacketSilently(event.getPlayer(), teamsPacketCreate);
+                .getPlayerManager()
+                .sendPacketSilently(event.getPlayer(), teamsPacketCreate);
 
             // Notify existing players of the new player
             final WrapperPlayServerTeams teamsPacketUpdate = new WrapperPlayServerTeams(
-                    TEAM_NAME,
-                    WrapperPlayServerTeams.TeamMode.ADD_ENTITIES,
-                    TEAM_INFO,
-                    List.of(event.getPlayer().getName())
+                TEAM_NAME,
+                WrapperPlayServerTeams.TeamMode.ADD_ENTITIES,
+                TEAM_INFO,
+                List.of(event.getPlayer().getName())
             );
 
             for (Player player : Bukkit.getOnlinePlayers()) {
                 if (player == event.getPlayer()) continue;
 
                 PacketEvents.getAPI()
-                        .getPlayerManager()
-                        .sendPacketSilently(player, teamsPacketUpdate);
+                    .getPlayerManager()
+                    .sendPacketSilently(player, teamsPacketUpdate);
             }
         }, 500L, TimeUnit.MILLISECONDS);
     }

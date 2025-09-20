@@ -110,26 +110,7 @@ public class NameTagEntity {
     public void sendPassengerPacket(Player target) {
         PacketEvents.getAPI()
             .getPlayerManager()
-            .sendPacket(target, getPassengersPacket());
-    }
-
-    public PacketWrapper<?> getPassengersPacket() {
-        int[] previousPackets = NameTags.getInstance()
-            .getEntityManager()
-            .getLastSentPassengers(getOwner().getEntityId())
-            .orElseGet(() -> {
-                int[] bukkitPassengers = getOwner().getPassengers()
-                    .stream()
-                    .mapToInt(Entity::getEntityId)
-                    .toArray();
-
-                int[] passengers = Arrays.copyOf(bukkitPassengers, bukkitPassengers.length + 1);
-                passengers[passengers.length - 1] = getWrapperEntity().getEntityId();
-
-                return passengers;
-            });
-
-        return new WrapperPlayServerSetPassengers(getOwner().getEntityId(), previousPackets);
+            .sendPacket(target, holder.getPassengersPacket());
     }
 
     public @NotNull Entity getOwner() {

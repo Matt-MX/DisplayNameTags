@@ -1,8 +1,10 @@
 package com.mattmx.nametags.config.groups;
 
+import com.mattmx.nametags.config.TextDisplayMetaConfiguration;
 import com.mattmx.nametags.entity.NameTagEntity;
 import com.mattmx.nametags.entity.NameTagHolder;
 import lombok.Getter;
+import me.tofaa.entitylib.meta.display.TextDisplayMeta;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.permissions.Permission;
@@ -66,6 +68,14 @@ public class ConfigGroup {
             for (BoundConfigValue<?> update : line.updates) {
                 update.entry().updateIfChanged(entity, update.value());
             }
+
+            TextDisplayMeta meta = entity.getTextMeta();
+
+            TextDisplayMetaConfiguration.applyTextMeta(line.section(), meta, holder.getOwner());
+            TextDisplayMetaConfiguration.applyBackground(line.section(), meta);
+
+            // Now we can emit changes
+            entity.notifyChanges(true);
         }
     }
 

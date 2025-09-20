@@ -45,7 +45,7 @@ public class PlayServerSpawnEntityHandler {
             nameTagEntity.getWrapperEntity().removeViewer(clone.getUser());
             nameTagEntity.getWrapperEntity().addViewer(clone.getUser());
 
-            clone.getUser().sendPacket(nameTagEntity.getPassengersPacket());
+            clone.getUser().sendPacketSilently(holder.getPassengersPacket());
         }));
     }
 

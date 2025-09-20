@@ -3,7 +3,7 @@ package com.mattmx.nametags;
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.PacketEventsAPI;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import com.mattmx.nametags.config.ConfigDefaultsListener;
+import com.mattmx.nametags.config.DefaultsHook;
 import com.mattmx.nametags.config.TextFormatter;
 import com.mattmx.nametags.config.groups.ConfigGroup;
 import com.mattmx.nametags.entity.NameTagEntityManager;
@@ -25,8 +25,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -36,17 +34,15 @@ public class NameTags extends JavaPlugin {
     private static @Nullable NameTags instance;
     private @Nullable Executor executor = null;
     @Getter
-    private final Set<ConfigGroup> groups = ConcurrentHashMap.newKeySet();
-    @Getter
-    private ConfigGroup defaultGroup = null;
-    @Getter
     private @NotNull TextFormatter formatter = TextFormatter.MINI_MESSAGE;
     @Getter
     private NameTagEntityManager entityManager;
     private EventsListener eventsListener;
     private OutgoingPacketListener packetListener;
     private Metrics metrics;
-    private @Nullable ConfigDefaultsListener defaultsListener = null;
+
+    @Getter
+    private @Nullable DefaultsHook defaults = null;
 
     @Override
     public void onEnable() {
@@ -107,40 +103,18 @@ public class NameTags extends JavaPlugin {
         if (defaults != null && defaults.getBoolean("enabled")) {
             getLogger().info("Using default behaviour from the config file.");
 
-            if (defaultsListener != null) {
-                HandlerList.unregisterAll(defaultsListener);
+            if (this.defaults != null) {
+                HandlerList.unregisterAll(this.defaults);
             }
 
-            defaultsListener = new ConfigDefaultsListener(this);
-            Bukkit.getPluginManager().registerEvents(defaultsListener, this);
-
-            this.defaultGroup = new ConfigGroup("default", defaults);
+            this.defaults = new DefaultsHook(this);
+            Bukkit.getPluginManager().registerEvents(this.defaults, this);
         }
 
-        String textFormatterIdentifier = getConfig().getString("formatter", "minimessage");
-        formatter = TextFormatter.getById(textFormatterIdentifier).orElse(TextFormatter.MINI_MESSAGE);
+        String textFormatterIdentifier = getConfig().getString("text-formatter", "smart");
+        formatter = TextFormatter.getById(textFormatterIdentifier).orElse(TextFormatter.SMART);
 
         getLogger().info("Using " + formatter.name() + " as text formatter.");
-
-        for (ConfigGroup group : groups) {
-            Bukkit.getPluginManager().removePermission(group.getPermissionNode());
-        }
-
-        groups.clear();
-
-        ConfigurationSection groups = getConfig().getConfigurationSection("groups");
-
-        if (groups == null) return;
-
-        for (String key : groups.getKeys(false)) {
-            ConfigurationSection sub = groups.getConfigurationSection(key);
-
-            if (sub == null) continue;
-            ConfigGroup group = new ConfigGroup(key, sub);
-
-            this.groups.add(group);
-            Bukkit.getPluginManager().addPermission(new Permission(group.getPermissionNode()));
-        }
     }
 
     public void registerMetrics() {

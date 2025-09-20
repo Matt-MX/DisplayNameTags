@@ -1,8 +1,12 @@
 package com.mattmx.nametags.entity;
 
+import com.github.retrooper.packetevents.wrapper.PacketWrapper;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSetPassengers;
+import com.mattmx.nametags.NameTags;
 import com.mattmx.nametags.entity.trait.TraitHolder;
 import lombok.Getter;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -48,6 +52,7 @@ public class NameTagHolder {
     }
 
     public void destroy() {
+        traits.destroy();
         entitiesById.clear();
 
         Iterator<NameTagEntity> iterator = entities.iterator();
@@ -74,5 +79,69 @@ public class NameTagHolder {
         for (NameTagEntity entity : entities) {
             entity.getWrapperEntity().addViewer(viewer);
         }
+    }
+
+    public void manuallyUpdateVisibility() {
+        setVisible(!owner.isInvisible());
+    }
+
+    public PacketWrapper<?> getPassengersPacket() {
+        return new WrapperPlayServerSetPassengers(getOwner().getEntityId(), getPassengers());
+    }
+
+    public int[] getPassengers() {
+        NameTagEntityManager manager = NameTags.getInstance().getEntityManager();
+        Optional<int[]> cached = manager.getLastSentPassengers(owner.getEntityId());
+
+        if (cached.isPresent()) {
+            // Ensure all of our nametag entities are in this list
+            int[] existing = cached.get();
+            Set<Integer> additional = this.entitiesById.keySet();
+
+            for (int id : existing) {
+                additional.remove(id);
+            }
+
+            // If the set is empty then all passengers are in the array.
+            if (additional.isEmpty()) {
+                return existing;
+            }
+
+            // Append remaining passengers
+            int[] passengers = Arrays.copyOf(existing, existing.length + additional.size());
+
+            int i = 0;
+            for (int id : additional) {
+                passengers[passengers.length - i - 1] = id;
+                i++;
+            }
+
+            // Cache so we don't have to do this again.
+            manager.setLastSentPassengers(owner.getEntityId(), passengers);
+            return passengers;
+        }
+
+        return cached.orElseGet(() -> {
+            List<Entity> platformPassengers = owner.getPassengers();
+            int[] passengers = new int[platformPassengers.size() + entities.size()];
+
+            // Add platform passengers
+            for (int i = 0; i < platformPassengers.size(); i++) {
+                passengers[i] = platformPassengers.get(i).getEntityId();
+            }
+
+            // Add our nametag entities
+            for (int i = 0; i < this.entities.size(); i++) {
+                passengers[passengers.length - 1 - i] = entities.get(i).getWrapperEntity().getEntityId();
+            }
+
+            manager.setLastSentPassengers(owner.getEntityId(), passengers);
+            return passengers;
+        });
+    }
+
+    public void sendPassengerPacket(Player playerViewer) {
+
+
     }
 }

@@ -6,6 +6,7 @@ import com.github.retrooper.packetevents.event.PacketSendEvent;
 import com.github.retrooper.packetevents.protocol.packettype.PacketType;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerDestroyEntities;
 import com.mattmx.nametags.entity.NameTagEntity;
+import com.mattmx.nametags.entity.NameTagHolder;
 import com.mattmx.nametags.packet.PlayServerEntityMetaDataHandler;
 import com.mattmx.nametags.packet.PlayServerSetPassengersHandler;
 import com.mattmx.nametags.packet.PlayServerSpawnEntityHandler;
@@ -31,11 +32,13 @@ public class OutgoingPacketListener extends PacketListenerAbstract {
                     : (WrapperPlayServerDestroyEntities) event.getLastUsedWrapper();
 
                 for (int entityId : packet.getEntityIds()) {
-                    NameTagEntity nameTagEntity = plugin.getEntityManager().getNameTagHolderById(entityId);
+                    NameTagHolder holder = plugin.getEntityManager().getNameTagHolderById(entityId);
+                    if (holder == null) continue;
 
-                    if (nameTagEntity == null) continue;
+                    NameTagEntity entity = holder.entityByEntityId(entityId);
+                    if (entity == null) continue;
 
-                    nameTagEntity.getWrapperEntity().removeViewer(event.getUser());
+                    entity.getWrapperEntity().removeViewer(event.getUser());
                 }
             }
             default -> {
