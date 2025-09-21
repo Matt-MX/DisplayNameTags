@@ -1,23 +1,20 @@
 package com.mattmx.nametags.config;
 
-import com.github.retrooper.packetevents.util.Vector3f;
 import com.mattmx.nametags.NameTags;
 import com.mattmx.nametags.hook.PapiHook;
-import me.tofaa.entitylib.meta.display.AbstractDisplayMeta;
 import me.tofaa.entitylib.meta.display.TextDisplayMeta;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.minimessage.MiniMessage;
-import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -46,11 +43,16 @@ public class TextDisplayMetaConfiguration {
     }
 
     private static @NotNull List<String> getTextLines(@NotNull ConfigurationSection section) {
-        String single = section.getString("text");
+        Object single = section.get("text");
+
         if (single == null) {
+            return Collections.emptyList();
+        }
+
+        if (single instanceof List<?>) {
             return section.getStringList("text");
         } else {
-            return List.of(single);
+            return List.of(single.toString());
         }
     }
 

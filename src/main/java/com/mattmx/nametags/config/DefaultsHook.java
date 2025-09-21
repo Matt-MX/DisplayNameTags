@@ -14,7 +14,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.permissions.Permission;
-import org.checkerframework.checker.units.qual.C;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -51,7 +50,10 @@ public class DefaultsHook implements Listener {
                 ConfigGroup group = new ConfigGroup(key, sub);
 
                 this.groups.add(group);
-                Bukkit.getPluginManager().addPermission(new Permission(group.getPermissionNode()));
+                try {
+                    Bukkit.getPluginManager().addPermission(new Permission(group.getPermissionNode()));
+                } catch (Exception ignored) {
+                }
             }
         }
 

@@ -7,12 +7,12 @@ import lombok.Getter;
 import me.tofaa.entitylib.meta.display.TextDisplayMeta;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.permissions.Permission;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Getter
 public class ConfigGroup {
@@ -48,8 +48,14 @@ public class ConfigGroup {
         }
     }
 
-    public long getRefreshPeriodMillis() {
-        return section.getLong(ConfigurableEntry.REFRESH_KEY, 500L);
+    public Optional<Long> getDefaultRefreshPeriod() {
+        Optional<Long> opt = Optional.of(section.getLong(ConfigurableEntry.REFRESH_KEY, -1L));
+
+        if (opt.get() < 0L) {
+            return Optional.empty();
+        } else {
+            return opt;
+        }
     }
 
     public int getPriority() {
@@ -65,12 +71,15 @@ public class ConfigGroup {
 
             // Do not notify until we are done
             entity.notifyChanges(false);
+
+            // Update the cached attributes
             for (BoundConfigValue<?> update : line.updates) {
                 update.entry().updateIfChanged(entity, update.value());
             }
 
             TextDisplayMeta meta = entity.getTextMeta();
 
+            // Update special attributes
             TextDisplayMetaConfiguration.applyTextMeta(line.section(), meta, holder.getOwner());
             TextDisplayMetaConfiguration.applyBackground(line.section(), meta);
 
@@ -90,6 +99,14 @@ public class ConfigGroup {
         // Remove excess entities
         while (holder.getEntitiesList().size() > lines.size()) {
             final NameTagEntity last = holder.getEntitiesList().getLast();
+
+            // TODO: add some way that devs can add their own lines and not worry about the
+            // internal system removing or adding new ones or smth
+            // Maybe introduce a bound ID system?
+            if (last.isBypassAutoRemoval()) {
+                break;
+            }
+
             holder.removeEntity(last);
         }
 
@@ -104,6 +121,15 @@ public class ConfigGroup {
     }
 
     public record UpdatableLine(List<BoundConfigValue<?>> updates, ConfigurationSection section) {
+        public Optional<Long> getRefreshPeriod() {
+            Optional<Long> opt = Optional.of(section.getLong(ConfigurableEntry.REFRESH_KEY, -1L));
+
+            if (opt.get() < 0L) {
+                return Optional.empty();
+            } else {
+                return opt;
+            }
+        }
     }
 
 }

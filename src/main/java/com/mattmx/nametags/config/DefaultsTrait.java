@@ -6,16 +6,15 @@ import com.mattmx.nametags.entity.NameTagEntity;
 import com.mattmx.nametags.entity.NameTagHolder;
 import com.mattmx.nametags.entity.trait.Trait;
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
-import me.tofaa.entitylib.meta.display.TextDisplayMeta;
 import org.bukkit.Bukkit;
-import org.jetbrains.annotations.Nullable;
 
+import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 public class DefaultsTrait extends Trait<NameTagHolder> {
-    // TODO: Change to a task per entity
-    private @Nullable ScheduledTask repeating;
+    private final Map<Integer, ScheduledTask> repeatingTasks = new ConcurrentHashMap<>();
     private ConfigGroup group;
 
     @Override
@@ -23,28 +22,40 @@ public class DefaultsTrait extends Trait<NameTagHolder> {
         updateGroup();
 
         // Create repeating task to update the tag members
-        scheduleTask();
+        scheduleRepeatingTasks();
     }
 
     @Override
     public void onDestroy() {
-        if (this.repeating != null) {
-            this.repeating.cancel();
+        if (!this.repeatingTasks.isEmpty()) {
+            this.repeatingTasks.values().forEach(ScheduledTask::cancel);
+            this.repeatingTasks.clear();
         }
     }
 
-    public void scheduleTask() {
+    public void scheduleRepeatingTasks() {
         // Cancel current (scheduled) execution
-        if (this.repeating != null) {
-            this.repeating.cancel();
+        if (!this.repeatingTasks.isEmpty()) {
+            this.repeatingTasks.values().forEach(ScheduledTask::cancel);
+            this.repeatingTasks.clear();
         }
 
-        long refresh = group.getRefreshPeriodMillis();
-        this.repeating = Bukkit.getAsyncScheduler().runAtFixedRate(
-            NameTags.getInstance(),
-            (t) -> update(),
-            1L, refresh, TimeUnit.MILLISECONDS
-        );
+        for (int i = 0; i < group.getLines().size(); i++) {
+            final NameTagEntity entity = getOwner().getEntities().get(i);
+            final ConfigGroup.UpdatableLine line = group.getLines().get(i);
+
+            line.getRefreshPeriod()
+                .or(group::getDefaultRefreshPeriod)
+                .ifPresent((refreshMillis) -> {
+                    ScheduledTask task = Bukkit.getAsyncScheduler().runAtFixedRate(
+                        NameTags.getInstance(),
+                        (t) -> update(),
+                        0L, refreshMillis, TimeUnit.MILLISECONDS
+                    );
+
+                    repeatingTasks.put(entity.getWrapperEntity().getEntityId(), task);
+                });
+        }
     }
 
     public void update() {
@@ -75,7 +86,7 @@ public class DefaultsTrait extends Trait<NameTagHolder> {
 
         // If the group changed, then restart the repeating task
         if (this.group != previousGroup) {
-            scheduleTask();
+            scheduleRepeatingTasks();
         }
     }
 }

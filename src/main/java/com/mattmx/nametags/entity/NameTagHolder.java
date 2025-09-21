@@ -1,5 +1,6 @@
 package com.mattmx.nametags.entity;
 
+import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.wrapper.PacketWrapper;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSetPassengers;
 import com.mattmx.nametags.NameTags;
@@ -32,14 +33,18 @@ public class NameTagHolder {
         // Face downwards to hide debug lines
         entity.getWrapperEntity().rotateHead(0f, 90f);
 
-        entities.add(entity);
+        synchronized (this) {
+            entities.add(entity);
+        }
         entitiesById.put(entity.getWrapperEntity().getEntityId(), entity);
 
         return entity;
     }
 
     public void removeEntity(@NotNull NameTagEntity entity) {
-        entities.remove(entity);
+        synchronized (this) {
+            entities.remove(entity);
+        }
         entitiesById.remove(entity.getWrapperEntity().getEntityId());
     }
 
@@ -55,11 +60,13 @@ public class NameTagHolder {
         traits.destroy();
         entitiesById.clear();
 
-        Iterator<NameTagEntity> iterator = entities.iterator();
-        while (iterator.hasNext()) {
-            final NameTagEntity entry = iterator.next();
-            entry.destroy();
-            iterator.remove();
+        synchronized (this) {
+            Iterator<NameTagEntity> iterator = entities.iterator();
+            while (iterator.hasNext()) {
+                final NameTagEntity entry = iterator.next();
+                entry.destroy();
+                iterator.remove();
+            }
         }
     }
 
@@ -141,7 +148,6 @@ public class NameTagHolder {
     }
 
     public void sendPassengerPacket(Player playerViewer) {
-
-
+        PacketEvents.getAPI().getPlayerManager().sendPacketSilently(playerViewer, getPassengersPacket());
     }
 }

@@ -134,9 +134,11 @@ public class EventsListener implements Listener {
 
         if (holder == null) return;
 
-        holder.getTraits()
-            .getOrAddTrait(SneakTrait.class, SneakTrait::new)
-            .setSneaking(event.isSneaking());
+        for (NameTagEntity entity : holder.getEntities()) {
+            entity.getTraits()
+                .getOrAddTrait(SneakTrait.class, SneakTrait::new)
+                .setSneaking(event.isSneaking());
+        }
     }
 
     @EventHandler

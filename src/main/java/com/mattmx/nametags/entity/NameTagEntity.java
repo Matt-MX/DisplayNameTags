@@ -3,12 +3,11 @@ package com.mattmx.nametags.entity;
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.protocol.entity.type.EntityTypes;
 import com.github.retrooper.packetevents.protocol.world.Location;
-import com.github.retrooper.packetevents.wrapper.PacketWrapper;
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSetPassengers;
 import com.mattmx.nametags.NameTags;
 import com.mattmx.nametags.entity.trait.TraitHolder;
 import io.github.retrooper.packetevents.util.SpigotConversionUtil;
 import lombok.Getter;
+import lombok.Setter;
 import me.tofaa.entitylib.meta.display.AbstractDisplayMeta;
 import me.tofaa.entitylib.meta.display.TextDisplayMeta;
 import me.tofaa.entitylib.wrapper.WrapperEntity;
@@ -18,7 +17,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
 import java.util.function.Consumer;
 
 @Getter
@@ -27,6 +25,8 @@ public class NameTagEntity {
     private final @NotNull WrapperEntity wrapperEntity;
     private final @NotNull NameTagHolder holder;
     private float cachedViewRange = -1f;
+    @Setter
+    private boolean bypassAutoRemoval = false;
 
     public NameTagEntity(@NotNull NameTagHolder holder) {
         this.holder = holder;
@@ -56,7 +56,7 @@ public class NameTagEntity {
 
         this.wrapperEntity.spawn(location);
 
-        if (NameTags.getInstance().getConfig().getBoolean("show-self", false)) {
+        if (NameTags.getInstance().getConfig().getBoolean("extra.show-self", false)) {
 
             if (holder.getOwner() instanceof Player self) {
                 this.wrapperEntity.addViewer(self.getUniqueId());
@@ -93,7 +93,7 @@ public class NameTagEntity {
         notifyChanges(true);
     }
 
-    public @NotNull TraitHolder getTraits() {
+    public @NotNull TraitHolder<NameTagEntity> getTraits() {
         return traits;
     }
 

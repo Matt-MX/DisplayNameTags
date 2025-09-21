@@ -21,7 +21,7 @@ public class TestPassenger implements Listener {
             return;
         }
 
-        if (event.getAction() != Action.LEFT_CLICK_BLOCK) {
+        if (event.getAction() != Action.RIGHT_CLICK_BLOCK) {
             return;
         }
 

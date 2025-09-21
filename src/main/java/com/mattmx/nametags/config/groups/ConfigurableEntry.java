@@ -14,7 +14,7 @@ import java.util.function.Function;
 public class ConfigurableEntry<T, E extends AbstractDisplayMeta> {
     public static final Map<String, ConfigurableEntry<?, ?>> ENTRIES = new HashMap<>();
 
-    public static final String REFRESH_KEY = "refresh";
+    public static final String REFRESH_KEY = "refresh-every";
     public static final String PRIORITY_KEY = "priority";
 
     static {
@@ -97,7 +97,7 @@ public class ConfigurableEntry<T, E extends AbstractDisplayMeta> {
         return list;
     }
 
-    public static Map<String, ConfigurableEntry<?, ?>> addEntries(ConfigurableEntry<?, ?>... entries) {
+    public static void addEntries(ConfigurableEntry<?, ?>... entries) {
         Map<String, ConfigurableEntry<?, ?>> map = new HashMap<>();
 
         for (ConfigurableEntry<?, ?> entry : entries) {
@@ -106,7 +106,7 @@ public class ConfigurableEntry<T, E extends AbstractDisplayMeta> {
             }
         }
 
-        return map;
+        ENTRIES.putAll(map);
     }
 
     public static void updateIfChanged(List<ConfigurableEntry<?, ?>> changes, final NameTagEntity entity, Object newValue) {

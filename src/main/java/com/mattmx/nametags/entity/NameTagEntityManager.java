@@ -43,6 +43,7 @@ public class NameTagEntityManager {
 
             return holder;
         });
+
         return Objects.requireNonNull(tagEntity, "Cache.get(…) unexpectedly returned null for UUID " + entity.getUniqueId());
     }
 

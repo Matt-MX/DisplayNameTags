@@ -19,6 +19,10 @@ import java.util.concurrent.TimeUnit;
 /**
  * Will send scoreboard teams packets to clients to ensure
  * vanilla name tags are hidden by adding them all to the same team.
+ * <p></p>
+ * Note: If TAB is installed on the proxy with scoreboard-teams enabled, this module
+ * will not work. From what I know currently, it's not possible to use TAB's API to
+ * get around this.
  */
 public class ScoreboardTeams implements Listener {
     public static final WrapperPlayServerTeams.ScoreBoardTeamInfo TEAM_INFO = new WrapperPlayServerTeams.ScoreBoardTeamInfo(

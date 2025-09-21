@@ -16,13 +16,13 @@ public class DependencyVersionChecker {
 
         if (isOutdated && isUnsupported) {
             NameTags.getInstance().getComponentLogger().warn(Component.text("""
-                    
-                    ⚠ PacketEvents version 2.7.0 does not support versions newer than 1.21.4!
-                    
-                    Please update to a development 2.8.0 build that adds 1.21.5+ support.
-                    https://ci.codemc.io/job/retrooper/job/packetevents/
-                    
-                    """));
+                
+                ⚠ PacketEvents version 2.7.0 does not support versions newer than 1.21.4!
+                
+                Please update to a development 2.8.0 build that adds 1.21.5+ support.
+                https://ci.codemc.io/job/retrooper/job/packetevents/
+                
+                """));
         }
     }
 
