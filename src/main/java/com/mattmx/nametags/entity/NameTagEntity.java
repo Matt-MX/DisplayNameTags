@@ -75,9 +75,7 @@ public class NameTagEntity {
 
     public void modify(boolean applyUpdates, Consumer<TextDisplayMeta> consumer) {
         TextDisplayMeta meta = getMeta();
-        if (applyUpdates) {
-            meta.setNotifyAboutChanges(false);
-        }
+        meta.setNotifyAboutChanges(false);
 
         this.passenger.consumeEntityMeta(TextDisplayMeta.class, consumer);
 
