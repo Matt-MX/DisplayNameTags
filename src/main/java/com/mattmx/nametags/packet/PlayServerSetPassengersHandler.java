@@ -13,9 +13,7 @@ public class PlayServerSetPassengersHandler {
 
     public static void handlePacket(@NotNull PacketSendEvent event) {
         final NameTags plugin = NameTags.getInstance();
-        final WrapperPlayServerSetPassengers packet = event.getLastUsedWrapper() == null
-            ? new WrapperPlayServerSetPassengers(event)
-            : (WrapperPlayServerSetPassengers) event.getLastUsedWrapper();
+        final WrapperPlayServerSetPassengers packet = new WrapperPlayServerSetPassengers(event);
 
         final NameTagEntity nameTagEntity = plugin.getEntityManager().getNameTagEntityById(packet.getEntityId());
 

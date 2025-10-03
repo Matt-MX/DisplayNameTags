@@ -4,14 +4,11 @@ import com.mattmx.nametags.entity.NameTagEntity;
 import com.mattmx.nametags.entity.trait.SneakTrait;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityPotionEffectEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.player.PlayerChangedWorldEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.player.PlayerRespawnEvent;
-import org.bukkit.event.player.PlayerToggleSneakEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
 
@@ -23,16 +20,16 @@ public class EventsListener implements Listener {
         this.plugin = plugin;
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     public void onPlayerJoin(@NotNull PlayerJoinEvent event) {
         Bukkit.getAsyncScheduler().runNow(plugin, (task) -> {
-            if (!event.getPlayer().isOnline()) {
+            if (!event.getPlayer().isConnected()) {
                 return;
             }
 
             plugin.getEntityManager()
-                    .getOrCreateNameTagEntity(event.getPlayer())
-                    .updateVisibility();
+                .getOrCreateNameTagEntity(event.getPlayer())
+                .updateVisibility();
         });
 
     }
@@ -49,7 +46,7 @@ public class EventsListener implements Listener {
 //        }
 //    }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerQuit(@NotNull PlayerQuitEvent event) {
         plugin.getEntityManager().removeLastSentPassengersCache(event.getPlayer().getEntityId());
 
@@ -68,7 +65,7 @@ public class EventsListener implements Listener {
     @EventHandler
     public void onPlayerChangeWorld(@NotNull PlayerChangedWorldEvent event) {
         NameTagEntity nameTagEntity = plugin.getEntityManager()
-                .getNameTagEntity(event.getPlayer());
+            .getNameTagEntity(event.getPlayer());
 
         if (nameTagEntity == null) return;
 
@@ -85,7 +82,7 @@ public class EventsListener implements Listener {
     @EventHandler
     public void onPlayerDeath(@NotNull PlayerDeathEvent event) {
         NameTagEntity nameTagEntity = plugin.getEntityManager()
-                .getNameTagEntity(event.getPlayer());
+            .getNameTagEntity(event.getPlayer());
 
         if (nameTagEntity == null) return;
 
@@ -98,7 +95,7 @@ public class EventsListener implements Listener {
     @EventHandler
     public void onPlayerRespawn(@NotNull PlayerRespawnEvent event) {
         NameTagEntity nameTagEntity = plugin.getEntityManager()
-                .getNameTagEntity(event.getPlayer());
+            .getNameTagEntity(event.getPlayer());
 
         if (nameTagEntity == null) return;
 
@@ -129,29 +126,29 @@ public class EventsListener implements Listener {
         if (event.getPlayer().isInsideVehicle()) return;
 
         NameTagEntity nameTagEntity = plugin.getEntityManager()
-                .getNameTagEntity(event.getPlayer());
+            .getNameTagEntity(event.getPlayer());
 
         if (nameTagEntity == null) return;
 
         nameTagEntity.getTraits()
-                .getOrAddTrait(SneakTrait.class, SneakTrait::new)
-                .updateSneak(event.isSneaking());
+            .getOrAddTrait(SneakTrait.class, SneakTrait::new)
+            .updateSneak(event.isSneaking());
     }
 
-    @EventHandler
-    public void onPlayerEffect(@NotNull EntityPotionEffectEvent event) {
-        final NameTagEntity tag = plugin.getEntityManager()
-            .getNameTagEntity(event.getEntity());
-
-        if (tag == null) {
-            return;
-        }
-
-        if (event.getNewEffect() == null && event.getOldEffect() != null && event.getOldEffect().getType() == PotionEffectType.INVISIBILITY) {
-            // If losing the effect and its invisibility
-            tag.updateVisibility(false);
-        } else if (event.getNewEffect() != null && event.getNewEffect().getType() == PotionEffectType.INVISIBILITY) {
-            tag.updateVisibility(true);
-        }
-    }
+//    @EventHandler
+//    public void onPlayerEffect(@NotNull EntityPotionEffectEvent event) {
+//        final NameTagEntity tag = plugin.getEntityManager()
+//            .getNameTagEntity(event.getEntity());
+//
+//        if (tag == null) {
+//            return;
+//        }
+//
+//        if (event.getNewEffect() == null && event.getOldEffect() != null && event.getOldEffect().getType() == PotionEffectType.INVISIBILITY) {
+//            // If losing the effect and its invisibility
+//            tag.updateVisibility(false);
+//        } else if (event.getNewEffect() != null && event.getNewEffect().getType() == PotionEffectType.INVISIBILITY) {
+//            tag.updateVisibility(true);
+//        }
+//    }
 }
