@@ -6,6 +6,7 @@ import com.mattmx.nametags.entity.trait.RefreshTrait;
 import com.mattmx.nametags.entity.trait.SneakTrait;
 import com.mattmx.nametags.event.NameTagEntityCreateEvent;
 import me.tofaa.entitylib.meta.display.AbstractDisplayMeta;
+import me.tofaa.entitylib.meta.display.TextDisplayMeta;
 import org.bukkit.Color;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
@@ -65,7 +66,10 @@ public class ConfigDefaultsListener implements Listener {
                 plugin,
                 refreshMillis,
                 (entity) -> {
-                    synchronized (entity) {
+                    synchronized (this) {
+                        TextDisplayMeta meta = entity.getMeta();
+                        meta.setNotifyAboutChanges(false);
+
                         TextDisplayMetaConfiguration.applyMeta(defaultSection(), entity.getMeta());
                         TextDisplayMetaConfiguration.applyTextMeta(defaultSection(), entity.getMeta(), player);
 
@@ -108,6 +112,8 @@ public class ConfigDefaultsListener implements Listener {
 
                         entity.updateVisibility();
                         entity.getPassenger().refresh();
+
+                        meta.setNotifyAboutChanges(true);
                     }
                 }
             )

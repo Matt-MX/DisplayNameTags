@@ -11,13 +11,13 @@ import java.util.Spliterator;
 
 public class ComponentUtils {
 
-    public static boolean startsWith(@NotNull TextComponent checking, @NotNull TextComponent test) {
+    public static boolean contains(@NotNull TextComponent checking, @NotNull TextComponent test) {
         return checking.contains(test, (a, b) -> {
             if (!(a instanceof TextComponent aText) || !(b instanceof TextComponent bText)) {
                 return false;
             }
 
-            return (aText).content().startsWith((bText).content());
+            return (aText).content().contains((bText).content());
         });
     }
 
