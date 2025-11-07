@@ -37,6 +37,7 @@ dependencies {
     compileOnly(libs.tab)
     compileOnly(libs.packetevents)
     compileOnly(libs.skinsrestorer)
+    compileOnly(libs.floodgate)
 
     // Downloaded during runtime
     compileOnly(libs.caffeine)

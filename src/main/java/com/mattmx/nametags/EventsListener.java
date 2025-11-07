@@ -2,6 +2,7 @@ package com.mattmx.nametags;
 
 import com.mattmx.nametags.entity.NameTagEntity;
 import com.mattmx.nametags.entity.trait.SneakTrait;
+import com.mattmx.nametags.utils.BedrockUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -71,7 +72,11 @@ public class EventsListener implements Listener {
 
         nameTagEntity.updateLocation();
 
-        if (plugin.getConfig().getBoolean("show-self", false)) {
+        final var conf = plugin.getConfig();
+        if(
+            conf.getBoolean("show-self", false)
+            && (BedrockUtil.isBedrock(event.getPlayer()) && conf.getBoolean("show-self-bedrock", false))
+        ) {
             nameTagEntity.getPassenger().removeViewer(nameTagEntity.getBukkitEntity().getUniqueId());
             nameTagEntity.getPassenger().addViewer(nameTagEntity.getBukkitEntity().getUniqueId());
             nameTagEntity.sendPassengerPacket(event.getPlayer());
@@ -99,8 +104,11 @@ public class EventsListener implements Listener {
 
         if (nameTagEntity == null) return;
 
-        if (plugin.getConfig().getBoolean("show-self", false)) {
-
+        final var conf = plugin.getConfig();
+        if(
+            conf.getBoolean("show-self", false)
+            && (BedrockUtil.isBedrock(event.getPlayer()) && conf.getBoolean("show-self-bedrock", false))
+        ) {
             String respawnWorld = event.getRespawnLocation().getWorld().getName();
             String playerWorld = event.getPlayer().getWorld().getName();
             // Ignoring since same action is handled at EventListener#onPlayerChangeWorld if player was killed in another world.
