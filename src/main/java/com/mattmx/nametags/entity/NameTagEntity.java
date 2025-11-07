@@ -8,6 +8,7 @@ import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSe
 import com.mattmx.nametags.NameTags;
 import com.mattmx.nametags.entity.trait.TraitHolder;
 import com.mattmx.nametags.utils.BedrockUtil;
+import com.mattmx.nametags.utils.SelfVisibilityUtil;
 import io.github.retrooper.packetevents.util.SpigotConversionUtil;
 import me.tofaa.entitylib.meta.display.TextDisplayMeta;
 import me.tofaa.entitylib.wrapper.WrapperEntity;
@@ -39,11 +40,7 @@ public class NameTagEntity {
         this.passenger.spawn(location);
 
         if(this.bukkitEntity instanceof Player self) {
-            final var conf = NameTags.getInstance().getConfig();
-            if(
-                conf.getBoolean("show-self", false)
-                && (BedrockUtil.isBedrock(self) && conf.getBoolean("show-self-bedrock", false))
-            ) {
+            if(SelfVisibilityUtil.shouldShowSelf(self)) {
                 this.passenger.addViewer(self.getUniqueId());
                 sendPassengerPacket(self);
             }

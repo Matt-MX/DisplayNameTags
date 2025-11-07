@@ -15,7 +15,7 @@ public class BedrockUtil {
 
     public static boolean isBedrock(final UUID playerId) {
         if(Bukkit.getPluginManager().isPluginEnabled(PLUGIN_NAME)) {
-            return FloodgateApi.getInstance().isFloodgatePlayer(playerId);
+            return FloodgateApi.getInstance().isFloodgateId(playerId);
         }
 
         return playerId.getMostSignificantBits() == 0;

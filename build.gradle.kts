@@ -22,6 +22,8 @@ repositories {
     maven("https://repo.dmulloy2.net/repository/public/")
     maven("https://repo.extendedclip.com/content/repositories/placeholderapi/")
     maven("https://repo.codemc.io/repository/maven-releases/")
+    maven("https://repo.opencollab.dev/main/")
+
 
     mavenLocal()
     mavenCentral()
@@ -36,6 +38,7 @@ dependencies {
     compileOnly(libs.tab)
     compileOnly(libs.packetevents)
     compileOnly(libs.skinsrestorer)
+    compileOnly(libs.floodgate)
 
     // Shaded
     implementation(libs.caffeine)

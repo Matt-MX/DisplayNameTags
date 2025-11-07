@@ -2,6 +2,8 @@ package com.mattmx.nametags.hook;
 
 import com.mattmx.nametags.NameTags;
 import com.mattmx.nametags.entity.NameTagEntity;
+import com.mattmx.nametags.utils.BedrockUtil;
+import com.mattmx.nametags.utils.SelfVisibilityUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.skinsrestorer.api.SkinsRestorer;
@@ -56,7 +58,7 @@ public class SkinRestorerHook {
                 newEntity.updateVisibility();
                 newEntity.updateLocation();
 
-                if (plugin.getConfig().getBoolean("show-self", false)) {
+                if(SelfVisibilityUtil.shouldShowSelf(player)) {
                     newEntity.getPassenger().removeViewer(newEntity.getBukkitEntity().getUniqueId());
                     newEntity.getPassenger().addViewer(newEntity.getBukkitEntity().getUniqueId());
                     newEntity.sendPassengerPacket(event.getPlayer(Player.class));

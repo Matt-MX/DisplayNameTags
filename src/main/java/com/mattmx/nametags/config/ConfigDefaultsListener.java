@@ -59,37 +59,36 @@ public class ConfigDefaultsListener implements Listener {
     public void registerDefaultRefreshListener(@NotNull NameTagEntity tag, long refreshMillis) {
         Player player = (Player) tag.getBukkitEntity();
 
-        tag.getTraits().getOrAddTrait(RefreshTrait.class, () ->
-            RefreshTrait.ofMillis(
-                plugin,
-                refreshMillis,
-                (entity) -> {
-                    synchronized (this) {
-                        TextDisplayMeta meta = entity.getMeta();
-                        meta.setNotifyAboutChanges(false);
+        tag.getTraits().getOrAddTrait(RefreshTrait.class, () -> RefreshTrait.ofMillis(
+            plugin,
+            refreshMillis,
+            (entity) -> {
+                long recentRefreshEvery = plugin.getConfig().getLong("defaults.refresh-every", 50);
 
-                        TextDisplayMetaConfiguration.applyMeta(defaultSection(), entity.getMeta());
-                        TextDisplayMetaConfiguration.applyTextMeta(defaultSection(), entity.getMeta(), player);
+                synchronized(this) {
+                    TextDisplayMeta meta = entity.getMeta();
+                    meta.setNotifyAboutChanges(false);
 
-                        // TODO we should cache this stuff
-                        List<Map.Entry<String, ConfigurationSection>> groups = plugin.getGroups()
-                            .entrySet()
-                            .stream()
-                            .filter((e) -> player.hasPermission(e.getKey()))
-                            .sorted(GroupPriorityComparator.get())
-                            .toList();
+                    TextDisplayMetaConfiguration.applyMeta(defaultSection(), entity.getMeta());
+                    TextDisplayMetaConfiguration.applyTextMeta(defaultSection(), entity.getMeta(), player);
 
-                        long recentRefreshEvery = plugin.getConfig().getLong("defaults.refresh-every", 50);
-                        if (!groups.isEmpty()) {
-                            Map.Entry<String, ConfigurationSection> highest = groups.getLast();
+                    // TODO we should cache this stuff
+                    List<Map.Entry<String, ConfigurationSection>> groups = plugin.getGroups()
+                        .entrySet()
+                        .stream()
+                        .filter((e) -> player.hasPermission(e.getKey()))
+                        .sorted(GroupPriorityComparator.get())
+                        .toList();
 
-                            TextDisplayMetaConfiguration.applyMeta(highest.getValue(), entity.getMeta());
-                            TextDisplayMetaConfiguration.applyTextMeta(highest.getValue(), entity.getMeta(), player);
+                    if (!groups.isEmpty()) {
+                        Map.Entry<String, ConfigurationSection> highest = groups.getLast();
 
-                            long groupRefresh = highest.getValue().getLong("refresh-every", -1);
-                            if (groupRefresh > 0) {
-                                recentRefreshEvery = groupRefresh;
-                            }
+                        TextDisplayMetaConfiguration.applyMeta(highest.getValue(), entity.getMeta());
+                        TextDisplayMetaConfiguration.applyTextMeta(highest.getValue(), entity.getMeta(), player);
+
+                        long groupRefresh = highest.getValue().getLong("refresh-every", -1);
+                        if (groupRefresh > 0) {
+                            recentRefreshEvery = groupRefresh;
                         }
                     }
 
@@ -109,14 +108,12 @@ public class ConfigDefaultsListener implements Listener {
                         .getTrait(SneakTrait.class)
                         .ifPresent(SneakTrait::manuallyUpdateSneakingOpacity);
 
-                        entity.updateVisibility();
+                    entity.updateVisibility();
 
-                        meta.setNotifyAboutChanges(true);
-                        entity.getPassenger().refresh();
-                    }
+                    meta.setNotifyAboutChanges(true);
+                    entity.getPassenger().refresh();
                 }
-            )
-        );
+            }
+        ));
     }
-
 }

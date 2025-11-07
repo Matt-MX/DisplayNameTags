@@ -29,29 +29,19 @@ public class PlayServerSpawnEntityHandler {
         final NameTags plugin = NameTags.getInstance();
         final WrapperPlayServerSpawnEntity packet = new WrapperPlayServerSpawnEntity(event);
 
-        if (packet.getUUID().isEmpty()) return;
+        if(packet.getUUID().isEmpty()) {
+            return;
+        }
 
         final UUID packetUUID = packet.getUUID().get();
         final NameTagEntity nameTagEntity = plugin.getEntityManager().getNameTagEntityByUUID(packetUUID);
 
         final User user = event.getUser();
-        if (nameTagEntity == null) {
 
-            // If it's a player, and they don't have a name tag yet, retry after a delay.
-            if (packet.getEntityType() == EntityTypes.PLAYER) {
-                Bukkit.getAsyncScheduler().runDelayed(plugin, (task) -> {
-                    final NameTagEntity nameTagEntity0 = plugin.getEntityManager().getNameTagEntityByUUID(packetUUID);
-
-                    if (nameTagEntity0 == null) {
-                        return;
-                    }
-
-        UUID packetUUID = packet.getUUID().orElse(null);
-        User user = event.getUser();
-        if (nameTagEntity == null && packetUUID != null) {
-            if (packet.getEntityType() == EntityTypes.PLAYER) {
+        if(nameTagEntity == null) {
+            if(packet.getEntityType() == EntityTypes.PLAYER) {
                 Bukkit.getAsyncScheduler().runDelayed(plugin, task -> {
-                    NameTagEntity nameTagEntity0 = plugin.getEntityManager().getNameTagEntityByUUID(packetUUID);
+                    final NameTagEntity nameTagEntity0 = plugin.getEntityManager().getNameTagEntityByUUID(packetUUID);
 
                     if (nameTagEntity0 == null) {
                         return;
@@ -60,10 +50,13 @@ public class PlayServerSpawnEntityHandler {
                     PlayServerSpawnEntityHandler.attachPassengerToEntity(nameTagEntity0, user);
                 }, 1L, TimeUnit.SECONDS);
             }
-            return;
         }
 
-        event.getTasksAfterSend().add(() -> plugin.getExecutor().execute(() -> PlayServerSpawnEntityHandler.attachPassengerToEntity(nameTagEntity, user)));
+        event.getTasksAfterSend().add(() -> {
+            plugin.getExecutor().execute(() -> {
+                PlayServerSpawnEntityHandler.attachPassengerToEntity(nameTagEntity, user);
+            });
+        });
     }
 
     private static void attachPassengerToEntity(@Nullable NameTagEntity nameTagEntity, User receiver) {
@@ -78,5 +71,4 @@ public class PlayServerSpawnEntityHandler {
 
         receiver.sendPacket(nameTagEntity.getPassengersPacket());
     }
-
 }
