@@ -12,10 +12,8 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -93,22 +91,23 @@ public class ConfigDefaultsListener implements Listener {
                                 recentRefreshEvery = groupRefresh;
                             }
                         }
+                    }
 
-                        if (recentRefreshEvery != refreshMillis) {
-                            entity.getTraits().removeTrait(RefreshTrait.class);
-                            registerDefaultRefreshListener(tag, recentRefreshEvery);
-                        }
+                    if (recentRefreshEvery != refreshMillis) {
+                        entity.getTraits().removeTrait(RefreshTrait.class);
+                        registerDefaultRefreshListener(tag, recentRefreshEvery);
+                    }
 
-                        if (entity.getMeta().getBillboardConstraints() == AbstractDisplayMeta.BillboardConstraints.CENTER) {
-                            // Look passenger down to remove debug getting in the way
-                            entity.getPassenger().rotateHead(0f, 90f);
-                        }
+                    if (entity.getMeta().getBillboardConstraints() == AbstractDisplayMeta.BillboardConstraints.CENTER) {
+                        // Look passenger down to remove debug getting in the way
+                        entity.getPassenger().rotateHead(0f, 90f);
+                    }
 
-                        // Preserve background color for sneaking
-                        // Maybe we should introduce an `afterRefresh` callback?
-                        entity.getTraits()
-                            .getTrait(SneakTrait.class)
-                            .ifPresent(SneakTrait::manuallyUpdateSneakingOpacity);
+                    // Preserve background color for sneaking
+                    // Maybe we should introduce an `afterRefresh` callback?
+                    entity.getTraits()
+                        .getTrait(SneakTrait.class)
+                        .ifPresent(SneakTrait::manuallyUpdateSneakingOpacity);
 
                         entity.updateVisibility();
 

@@ -11,8 +11,12 @@ softdepend:
   - PlaceholderAPI
   - TAB
   - SkinsRestorer
+  - floodgate
+
+libraries:
+  - com.github.ben-manes.caffeine:caffeine:3.2.0
 
 commands:
   nametags:
-    description: Reload the config
-    permission: nametags.command.reload
+    description: Reload and debug commands
+    permission: nametags.command.admin

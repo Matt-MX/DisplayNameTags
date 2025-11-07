@@ -17,7 +17,7 @@ public class ComponentUtils {
                 return false;
             }
 
-            return (aText).content().contains((bText).content());
+            return aText.content().contains(bText.content());
         });
     }
 

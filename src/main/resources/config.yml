@@ -61,6 +61,9 @@ defaults:
 # This is not entirely supported, but bug reports still help
 show-self: false
 
+# Whether we should show their own tag for bedrock clients.
+show-self-bedrock: false
+
 # Disables vanilla name tag rendering through a scoreboard teams packet
 # sent to the client on joining the server.
 disable-vanilla: true

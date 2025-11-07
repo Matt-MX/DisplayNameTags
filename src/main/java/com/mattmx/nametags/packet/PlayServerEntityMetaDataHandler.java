@@ -40,11 +40,11 @@ public class PlayServerEntityMetaDataHandler {
 
     private static final Vector3f PRE_1_20_2_TRANSLATION_OFFSET = new Vector3f(0f, 0.4f, 0f);
     private static final byte ENTITY_OFFSET_INDEX = PacketEvents.getAPI()
-            .getServerManager()
-            .getVersion()
-            .is(VersionComparison.OLDER_THAN, ServerVersion.V_1_20_2)
-            ? PRE_1_20_2_TRANSLATION_INDEX
-            : POST_1_20_2_TRANSLATION_INDEX;
+        .getServerManager()
+        .getVersion()
+        .is(VersionComparison.OLDER_THAN, ServerVersion.V_1_20_2)
+        ? PRE_1_20_2_TRANSLATION_INDEX
+        : POST_1_20_2_TRANSLATION_INDEX;
 
     private static final TextComponent RELATIVE_ARG_PREFIX = Component.text("%rel_");
 
