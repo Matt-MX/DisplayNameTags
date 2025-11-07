@@ -44,6 +44,14 @@ public class RefreshTrait extends Trait {
             }, 0L, period, unit);
     }
 
+    public Consumer<NameTagEntity> getUpdate() {
+        return this.update;
+    }
+
+    public void forceUpdate() {
+        this.update.accept(getTag());
+    }
+
     public void setPaused(boolean paused) {
         this.paused = paused;
     }

@@ -62,7 +62,7 @@ public class NameTagEntity {
     }
 
     public void updateVisibility(final boolean isInvisible) {
-        modify((meta) -> {
+        modify(false, (meta) -> {
             if (isInvisible && !meta.isInvisible()) {
                 this.cachedViewRange = meta.getViewRange();
                 meta.setViewRange(0f);
@@ -76,8 +76,19 @@ public class NameTagEntity {
         return traits;
     }
 
-    public void modify(Consumer<TextDisplayMeta> consumer) {
+    public void modify(boolean applyUpdates, Consumer<TextDisplayMeta> consumer) {
+        TextDisplayMeta meta = getMeta();
+        meta.setNotifyAboutChanges(false);
+
         this.passenger.consumeEntityMeta(TextDisplayMeta.class, consumer);
+
+        if (applyUpdates) {
+            meta.setNotifyAboutChanges(true);
+        }
+    }
+
+    public void modify(Consumer<TextDisplayMeta> consumer) {
+        modify(true, consumer);
     }
 
     public @NotNull TextDisplayMeta getMeta() {

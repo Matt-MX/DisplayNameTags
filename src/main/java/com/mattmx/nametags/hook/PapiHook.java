@@ -46,13 +46,13 @@ public class PapiHook {
         if (!isPapi()) return text;
 
         return text.replaceText(TextReplacementConfig.builder()
-            .match(RELATIVE_PLACEHOLDER_REGEX)
-            .replacement((match, ctx) -> {
-                String matchedText = match.group();
-                String parsed = PlaceholderAPI.setRelationalPlaceholders(one, two, matchedText);
-                return NameTags.getInstance().getFormatter().format(parsed);
-            })
-            .build()
+                .match(RELATIVE_PLACEHOLDER_REGEX)
+                .replacement((match, ctx) -> {
+                    String matchedText = match.group();
+                    String parsed = PlaceholderAPI.setRelationalPlaceholders(one, two, matchedText);
+                    return NameTags.getInstance().getFormatter().format(parsed);
+                })
+                .build()
         );
     }
 

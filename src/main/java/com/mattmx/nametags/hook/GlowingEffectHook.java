@@ -30,7 +30,7 @@ public class GlowingEffectHook extends PacketListenerAbstract {
         EntityMeta wrapper = new EntityMeta(packet.getEntityId(), meta);
 
         if (wrapper.isGlowing()) {
-            entity.modify((tagMeta) -> {
+            entity.modify(false, (tagMeta) -> {
                 tagMeta.setSeeThrough(true);
             });
         }

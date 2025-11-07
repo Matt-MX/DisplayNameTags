@@ -5,12 +5,14 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 public class TraitHolder {
     private final @NotNull NameTagEntity owner;
-    private final @NotNull HashMap<Class<?>, Trait> map = new HashMap<>();
+    private final @NotNull Map<Class<?>, Trait> map = new ConcurrentHashMap<>();
 
     public TraitHolder(@NotNull NameTagEntity owner) {
         this.owner = owner;

@@ -21,9 +21,11 @@ public class NeznamyTABHook {
         final boolean isTab = Bukkit.getPluginManager().isPluginEnabled("TAB");
         if (!isTab) return;
 
-        Objects.requireNonNull(TabAPI.getInstance().getEventBus()).register(PlayerLoadEvent.class, (event) -> {
-            final TabPlayer tabPlayer = event.getPlayer();
-            NameTagManager manager = TabAPI.getInstance().getNameTagManager();
+        Objects.requireNonNull(TabAPI.getInstance().getEventBus())
+            .register(PlayerLoadEvent.class, (event) -> {
+                final TabPlayer tabPlayer = event.getPlayer();
+
+                NameTagManager manager = TabAPI.getInstance().getNameTagManager();
 
             if (manager != null) {
                 manager.hideNameTag(tabPlayer);

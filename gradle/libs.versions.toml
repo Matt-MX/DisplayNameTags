@@ -5,7 +5,7 @@ runPaper = "2.3.1"
 paper = "1.21.5-R0.1-SNAPSHOT"
 
 placeholderapi = "2.11.6"
-packetevents = "2.8.0"
+packetevents = "2.9.5"
 tab = "5.2.0"
 skinsrestorer = "15.6.4"
 caffeine = "3.2.0"

@@ -56,17 +56,21 @@ public class NameTagEntityManager {
     }
 
     public @Nullable NameTagEntity removeEntity(@NotNull Entity entity) {
+        final NameTagEntity nameTagEntity = nameTagCache.getIfPresent(entity.getUniqueId());
+
+        nameTagCache.invalidate(entity.getUniqueId());
+
+        return nameTagEntity;
+    }
+
+    private void removeEntirely(@NotNull Entity entity) {
         lastSentPassengers.remove(entity.getEntityId());
         nameTagCache.invalidate(entity.getUniqueId());
 
         final NameTagEntity removed = nameTagEntityByEntityId.remove(entity.getEntityId());
         if (removed != null) {
             nameTagEntityByPassengerEntityId.remove(removed.getPassenger().getEntityId());
-        } else {
-            throw new IllegalArgumentException("No cached NameTag by the passenger entity ID, this could be a memory leak.");
         }
-
-        return removed;
     }
 
     public @Nullable NameTagEntity getNameTagEntity(@NotNull Entity entity) {
@@ -126,22 +130,28 @@ public class NameTagEntityManager {
     }
 
     private void handleRemoval(UUID uuid, NameTagEntity tagEntity, RemovalCause cause) {
-        if (cause != RemovalCause.EXPIRED || tagEntity == null) return;
+        if (uuid == null || tagEntity == null) {
+            return;
+        }
 
         Entity entity = tagEntity.getBukkitEntity();
 
         if (entity instanceof Player player) {
-            if (!player.isOnline()) {
+            if (!player.isOnline() || !player.isConnected()) {
                 tagEntity.destroy();
-                removeEntity(entity);
+                removeEntirely(entity);
+                // Actually remove from map
+                this.nameTagCache.cleanUp();
             } else {
                 this.nameTagCache.put(uuid, tagEntity);
             }
         } else {
+            // Must be run on the main thread, so sync this call
             Bukkit.getScheduler().runTask(NameTags.getInstance(), () -> {
                 if (Bukkit.getEntity(uuid) == null) {
                     tagEntity.destroy();
-                    removeEntity(entity);
+                    removeEntirely(entity);
+                    this.nameTagCache.cleanUp();
                 } else {
                     this.nameTagCache.put(uuid, tagEntity);
                 }

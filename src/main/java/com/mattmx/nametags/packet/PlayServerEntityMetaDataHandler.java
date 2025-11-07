@@ -52,6 +52,7 @@ public class PlayServerEntityMetaDataHandler {
         final NameTags plugin = NameTags.getInstance();
 
         final PacketSendEvent eventClone = event.clone();
+
         final WrapperPlayServerEntityMetadata packet0 = new WrapperPlayServerEntityMetadata(event);
 
         final NameTagEntity nameTagEntity = plugin.getEntityManager().getNameTagEntityByTagEntityId(packet0.getEntityId());
@@ -62,66 +63,78 @@ public class PlayServerEntityMetaDataHandler {
         }
 
         event.setCancelled(true);
-        final WrapperPlayServerEntityMetadata packet = new WrapperPlayServerEntityMetadata(eventClone);
+
+        WrapperPlayServerEntityMetadata packet = new WrapperPlayServerEntityMetadata(eventClone);
 
         // This could prove a concurrency issue, maybe we should keep track of if there is a newer packet processing?
         plugin.getExecutor().execute(() -> {
-            boolean isOldClient = eventClone.getUser()
-                .getClientVersion()
-                .isOlderThan(ClientVersion.V_1_20_2);
+            try {
+                boolean isOldClient = eventClone.getUser()
+                    .getClientVersion()
+                    .isOlderThan(ClientVersion.V_1_20_2);
 
-            boolean containsEntityOffset = false;
-            @Nullable EntityData textEntry = null;
+                boolean containsEntityOffset = false;
+                @Nullable EntityData textEntry = null;
 
-            for (final EntityData entry : packet.getEntityMetadata()) {
-                if (containsEntityOffset && textEntry != null) {
-                    break;
+                for (final EntityData entry : packet.getEntityMetadata()) {
+                    if (containsEntityOffset && textEntry != null) {
+                        break;
+                    }
+
+                    if (isOldClient && entry.getIndex() == ENTITY_OFFSET_INDEX) {
+                        Vector3f vec = (Vector3f) entry.getValue();
+                        // If there is already an entity offset, and it's an old client, add to it.
+                        entry.setValue(vec.add(PRE_1_20_2_TRANSLATION_OFFSET));
+
+                        containsEntityOffset = true;
+                    } else if (entry.getIndex() == TEXT_DISPLAY_TEXT_INDEX) {
+                        textEntry = entry;
+                    }
                 }
 
-                if (isOldClient && entry.getIndex() == ENTITY_OFFSET_INDEX) {
-                    Vector3f vec = (Vector3f) entry.getValue();
-                    // If there is already an entity offset, and it's an old client, add to it.
-                    entry.setValue(vec.add(PRE_1_20_2_TRANSLATION_OFFSET));
-
-                    containsEntityOffset = true;
-                } else if (entry.getIndex() == TEXT_DISPLAY_TEXT_INDEX) {
-                    textEntry = entry;
+                // Backwards compatibility for clients older than 1.20.2
+                // Mojank changed the passenger origin point when riding an entity so the tag appears inside their head.
+                if (isOldClient && !containsEntityOffset) {
+                    // If there was no offset found then add one ourselves for the offset.
+                    packet.getEntityMetadata().add(new EntityData(
+                        ENTITY_OFFSET_INDEX,
+                        EntityDataTypes.VECTOR3F,
+                        PRE_1_20_2_TRANSLATION_OFFSET
+                    ));
                 }
-            }
 
-            // Backwards compatibility for clients older than 1.20.2
-            // Mojank changed the passenger origin point when riding an entity so the tag appears inside their head.
-            if (isOldClient && !containsEntityOffset) {
-                // If there was no offset found then add one ourselves for the offset.
-                packet.getEntityMetadata().add(new EntityData(
-                    ENTITY_OFFSET_INDEX,
-                    EntityDataTypes.VECTOR3F,
-                    PRE_1_20_2_TRANSLATION_OFFSET
-                ));
-            }
+                // Apply relational placeholders to the text of an outgoing display entity
+                if (plugin.getConfig().getBoolean("options.relative-placeholders-support") &&
+                    nameTagEntity.getBukkitEntity() instanceof Player from &&
+                    textEntry != null
+                ) {
+                    final TextComponent originalText = (TextComponent) textEntry.getValue();
+                    final Player to = eventClone.getPlayer();
 
-            // Apply relational placeholders to the text of an outgoing display entity
-            if (plugin.getConfig().getBoolean("options.relative-placeholders-support") &&
-                nameTagEntity.getBukkitEntity() instanceof Player from &&
-                textEntry != null
-            ) {
-                final TextComponent originalText = (TextComponent) textEntry.getValue();
-                final Player to = eventClone.getPlayer();
+                    boolean containsRelativePlaceholder = ComponentUtils.contains(originalText, RELATIVE_ARG_PREFIX);
 
-                boolean containsRelativePlaceholder = ComponentUtils.contains(originalText, RELATIVE_ARG_PREFIX);
+                    // If it doesn't have any placeholders in then stop
+                    if (!containsRelativePlaceholder) {
+                        eventClone.getUser().sendPacketSilently(packet);
+                        return;
+                    }
 
-                // If it doesn't have any placeholders in then stop
-                if (!containsRelativePlaceholder) {
+                    Component textWithRelativeApplied = PapiHook.setRelationalPlaceholders(to, from, originalText);
+
+                    // Remove any empty lines
+                    // TODO(matt): This should check for the players' "group" instead of just defaults
+                    if (plugin.getConfig().getBoolean("defaults.enabled")
+                        && plugin.getConfig().getBoolean("defaults.remove-empty-lines")) {
+                        textWithRelativeApplied = ComponentUtils.removeEmptyLines0(originalText);
+                    }
+
+                    textEntry.setValue(textWithRelativeApplied);
                     eventClone.getUser().sendPacketSilently(packet);
-                    return;
+                } else {
+                    eventClone.getUser().sendPacketSilently(packet);
                 }
-
-                final Component textWithRelativeApplied = PapiHook.setRelationalPlaceholders(from, to, originalText);
-
-                textEntry.setValue(textWithRelativeApplied);
-                eventClone.getUser().sendPacketSilently(packet);
-            } else {
-                eventClone.getUser().sendPacketSilently(packet);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         });
     }

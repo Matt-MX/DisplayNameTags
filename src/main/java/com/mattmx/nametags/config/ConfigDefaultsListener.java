@@ -6,6 +6,8 @@ import com.mattmx.nametags.entity.trait.RefreshTrait;
 import com.mattmx.nametags.entity.trait.SneakTrait;
 import com.mattmx.nametags.event.NameTagEntityCreateEvent;
 import me.tofaa.entitylib.meta.display.AbstractDisplayMeta;
+import me.tofaa.entitylib.meta.display.TextDisplayMeta;
+import org.bukkit.Color;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -62,27 +64,32 @@ public class ConfigDefaultsListener implements Listener {
                 plugin,
                 refreshMillis,
                 (entity) -> {
-                    TextDisplayMetaConfiguration.applyMeta(defaultSection(), entity.getMeta());
-                    TextDisplayMetaConfiguration.applyTextMeta(defaultSection(), entity.getMeta(), player);
+                    synchronized (this) {
+                        TextDisplayMeta meta = entity.getMeta();
+                        meta.setNotifyAboutChanges(false);
 
-                    // TODO we should cache this stuff
-                    List<Map.Entry<String, ConfigurationSection>> groups = plugin.getGroups()
-                        .entrySet()
-                        .stream()
-                        .filter((e) -> player.hasPermission(e.getKey()))
-                        .sorted(GroupPriorityComparator.get())
-                        .toList();
+                        TextDisplayMetaConfiguration.applyMeta(defaultSection(), entity.getMeta());
+                        TextDisplayMetaConfiguration.applyTextMeta(defaultSection(), entity.getMeta(), player);
 
-                    long recentRefreshEvery = plugin.getConfig().getLong("defaults.refresh-every", 50);
-                    if (!groups.isEmpty()) {
-                        Map.Entry<String, ConfigurationSection> highest = groups.getLast();
+                        // TODO we should cache this stuff
+                        List<Map.Entry<String, ConfigurationSection>> groups = plugin.getGroups()
+                            .entrySet()
+                            .stream()
+                            .filter((e) -> player.hasPermission(e.getKey()))
+                            .sorted(GroupPriorityComparator.get())
+                            .toList();
 
-                        TextDisplayMetaConfiguration.applyMeta(highest.getValue(), entity.getMeta());
-                        TextDisplayMetaConfiguration.applyTextMeta(highest.getValue(), entity.getMeta(), player);
+                        long recentRefreshEvery = plugin.getConfig().getLong("defaults.refresh-every", 50);
+                        if (!groups.isEmpty()) {
+                            Map.Entry<String, ConfigurationSection> highest = groups.getLast();
 
-                        long groupRefresh = highest.getValue().getLong("refresh-every", -1);
-                        if (groupRefresh > 0) {
-                            recentRefreshEvery = groupRefresh;
+                            TextDisplayMetaConfiguration.applyMeta(highest.getValue(), entity.getMeta());
+                            TextDisplayMetaConfiguration.applyTextMeta(highest.getValue(), entity.getMeta(), player);
+
+                            long groupRefresh = highest.getValue().getLong("refresh-every", -1);
+                            if (groupRefresh > 0) {
+                                recentRefreshEvery = groupRefresh;
+                            }
                         }
                     }
 
@@ -102,8 +109,11 @@ public class ConfigDefaultsListener implements Listener {
                         .getTrait(SneakTrait.class)
                         .ifPresent(SneakTrait::manuallyUpdateSneakingOpacity);
 
-                    entity.updateVisibility();
-                    entity.getPassenger().refresh();
+                        entity.updateVisibility();
+
+                        meta.setNotifyAboutChanges(true);
+                        entity.getPassenger().refresh();
+                    }
                 }
             )
         );
