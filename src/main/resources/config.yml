@@ -62,6 +62,9 @@ defaults:
 # This is not entirely supported, but bug reports still help
 show-self: false
 
+# Whether we should show their own tag for bedrock clients.
+show-self-bedrock: false
+
 sneak:
   # Should we modify the opacity of the tag's background when the player shifts?
   enabled: true
