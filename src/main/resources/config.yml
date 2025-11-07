@@ -9,7 +9,7 @@ defaults:
   # overwriting the vanilla implementation provided yourself.
   enabled: true
   # How often should we refresh tags (in milliseconds)
-  refresh-every: 1
+  refresh-every: 1000
   # Lines of text to display.
   text:
     - "<white>%player_name%</white>"

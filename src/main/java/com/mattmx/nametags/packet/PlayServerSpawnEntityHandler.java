@@ -8,6 +8,7 @@ import com.mattmx.nametags.NameTags;
 import com.mattmx.nametags.entity.NameTagEntity;
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -25,7 +26,6 @@ public class PlayServerSpawnEntityHandler {
         final WrapperPlayServerSpawnEntity packet = new WrapperPlayServerSpawnEntity(event);
 
         if (packet.getUUID().isEmpty()) return;
-
 
         final NameTagEntity nameTagEntity = plugin.getEntityManager().getNameTagEntityByUUID(packet.getUUID().get());
 
@@ -49,10 +49,16 @@ public class PlayServerSpawnEntityHandler {
         event.getTasksAfterSend().add(() -> plugin.getExecutor().execute(() -> PlayServerSpawnEntityHandler.attachPassengerToEntity(nameTagEntity, user)));
     }
 
-    private static void attachPassengerToEntity(NameTagEntity nameTagEntity, User receiver) {
+    private static void attachPassengerToEntity(@Nullable NameTagEntity nameTagEntity, User receiver) {
+        if (nameTagEntity == null) {
+            return;
+        }
+
         nameTagEntity.updateLocation();
+
         nameTagEntity.getPassenger().removeViewer(receiver);
         nameTagEntity.getPassenger().addViewer(receiver);
+
         receiver.sendPacket(nameTagEntity.getPassengersPacket());
     }
 

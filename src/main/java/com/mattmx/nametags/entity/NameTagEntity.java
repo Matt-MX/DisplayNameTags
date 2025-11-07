@@ -38,12 +38,10 @@ public class NameTagEntity {
         this.passenger.spawn(location);
 
         if (NameTags.getInstance().getConfig().getBoolean("show-self", false)) {
-
             if (this.bukkitEntity instanceof Player self) {
                 this.passenger.addViewer(self.getUniqueId());
                 sendPassengerPacket(self);
             }
-
         }
     }
 

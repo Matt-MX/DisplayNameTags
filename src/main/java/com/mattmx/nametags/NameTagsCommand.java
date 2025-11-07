@@ -13,7 +13,6 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Stream;
 
 public class NameTagsCommand implements CommandExecutor, TabCompleter {
@@ -83,31 +82,24 @@ public class NameTagsCommand implements CommandExecutor, TabCompleter {
 
             if (tag != null) {
                 tag.getTraits().destroy();
+                tag.destroy();
             }
         }
 
         this.plugin.reloadConfig();
 
         for (final Player player : Bukkit.getOnlinePlayers()) {
-            final NameTagEntity tag = plugin.getEntityManager().removeEntity(player);
-
-            if (tag != null) {
-                tag.destroy();
-            }
-
             final NameTagEntity newTag = plugin.getEntityManager().getOrCreateNameTagEntity(player);
 
             // Add existing viewers
-            if (tag != null) {
-                for (final UUID viewer : tag.getPassenger().getViewers()) {
-                    newTag.getPassenger().addViewer(viewer);
-
-                    // Send passenger packet
-                    Player playerViewer = Bukkit.getPlayer(viewer);
-                    if (playerViewer != null) {
-                        newTag.sendPassengerPacket(playerViewer);
-                    }
+            // TODO: this bad, spectator n stuff
+            for (final Player viewer : Bukkit.getOnlinePlayers()) {
+                if (viewer == player && !plugin.getConfig().getBoolean("show-self", false)) {
+                    continue;
                 }
+
+                newTag.getPassenger().addViewer(viewer.getUniqueId());
+                newTag.sendPassengerPacket(viewer);
             }
 
             newTag.updateVisibility();

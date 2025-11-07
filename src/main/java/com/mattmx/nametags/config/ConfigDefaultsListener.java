@@ -111,9 +111,9 @@ public class ConfigDefaultsListener implements Listener {
                             .ifPresent(SneakTrait::manuallyUpdateSneakingOpacity);
 
                         entity.updateVisibility();
-                        entity.getPassenger().refresh();
 
                         meta.setNotifyAboutChanges(true);
+                        entity.getPassenger().refresh();
                     }
                 }
             )

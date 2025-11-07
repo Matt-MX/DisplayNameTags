@@ -77,7 +77,7 @@ public class NameTags extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(eventsListener, this);
         Bukkit.getScheduler().runTaskLater(this, DependencyVersionChecker::checkPacketEventsVersion, 10L);
 
-        Objects.requireNonNull(Bukkit.getPluginCommand("nametags-reload")).setExecutor(new NameTagsCommand(this));
+        Objects.requireNonNull(Bukkit.getPluginCommand("nametags")).setExecutor(new NameTagsCommand(this));
     }
 
     public void reload() {

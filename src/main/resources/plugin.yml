@@ -13,6 +13,6 @@ softdepend:
   - SkinsRestorer
 
 commands:
-  nametags-reload:
+  nametags:
     description: Reload the config
     permission: nametags.command.reload
