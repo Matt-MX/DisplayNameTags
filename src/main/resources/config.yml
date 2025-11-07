@@ -65,6 +65,10 @@ show-self: false
 # Whether we should show their own tag for bedrock clients.
 show-self-bedrock: false
 
+# Disables vanilla name tag rendering through a scoreboard teams packet
+# sent to the client on joining the server.
+disable-vanilla: true
+
 sneak:
   # Should we modify the opacity of the tag's background when the player shifts?
   enabled: true

@@ -10,6 +10,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -87,7 +88,7 @@ public class NameTagsCommand implements CommandExecutor, TabCompleter {
             }
         }
 
-        this.plugin.reloadConfig();
+        this.plugin.reload();
 
         for (final Player player : Bukkit.getOnlinePlayers()) {
             final NameTagEntity tag = plugin.getEntityManager().removeEntity(player);
