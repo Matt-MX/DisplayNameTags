@@ -30,8 +30,6 @@ public class NameTagEntity {
     public NameTagEntity(@NotNull Entity entity) {
         this.bukkitEntity = entity;
         this.passenger = new WrapperEntity(EntityTypes.TEXT_DISPLAY);
-
-        initialize();
     }
 
     public void initialize() {

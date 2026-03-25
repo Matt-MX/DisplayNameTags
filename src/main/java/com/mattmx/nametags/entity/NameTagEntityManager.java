@@ -6,6 +6,7 @@ import com.github.benmanes.caffeine.cache.RemovalCause;
 import com.github.retrooper.packetevents.util.Vector3f;
 import com.mattmx.nametags.NameTags;
 import com.mattmx.nametags.event.NameTagEntityCreateEvent;
+import com.mattmx.nametags.event.NameTagEntityPreSpawnEvent;
 import me.tofaa.entitylib.meta.display.AbstractDisplayMeta;
 import me.tofaa.entitylib.meta.display.TextDisplayMeta;
 import org.bukkit.Bukkit;
@@ -44,6 +45,10 @@ public class NameTagEntityManager {
             newlyCreated.getPassenger().consumeEntityMeta(TextDisplayMeta.class, meta ->
                 defaultProvider.accept(entity, meta)
             );
+
+            Bukkit.getPluginManager().callEvent(new NameTagEntityPreSpawnEvent(newlyCreated));
+
+            newlyCreated.initialize();
 
             Bukkit.getPluginManager().callEvent(new NameTagEntityCreateEvent(newlyCreated));
 
