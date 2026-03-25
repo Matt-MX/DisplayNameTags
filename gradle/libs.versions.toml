@@ -1,16 +1,16 @@
 [versions]
-shadow = "8.3.6"
+shadow = "9.4.0"
 runPaper = "2.3.1"
 
-paper = "1.21.5-R0.1-SNAPSHOT"
+paper = "1.21.11-R0.1-SNAPSHOT"
 
 placeholderapi = "2.11.6"
-packetevents = "2.9.5"
-tab = "5.2.0"
+packetevents = "2.11.2"
+tab = "5.5.0"
 skinsrestorer = "15.6.4"
-caffeine = "3.2.0"
-entitylib = "-SNAPSHOT"
-bstats = "3.1.0"
+caffeine = "3.2.3"
+entitylib = "3.0.3-SNAPSHOT"
+bstats = "3.2.1"
 floodgate = "2.2.4-SNAPSHOT"
 
 junit-jupiter = "5.13.0"
@@ -23,7 +23,7 @@ packetevents = { module = "com.github.retrooper:packetevents-spigot", version.re
 tab = { module = "com.github.NEZNAMY:TAB-API", version.ref = "tab" }
 skinsrestorer = { module = "net.skinsrestorer:skinsrestorer-api", version.ref = "skinsrestorer" }
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version.ref = "caffeine" }
-entitylib = { group = "com.github.Tofaa2.EntityLib", name = "spigot", version.ref = "entitylib" }
+entitylib = { group = "io.github.tofaa2", name = "spigot", version.ref = "entitylib" }
 bstats = { group = "org.bstats", name = "bstats-bukkit", version.ref = "bstats" }
 floodgate = { module = "org.geysermc.floodgate:api", version.ref = "floodgate" }
 

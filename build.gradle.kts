@@ -23,6 +23,7 @@ repositories {
     maven("https://repo.extendedclip.com/content/repositories/placeholderapi/")
     maven("https://repo.codemc.io/repository/maven-releases/")
     maven("https://repo.opencollab.dev/main/")
+    maven("https://maven.pvphub.me/tofaa")
 
 
     mavenLocal()
