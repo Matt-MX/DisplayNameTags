@@ -7,6 +7,7 @@ import com.github.retrooper.packetevents.protocol.player.User;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSpawnEntity;
 import com.mattmx.nametags.NameTags;
 import com.mattmx.nametags.entity.NameTagEntity;
+import io.github.retrooper.packetevents.util.folia.FoliaScheduler;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -36,7 +37,7 @@ public class PlayServerSpawnEntityHandler {
 
             // If it's a player, and they don't have a name tag yet, retry after a delay.
             if (packet.getEntityType() == EntityTypes.PLAYER) {
-                Bukkit.getAsyncScheduler().runDelayed(plugin, (task) -> {
+                FoliaScheduler.getAsyncScheduler().runDelayed(plugin, (task) -> {
                     final NameTagEntity nameTagEntity0 = plugin.getEntityManager().getNameTagEntityByUUID(packetUUID);
 
                     if (nameTagEntity0 == null) {
@@ -55,14 +56,28 @@ public class PlayServerSpawnEntityHandler {
     }
 
     private static void attachPassengerToEntity(final NameTagEntity nameTagEntity, final User receiver) {
-        // To avoid name tag moving when being added
-        nameTagEntity.updateLocation();
+        final Player player = Bukkit.getPlayer(receiver.getUUID());
 
-        // Refreshes as viewer (crusty fix)
-        nameTagEntity.getPassenger().removeViewer(receiver);
-        nameTagEntity.getPassenger().addViewer(receiver);
+        if (player == null || !nameTagEntity.canBeSeenBy(player)) {
+            nameTagEntity.getPassenger().removeViewer(receiver);
+            return;
+        }
 
-        receiver.sendPacket(nameTagEntity.getPassengersPacket());
+        FoliaScheduler.getEntityScheduler().run(nameTagEntity.getBukkitEntity(), NameTags.getInstance(), (task) -> {
+            if (!player.isConnected() || !nameTagEntity.canBeSeenBy(player)) {
+                nameTagEntity.getPassenger().removeViewer(receiver);
+                return;
+            }
+
+            // to avoid name tag moving when being added
+            nameTagEntity.updateLocation();
+
+            // refreshes as viewer (crusty fix)
+            nameTagEntity.getPassenger().removeViewer(receiver);
+            nameTagEntity.getPassenger().addViewer(receiver);
+
+            receiver.sendPacket(nameTagEntity.getPassengersPacket());
+        }, () -> nameTagEntity.getPassenger().removeViewer(receiver));
     }
 
 }

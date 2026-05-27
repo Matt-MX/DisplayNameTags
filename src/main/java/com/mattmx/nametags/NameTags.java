@@ -8,6 +8,7 @@ import com.mattmx.nametags.config.TextFormatter;
 import com.mattmx.nametags.entity.NameTagEntityManager;
 import com.mattmx.nametags.hook.NeznamyTABHook;
 import com.mattmx.nametags.hook.SkinRestorerHook;
+import io.github.retrooper.packetevents.util.folia.FoliaScheduler;
 import com.mattmx.nametags.utils.test.TestPlaceholderExpansion;
 import me.tofaa.entitylib.APIConfig;
 import me.tofaa.entitylib.EntityLib;
@@ -81,7 +82,8 @@ public class NameTags extends JavaPlugin {
         SkinRestorerHook.inject(this);
 
         Bukkit.getPluginManager().registerEvents(eventsListener, this);
-        Bukkit.getScheduler().runTaskLater(this, DependencyVersionChecker::checkPacketEventsVersion, 10L);
+
+        FoliaScheduler.getGlobalRegionScheduler().runDelayed(this, (task) -> DependencyVersionChecker.checkPacketEventsVersion(), 10L);
 
         Objects.requireNonNull(Bukkit.getPluginCommand("nametags")).setExecutor(new NameTagsCommand(this));
 

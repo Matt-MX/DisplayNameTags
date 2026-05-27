@@ -1,8 +1,8 @@
 package com.mattmx.nametags.entity.trait;
 
 import com.mattmx.nametags.entity.NameTagEntity;
-import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
-import org.bukkit.Bukkit;
+import io.github.retrooper.packetevents.util.folia.FoliaScheduler;
+import io.github.retrooper.packetevents.util.folia.TaskWrapper;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 public class RefreshTrait extends Trait {
-    private @Nullable ScheduledTask task = null;
+    private @Nullable TaskWrapper task = null;
     private final JavaPlugin plugin;
     private final long period;
     private final TimeUnit unit;
@@ -27,8 +27,7 @@ public class RefreshTrait extends Trait {
 
     @Override
     public void onEnable() {
-        this.task = Bukkit.getAsyncScheduler()
-            .runAtFixedRate(plugin, (task) -> {
+        this.task = FoliaScheduler.getAsyncScheduler().runAtFixedRate(plugin, (task) -> {
 
                 // Don't process if paused
                 if (!this.isPaused()) {
@@ -41,7 +40,7 @@ public class RefreshTrait extends Trait {
                     update.accept(getTag());
                 }
 
-            }, 0L, period, unit);
+            }, 1L, period, unit);
     }
 
     public void setPaused(boolean paused) {

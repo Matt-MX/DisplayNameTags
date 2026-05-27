@@ -2,6 +2,7 @@ package com.mattmx.nametags.hook;
 
 import com.mattmx.nametags.NameTags;
 import com.mattmx.nametags.entity.NameTagEntity;
+import io.github.retrooper.packetevents.util.folia.FoliaScheduler;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.skinsrestorer.api.SkinsRestorer;
@@ -15,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
 public class SkinRestorerHook {
 
     public static void inject(@NotNull NameTags plugin) {
-        Bukkit.getScheduler().runTaskLater(plugin, SkinRestorerHook::start, 5L);
+        FoliaScheduler.getGlobalRegionScheduler().runDelayed(plugin, (task) -> SkinRestorerHook.start(), 5L);
     }
 
     private static void start() {

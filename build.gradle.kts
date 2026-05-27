@@ -13,7 +13,7 @@ val id = findProperty("id").toString()
 val pluginName = findProperty("plugin_name")
 
 repositories {
-    maven("https://maven.pvphub.me/releases")
+    maven("https://maven.pvphub.me/tofaa")
     maven("https://repo.viaversion.com")
     maven("https://repo.codemc.org/repository/maven-public/") {
         name = "codemc"

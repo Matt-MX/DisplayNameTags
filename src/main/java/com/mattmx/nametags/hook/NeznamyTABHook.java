@@ -1,6 +1,7 @@
 package com.mattmx.nametags.hook;
 
 import com.mattmx.nametags.NameTags;
+import io.github.retrooper.packetevents.util.folia.FoliaScheduler;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.event.player.PlayerLoadEvent;
@@ -14,7 +15,7 @@ public class NeznamyTABHook {
 
     public static void inject(@NotNull NameTags plugin) {
         // Execute on first tick since we don't know when TAB will be available.
-        Bukkit.getScheduler().runTask(plugin, NeznamyTABHook::start);
+        FoliaScheduler.getGlobalRegionScheduler().run(plugin, (task) -> NeznamyTABHook.start());
     }
 
     private static void start() {

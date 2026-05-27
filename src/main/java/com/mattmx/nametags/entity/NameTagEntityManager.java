@@ -4,6 +4,7 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.RemovalCause;
 import com.github.retrooper.packetevents.util.Vector3f;
+import io.github.retrooper.packetevents.util.folia.FoliaScheduler;
 import com.mattmx.nametags.NameTags;
 import com.mattmx.nametags.event.NameTagEntityCreateEvent;
 import com.mattmx.nametags.event.NameTagEntityPreSpawnEvent;
@@ -143,14 +144,18 @@ public class NameTagEntityManager {
                 this.nameTagCache.put(uuid, tagEntity);
             }
         } else {
-            Bukkit.getScheduler().runTask(NameTags.getInstance(), () -> {
+            FoliaScheduler.getEntityScheduler().run(entity, NameTags.getInstance(), (task) -> {
                 if (Bukkit.getEntity(uuid) == null) {
                     tagEntity.destroy();
                     removeEntity(entity);
                 } else {
                     this.nameTagCache.put(uuid, tagEntity);
                 }
+            }, () -> {
+                tagEntity.destroy();
+                removeEntity(entity);
             });
         }
     }
+
 }

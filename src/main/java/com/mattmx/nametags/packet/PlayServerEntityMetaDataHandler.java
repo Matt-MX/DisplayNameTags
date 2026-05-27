@@ -61,6 +61,13 @@ public class PlayServerEntityMetaDataHandler {
             return;
         }
 
+        if (!nameTagEntity.canBeSeenBy(event.getPlayer())) {
+            nameTagEntity.getPassenger().removeViewer(event.getUser());
+            event.setCancelled(true);
+            eventClone.cleanUp();
+            return;
+        }
+
         event.setCancelled(true);
         final WrapperPlayServerEntityMetadata packet = new WrapperPlayServerEntityMetadata(eventClone);
 
