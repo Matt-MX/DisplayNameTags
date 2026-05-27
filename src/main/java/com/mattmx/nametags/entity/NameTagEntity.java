@@ -56,6 +56,10 @@ public class NameTagEntity {
         updateVisibility(isInvisible());
     }
 
+    public boolean canBeSeenBy(@NotNull Player viewer) {
+        return !(bukkitEntity instanceof Player player) || viewer.canSee(player);
+    }
+
     public void updateVisibility(final boolean isInvisible) {
         modify((meta) -> {
             if (isInvisible && !meta.isInvisible()) {

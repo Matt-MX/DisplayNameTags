@@ -18,6 +18,20 @@ public class PlayServerSetPassengersHandler {
 
         if (nameTagEntity == null) return;
 
+        if (!nameTagEntity.canBeSeenBy(event.getPlayer())) {
+            nameTagEntity.getPassenger().removeViewer(event.getUser());
+            int[] passengers = Arrays.stream(packet.getPassengers())
+                .filter(passengerId -> passengerId != nameTagEntity.getPassenger().getEntityId())
+                .toArray();
+
+            if (passengers.length != packet.getPassengers().length) {
+                packet.setPassengers(passengers);
+                event.markForReEncode(true);
+            }
+
+            return;
+        }
+
         // If the packet doesn't already contain our entity
         boolean containsNameTagPassenger = false;
         for (final int passengerId : packet.getPassengers()) {

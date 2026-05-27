@@ -24,15 +24,11 @@ public class EventsListener implements Listener {
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     public void onPlayerJoin(@NotNull PlayerJoinEvent event) {
-        FoliaScheduler.getAsyncScheduler().runNow(plugin, (task) -> {
-            if (!event.getPlayer().isConnected()) {
-                return;
-            }
-
+        FoliaScheduler.getEntityScheduler().run(event.getPlayer(), plugin, (task) -> {
             plugin.getEntityManager()
                 .getOrCreateNameTagEntity(event.getPlayer())
                 .updateVisibility();
-        });
+        }, () -> {});
     }
 
 //    @EventHandler
@@ -107,14 +103,14 @@ public class EventsListener implements Listener {
             // Ignoring since same action is handled at EventListener#onPlayerChangeWorld if player was killed in another world.
             if (!playerWorld.equalsIgnoreCase(respawnWorld)) return;
 
-            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            FoliaScheduler.getEntityScheduler().run(event.getPlayer(), plugin, (task) -> {
                 // Update entity location.
                 nameTagEntity.updateLocation();
                 // Add player back as viewer
                 nameTagEntity.getPassenger().addViewer(nameTagEntity.getBukkitEntity().getUniqueId());
                 // Send passenger packet
                 nameTagEntity.sendPassengerPacket(event.getPlayer());
-            });
+            }, () -> {});
         }
     }
 

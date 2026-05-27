@@ -56,14 +56,28 @@ public class PlayServerSpawnEntityHandler {
     }
 
     private static void attachPassengerToEntity(final NameTagEntity nameTagEntity, final User receiver) {
-        // To avoid name tag moving when being added
-        nameTagEntity.updateLocation();
+        final Player player = Bukkit.getPlayer(receiver.getUUID());
 
-        // Refreshes as viewer (crusty fix)
-        nameTagEntity.getPassenger().removeViewer(receiver);
-        nameTagEntity.getPassenger().addViewer(receiver);
+        if (player == null || !nameTagEntity.canBeSeenBy(player)) {
+            nameTagEntity.getPassenger().removeViewer(receiver);
+            return;
+        }
 
-        receiver.sendPacket(nameTagEntity.getPassengersPacket());
+        FoliaScheduler.getEntityScheduler().run(nameTagEntity.getBukkitEntity(), NameTags.getInstance(), (task) -> {
+            if (!player.isConnected() || !nameTagEntity.canBeSeenBy(player)) {
+                nameTagEntity.getPassenger().removeViewer(receiver);
+                return;
+            }
+
+            // to avoid name tag moving when being added
+            nameTagEntity.updateLocation();
+
+            // refreshes as viewer (crusty fix)
+            nameTagEntity.getPassenger().removeViewer(receiver);
+            nameTagEntity.getPassenger().addViewer(receiver);
+
+            receiver.sendPacket(nameTagEntity.getPassengersPacket());
+        }, () -> nameTagEntity.getPassenger().removeViewer(receiver));
     }
 
 }
