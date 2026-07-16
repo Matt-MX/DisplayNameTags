@@ -62,8 +62,6 @@ public class NameTagEntityManager {
         final NameTagEntity removed = nameTagEntityByEntityId.remove(entity.getEntityId());
         if (removed != null) {
             nameTagEntityByPassengerEntityId.remove(removed.getPassenger().getEntityId());
-        } else {
-            throw new IllegalArgumentException("No cached NameTag by the passenger entity ID, this could be a memory leak.");
         }
 
         return removed;
