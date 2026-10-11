@@ -2,29 +2,26 @@ package com.mattmx.nametags.entity;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.benmanes.caffeine.cache.RemovalCause;
 import com.github.retrooper.packetevents.util.Vector3f;
-import com.mattmx.nametags.NameTags;
 import com.mattmx.nametags.event.NameTagEntityCreateEvent;
 import me.tofaa.entitylib.meta.display.AbstractDisplayMeta;
 import me.tofaa.entitylib.meta.display.TextDisplayMeta;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 
 public class NameTagEntityManager {
 
-    private final Cache<UUID, NameTagEntity> nameTagCache = Caffeine.newBuilder()
-        .expireAfterAccess(Duration.ofMinutes(1))
-        .removalListener(this::handleRemoval)
-        .build();
+    // No time-based expiry: tags are removed explicitly on quit. The old expireAfterAccess(1 min)
+    // evicted tags of online players nobody had looked up recently; the removal listener then put the
+    // OLD tag back, racing with any getOrCreate that had already built a NEW one — leaving the cache
+    // and the id maps pointing at different tags, i.e. a tag mounted that no viewer was spawned for.
+    private final Cache<UUID, NameTagEntity> nameTagCache = Caffeine.newBuilder().build();
 
     private final ConcurrentHashMap<Integer, NameTagEntity> nameTagEntityByEntityId = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<Integer, NameTagEntity> nameTagEntityByPassengerEntityId = new ConcurrentHashMap<>();
@@ -121,29 +118,5 @@ public class NameTagEntityManager {
 
     public int getLastSentPassengersSize() {
         return lastSentPassengers.size();
-    }
-
-    private void handleRemoval(UUID uuid, NameTagEntity tagEntity, RemovalCause cause) {
-        if (cause != RemovalCause.EXPIRED || tagEntity == null) return;
-
-        Entity entity = tagEntity.getBukkitEntity();
-
-        if (entity instanceof Player player) {
-            if (!player.isOnline()) {
-                tagEntity.destroy();
-                removeEntity(entity);
-            } else {
-                this.nameTagCache.put(uuid, tagEntity);
-            }
-        } else {
-            Bukkit.getScheduler().runTask(NameTags.getInstance(), () -> {
-                if (Bukkit.getEntity(uuid) == null) {
-                    tagEntity.destroy();
-                    removeEntity(entity);
-                } else {
-                    this.nameTagCache.put(uuid, tagEntity);
-                }
-            });
-        }
     }
 }
