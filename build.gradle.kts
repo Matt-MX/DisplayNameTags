@@ -57,6 +57,9 @@ tasks {
     shadowJar {
         archiveFileName = "${rootProject.name}-${version}.jar"
         archiveClassifier = null
+        // Project classes are added before dependencies; keep the first copy so our
+        // me.tofaa.entitylib.spigot.SpigotEntityIdProvider replaces EntityLib's (Paper 26.x fix).
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
         mergeServiceFiles()
         manifest {
