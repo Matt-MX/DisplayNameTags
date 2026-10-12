@@ -4,6 +4,7 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 run/
+run-folia/
 
 ### IntelliJ IDEA ###
 .idea/modules.xml

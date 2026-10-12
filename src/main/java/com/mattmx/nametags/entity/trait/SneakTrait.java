@@ -20,6 +20,8 @@ public class SneakTrait extends Trait {
     }
 
     public void updateSneak(boolean sneaking) {
+        if (sneaking == this.isSneaking) return;
+
         this.isSneaking = sneaking;
         getTag().modify((meta) -> {
             Color color = Color.fromARGB(meta.getBackgroundColor());
@@ -29,10 +31,15 @@ public class SneakTrait extends Trait {
                 previousTextOpacity = meta.getTextOpacity();
 
                 // Not sure if this is vanilla behavior? Does only text opacity change??
-                meta.setBackgroundColor(withCustomSneakOpacity(color).asARGB());
+                // An unset background reads as 0 but renders as the client's default, writing it would make it transparent
+                if (color.getAlpha() != 0) {
+                    meta.setBackgroundColor(withCustomSneakOpacity(color).asARGB());
+                }
                 meta.setTextOpacity((byte) getCustomOpacity());
             } else {
-                meta.setBackgroundColor(color.setAlpha(previousBackgroundOpacity).asARGB());
+                if (color.getAlpha() != 0) {
+                    meta.setBackgroundColor(color.setAlpha(previousBackgroundOpacity).asARGB());
+                }
                 meta.setTextOpacity(previousTextOpacity);
             }
         });

@@ -7,15 +7,15 @@ pluginManagement {
 }
 
 plugins {
-    id("com.gradle.enterprise") version("3.15")
+    id("com.gradle.develocity") version("4.5.1")
 }
 
-gradleEnterprise {
+develocity {
     if (System.getenv("CI") != null) {
         buildScan {
-            publishAlways()
-            termsOfServiceUrl = "https://gradle.com/terms-of-service"
-            termsOfServiceAgree = "yes"
+            publishing.onlyIf { true }
+            termsOfUseUrl = "https://gradle.com/help/legal-terms-of-use"
+            termsOfUseAgree = "yes"
         }
     }
 }

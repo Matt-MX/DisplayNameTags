@@ -2,16 +2,14 @@ package com.mattmx.nametags;
 
 import com.mattmx.nametags.entity.NameTagEntity;
 import com.mattmx.nametags.entity.trait.SneakTrait;
-import org.bukkit.Bukkit;
+import io.github.retrooper.packetevents.util.folia.FoliaScheduler;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.*;
 import org.jetbrains.annotations.NotNull;
-import org.spigotmc.event.player.PlayerSpawnLocationEvent;
-
-import java.util.UUID;
 
 public class EventsListener implements Listener {
 
@@ -23,7 +21,7 @@ public class EventsListener implements Listener {
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     public void onPlayerJoin(@NotNull PlayerJoinEvent event) {
-        Bukkit.getAsyncScheduler().runNow(plugin, (task) -> {
+        runWhereReadable(event.getPlayer(), () -> {
             if (!event.getPlayer().isConnected()) {
                 return;
             }
@@ -106,7 +104,7 @@ public class EventsListener implements Listener {
             // Ignoring since same action is handled at EventListener#onPlayerChangeWorld if player was killed in another world.
             if (!playerWorld.equalsIgnoreCase(respawnWorld)) return;
 
-            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            runWhereReadable(event.getPlayer(), () -> {
                 // Update entity location.
                 nameTagEntity.updateLocation();
                 // Add player back as viewer
@@ -114,6 +112,14 @@ public class EventsListener implements Listener {
                 // Send passenger packet
                 nameTagEntity.sendPassengerPacket(event.getPlayer());
             });
+        }
+    }
+
+    private void runWhereReadable(@NotNull Player player, @NotNull Runnable run) {
+        if (FoliaScheduler.isFolia()) {
+            FoliaScheduler.getEntityScheduler().execute(player, plugin, run, null, 1L);
+        } else {
+            FoliaScheduler.getAsyncScheduler().runNow(plugin, (task) -> run.run());
         }
     }
 

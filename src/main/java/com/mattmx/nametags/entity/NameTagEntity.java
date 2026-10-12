@@ -8,22 +8,30 @@ import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSe
 import com.mattmx.nametags.NameTags;
 import com.mattmx.nametags.entity.trait.TraitHolder;
 import io.github.retrooper.packetevents.util.SpigotConversionUtil;
+import io.github.retrooper.packetevents.util.folia.FoliaScheduler;
 import me.tofaa.entitylib.meta.display.TextDisplayMeta;
 import me.tofaa.entitylib.wrapper.WrapperEntity;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 public class NameTagEntity {
     private final @NotNull TraitHolder traits = new TraitHolder(this);
     private final @NotNull Entity bukkitEntity;
     private final @NotNull WrapperEntity passenger;
+    private final @NotNull AtomicBoolean invisibilityRefreshQueued = new AtomicBoolean(false);
+    private final @NotNull AtomicBoolean locationRefreshQueued = new AtomicBoolean(false);
     private float cachedViewRange = -1f;
+    private volatile boolean cachedInvisible = false;
+    private volatile @Nullable Location cachedLocation = null;
 
     public NameTagEntity(@NotNull Entity entity) {
         this.bukkitEntity = entity;
@@ -46,6 +54,25 @@ public class NameTagEntity {
     }
 
     public boolean isInvisible() {
+        if (canReadEntityState()) {
+            this.cachedInvisible = readInvisible();
+        } else if (invisibilityRefreshQueued.compareAndSet(false, true)) {
+            FoliaScheduler.getEntityScheduler().execute(
+                bukkitEntity,
+                NameTags.getInstance(),
+                () -> {
+                    this.cachedInvisible = readInvisible();
+                    invisibilityRefreshQueued.set(false);
+                },
+                () -> invisibilityRefreshQueued.set(false),
+                1L
+            );
+        }
+
+        return this.cachedInvisible;
+    }
+
+    private boolean readInvisible() {
         boolean hasInvisibilityEffect = bukkitEntity instanceof LivingEntity e
             && e.hasPotionEffect(PotionEffectType.INVISIBILITY);
 
@@ -57,6 +84,8 @@ public class NameTagEntity {
     }
 
     public void updateVisibility(final boolean isInvisible) {
+        this.cachedInvisible = isInvisible;
+
         modify((meta) -> {
             if (isInvisible && !meta.isInvisible()) {
                 this.cachedViewRange = meta.getViewRange();
@@ -113,6 +142,31 @@ public class NameTagEntity {
     }
 
     public @NotNull Location updateLocation() {
+        Location location = this.cachedLocation;
+
+        if (location == null || canReadEntityState()) {
+            location = readLocation();
+            this.cachedLocation = location;
+        } else if (locationRefreshQueued.compareAndSet(false, true)) {
+            FoliaScheduler.getEntityScheduler().execute(
+                bukkitEntity,
+                NameTags.getInstance(),
+                () -> {
+                    locationRefreshQueued.set(false);
+                    this.cachedLocation = readLocation();
+                    this.passenger.setLocation(this.cachedLocation);
+                },
+                () -> locationRefreshQueued.set(false),
+                1L
+            );
+        }
+
+        this.passenger.setLocation(location);
+
+        return location;
+    }
+
+    private @NotNull Location readLocation() {
         org.bukkit.Location bukkitLocation = bukkitEntity.getLocation();
         bukkitLocation.setY(bukkitEntity.getBoundingBox().getMaxY());
 
@@ -121,9 +175,11 @@ public class NameTagEntity {
         location.setYaw(0f);
         location.setPitch(0f);
 
-        this.passenger.setLocation(location);
-
         return location;
+    }
+
+    private boolean canReadEntityState() {
+        return !FoliaScheduler.isFolia() || Bukkit.isOwnedByCurrentRegion(bukkitEntity);
     }
 
     public void destroy() {

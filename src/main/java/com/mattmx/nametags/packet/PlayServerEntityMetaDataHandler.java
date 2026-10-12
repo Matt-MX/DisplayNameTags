@@ -13,6 +13,7 @@ import com.mattmx.nametags.NameTags;
 import com.mattmx.nametags.entity.NameTagEntity;
 import com.mattmx.nametags.hook.PapiHook;
 import com.mattmx.nametags.utils.ComponentUtils;
+import me.tofaa.entitylib.meta.display.TextDisplayMeta;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import org.bukkit.entity.Player;
@@ -34,7 +35,7 @@ import org.jetbrains.annotations.Nullable;
  * any.
  */
 public class PlayServerEntityMetaDataHandler {
-    private static final byte TEXT_DISPLAY_TEXT_INDEX = 23;
+    private static final byte TEXT_DISPLAY_TEXT_INDEX = TextDisplayMeta.OFFSET;
     private static final byte PRE_1_20_2_TRANSLATION_INDEX = 10;
     private static final byte POST_1_20_2_TRANSLATION_INDEX = 11;
 

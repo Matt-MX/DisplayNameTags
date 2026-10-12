@@ -7,7 +7,7 @@ import com.github.retrooper.packetevents.protocol.player.User;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSpawnEntity;
 import com.mattmx.nametags.NameTags;
 import com.mattmx.nametags.entity.NameTagEntity;
-import org.bukkit.Bukkit;
+import io.github.retrooper.packetevents.util.folia.FoliaScheduler;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -36,7 +36,7 @@ public class PlayServerSpawnEntityHandler {
 
             // If it's a player, and they don't have a name tag yet, retry after a delay.
             if (packet.getEntityType() == EntityTypes.PLAYER) {
-                Bukkit.getAsyncScheduler().runDelayed(plugin, (task) -> {
+                FoliaScheduler.getAsyncScheduler().runDelayed(plugin, (task) -> {
                     final NameTagEntity nameTagEntity0 = plugin.getEntityManager().getNameTagEntityByUUID(packetUUID);
 
                     if (nameTagEntity0 == null) {

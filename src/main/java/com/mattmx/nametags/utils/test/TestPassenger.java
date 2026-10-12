@@ -2,7 +2,7 @@ package com.mattmx.nametags.utils.test;
 
 import com.destroystokyo.paper.MaterialTags;
 import com.mattmx.nametags.NameTags;
-import org.bukkit.Bukkit;
+import io.github.retrooper.packetevents.util.folia.FoliaScheduler;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -41,7 +41,7 @@ public class TestPassenger implements Listener {
 
         event.getPlayer().addPassenger(pig);
 
-        Bukkit.getGlobalRegionScheduler().runDelayed(NameTags.getInstance(), (task) -> pig.remove(), 40L);
+        FoliaScheduler.getEntityScheduler().execute(pig, NameTags.getInstance(), pig::remove, null, 40L);
     }
 
 }

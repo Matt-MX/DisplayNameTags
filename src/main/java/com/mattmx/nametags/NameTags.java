@@ -9,6 +9,7 @@ import com.mattmx.nametags.entity.NameTagEntityManager;
 import com.mattmx.nametags.hook.NeznamyTABHook;
 import com.mattmx.nametags.hook.SkinRestorerHook;
 import com.mattmx.nametags.utils.test.TestPlaceholderExpansion;
+import io.github.retrooper.packetevents.util.folia.FoliaScheduler;
 import me.tofaa.entitylib.APIConfig;
 import me.tofaa.entitylib.EntityLib;
 import me.tofaa.entitylib.spigot.SpigotEntityLibPlatform;
@@ -27,14 +28,16 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class NameTags extends JavaPlugin {
     public static final int TRANSPARENT = Color.fromARGB(0).asARGB();
     public static final char LEGACY_CHAR = (char) 167;
     private static @Nullable NameTags instance;
     private final HashMap<String, ConfigurationSection> groups = new HashMap<>();
-    private @Nullable Executor executor = null;
+    private @Nullable ExecutorService executor = null;
     private @NotNull TextFormatter formatter = TextFormatter.MINI_MESSAGE;
     private NameTagEntityManager entityManager;
     private EventsListener eventsListener;
@@ -50,7 +53,14 @@ public class NameTags extends JavaPlugin {
     public void onEnable() {
         instance = this;
 
+        if (!DependencyVersionChecker.isPacketEventsUsable()) {
+            DependencyVersionChecker.warnUnusablePacketEvents();
+            Bukkit.getPluginManager().disablePlugin(this);
+            return;
+        }
+
         entityManager = new NameTagEntityManager();
+        FoliaScheduler.getAsyncScheduler().runAtFixedRate(this, (task) -> entityManager.sweepStaleEntities(), 1L, 1L, TimeUnit.MINUTES);
         eventsListener = new EventsListener(this);
         packetListener = new OutgoingPacketListener(this);
 
@@ -81,7 +91,6 @@ public class NameTags extends JavaPlugin {
         SkinRestorerHook.inject(this);
 
         Bukkit.getPluginManager().registerEvents(eventsListener, this);
-        Bukkit.getScheduler().runTaskLater(this, DependencyVersionChecker::checkPacketEventsVersion, 10L);
 
         Objects.requireNonNull(Bukkit.getPluginCommand("nametags")).setExecutor(new NameTagsCommand(this));
 
@@ -139,13 +148,27 @@ public class NameTags extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        metrics.shutdown();
+        if (metrics != null) {
+            metrics.shutdown();
+        }
 
-        HandlerList.unregisterAll(this.eventsListener);
+        if (eventsListener != null) {
+            HandlerList.unregisterAll(this.eventsListener);
+        }
 
-        PacketEvents.getAPI()
-            .getEventManager()
-            .unregisterListener(this.packetListener);
+        if (packetListener != null) {
+            PacketEvents.getAPI()
+                .getEventManager()
+                .unregisterListener(this.packetListener);
+        }
+
+        FoliaScheduler.getAsyncScheduler().cancel(this);
+        FoliaScheduler.getGlobalRegionScheduler().cancel(this);
+
+        if (executor != null) {
+            executor.shutdownNow();
+            executor = null;
+        }
     }
 
     public Executor getExecutor() {

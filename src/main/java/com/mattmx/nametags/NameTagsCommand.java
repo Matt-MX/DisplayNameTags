@@ -1,6 +1,7 @@
 package com.mattmx.nametags;
 
 import com.mattmx.nametags.entity.NameTagEntity;
+import io.github.retrooper.packetevents.util.folia.FoliaScheduler;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -90,29 +91,33 @@ public class NameTagsCommand implements CommandExecutor, TabCompleter {
         this.plugin.reloadConfig();
 
         for (final Player player : Bukkit.getOnlinePlayers()) {
-            final NameTagEntity tag = plugin.getEntityManager().removeEntity(player);
+            FoliaScheduler.getEntityScheduler().execute(player, plugin, () -> rebuild(player), null, 1L);
+        }
+    }
 
-            if (tag != null) {
-                tag.destroy();
-            }
+    private void rebuild(@NotNull Player player) {
+        final NameTagEntity tag = plugin.getEntityManager().removeEntity(player);
 
-            final NameTagEntity newTag = plugin.getEntityManager().getOrCreateNameTagEntity(player);
+        if (tag != null) {
+            tag.destroy();
+        }
 
-            // Add existing viewers
-            if (tag != null) {
-                for (final UUID viewer : tag.getPassenger().getViewers()) {
-                    newTag.getPassenger().addViewer(viewer);
+        final NameTagEntity newTag = plugin.getEntityManager().getOrCreateNameTagEntity(player);
 
-                    // Send passenger packet
-                    Player playerViewer = Bukkit.getPlayer(viewer);
-                    if (playerViewer != null) {
-                        newTag.sendPassengerPacket(playerViewer);
-                    }
+        // Add existing viewers
+        if (tag != null) {
+            for (final UUID viewer : tag.getPassenger().getViewers()) {
+                newTag.getPassenger().addViewer(viewer);
+
+                // Send passenger packet
+                Player playerViewer = Bukkit.getPlayer(viewer);
+                if (playerViewer != null) {
+                    newTag.sendPassengerPacket(playerViewer);
                 }
             }
-
-            newTag.updateVisibility();
         }
+
+        newTag.updateVisibility();
     }
 
 

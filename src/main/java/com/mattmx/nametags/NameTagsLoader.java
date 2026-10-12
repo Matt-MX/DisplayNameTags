@@ -6,6 +6,7 @@ import io.papermc.paper.plugin.loader.library.impl.MavenLibraryResolver;
 import org.eclipse.aether.artifact.DefaultArtifact;
 import org.eclipse.aether.graph.Dependency;
 import org.eclipse.aether.repository.RemoteRepository;
+import org.eclipse.aether.repository.RepositoryPolicy;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedReader;
@@ -14,6 +15,9 @@ import java.io.FileReader;
 
 @SuppressWarnings("UnstableApiUsage")
 public class NameTagsLoader implements PluginLoader {
+
+    public static final String ENTITYLIB_VERSION = "3.3.7-SNAPSHOT";
+    public static final String ENTITYLIB_REPOSITORY = "https://maven.pvphub.me/tofaa";
 
     @Override
     public void classloader(@NotNull PluginClasspathBuilder classpathBuilder) {
@@ -25,7 +29,7 @@ public class NameTagsLoader implements PluginLoader {
             .resolve(".override")
             .toFile();
 
-        String entityLibVersion = "+1f4aeef-SNAPSHOT";
+        String entityLibVersion = ENTITYLIB_VERSION;
         if (override.exists()) {
             try (BufferedReader reader = new BufferedReader(new FileReader(override))) {
                 entityLibVersion = reader.readLine();
@@ -37,14 +41,20 @@ public class NameTagsLoader implements PluginLoader {
         MavenLibraryResolver resolver = new MavenLibraryResolver();
         resolver.addRepository(
             new RemoteRepository.Builder(
-                "evoke-games",
+                "pvphub-tofaa",
                 "default",
-                "https://maven.evokegames.gg/snapshots"
-            ).build()
+                ENTITYLIB_REPOSITORY
+            )
+                .setPolicy(new RepositoryPolicy(
+                    true,
+                    RepositoryPolicy.UPDATE_POLICY_NEVER,
+                    RepositoryPolicy.CHECKSUM_POLICY_WARN
+                ))
+                .build()
         );
         resolver.addDependency(
             new Dependency(
-                new DefaultArtifact("me.tofaa.entitylib:spigot:" + entityLibVersion),
+                new DefaultArtifact("io.github.tofaa2:spigot:" + entityLibVersion),
                 null
             ).setOptional(false)
         );

@@ -1,5 +1,6 @@
 package com.mattmx.nametags.entity.trait;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.mattmx.nametags.entity.NameTagEntity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -42,6 +43,7 @@ public class TraitHolder {
         });
     }
 
+    @CanIgnoreReturnValue
     @SuppressWarnings("unchecked")
     public <T extends Trait> @Nullable T removeTrait(@NotNull Class<T> traitClazz) {
         Trait trait = map.remove(traitClazz);
