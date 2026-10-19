@@ -12,14 +12,28 @@ import java.util.Objects;
 
 public class NeznamyTABHook {
 
+    private static final int MAX_ATTEMPTS = 30;
+
     public static void inject(@NotNull NameTags plugin) {
         // Execute on first tick since we don't know when TAB will be available.
-        Bukkit.getScheduler().runTask(plugin, NeznamyTABHook::start);
+        Bukkit.getScheduler().runTask(plugin, () -> start(plugin, 1));
     }
 
-    private static void start() {
+    private static void start(@NotNull NameTags plugin, int attempt) {
         final boolean isTab = Bukkit.getPluginManager().isPluginEnabled("TAB");
         if (!isTab) return;
+
+        // TAB 6.x enables before its API instance exists (it finishes loading later), so retry once a second.
+        try {
+            TabAPI.getInstance();
+        } catch (IllegalStateException e) {
+            if (attempt < MAX_ATTEMPTS) {
+                Bukkit.getScheduler().runTaskLater(plugin, () -> start(plugin, attempt + 1), 20L);
+            } else {
+                plugin.getLogger().warning("TAB API never became available, TAB name tags will not be hidden.");
+            }
+            return;
+        }
 
         Objects.requireNonNull(TabAPI.getInstance().getEventBus()).register(PlayerLoadEvent.class, (event) -> {
             final TabPlayer tabPlayer = event.getPlayer();
