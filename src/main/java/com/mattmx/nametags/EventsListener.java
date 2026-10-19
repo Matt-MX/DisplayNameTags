@@ -28,9 +28,14 @@ public class EventsListener implements Listener {
                 return;
             }
 
-            plugin.getEntityManager()
-                .getOrCreateNameTagEntity(event.getPlayer())
-                .updateVisibility();
+            NameTagEntity tag = plugin.getEntityManager().getOrCreateNameTagEntity(event.getPlayer());
+            tag.updateVisibility();
+
+            // Players near the spawn point may have received this player's spawn packet before the
+            // tag existed (this task runs async); the spawn handler's one-shot retry can miss them.
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                if (event.getPlayer().isOnline()) tag.resendToTrackers();
+            });
         });
     }
 

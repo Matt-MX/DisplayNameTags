@@ -34,13 +34,18 @@ public class PlayServerSpawnEntityHandler {
         final User user = event.getUser();
         if (nameTagEntity == null) {
 
-            // If it's a player, and they don't have a name tag yet, retry after a delay.
+            // If it's a player, and they don't have a name tag yet, retry after a delay. If it still
+            // doesn't exist by then, create it instead of giving up — otherwise this viewer would never
+            // see the tag until the player left and re-entered their view range.
             if (packet.getEntityType() == EntityTypes.PLAYER) {
                 Bukkit.getAsyncScheduler().runDelayed(plugin, (task) -> {
-                    final NameTagEntity nameTagEntity0 = plugin.getEntityManager().getNameTagEntityByUUID(packetUUID);
+                    NameTagEntity nameTagEntity0 = plugin.getEntityManager().getNameTagEntityByUUID(packetUUID);
 
                     if (nameTagEntity0 == null) {
-                        return;
+                        final Player target = Bukkit.getPlayer(packetUUID);
+                        if (target == null || !target.isOnline()) return;
+
+                        nameTagEntity0 = plugin.getEntityManager().getOrCreateNameTagEntity(target);
                     }
 
                     attachPassengerToEntity(nameTagEntity0, user);

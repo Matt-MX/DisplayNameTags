@@ -79,6 +79,28 @@ public class NameTagEntity {
         return this.passenger.getEntityMeta(TextDisplayMeta.class);
     }
 
+    /**
+     * Re-attaches this tag for every player currently tracking the entity (and for the entity itself
+     * when show-self is on). Spawn-packet interception only covers viewers that receive a spawn AFTER
+     * the tag exists; anyone who was already tracking the player when the tag was (re)created would
+     * otherwise never see it. Must be called on the main thread (reads the entity tracker).
+     */
+    public void resendToTrackers() {
+        updateLocation();
+
+        for (final Player viewer : this.bukkitEntity.getTrackedBy()) {
+            this.passenger.removeViewer(viewer.getUniqueId());
+            this.passenger.addViewer(viewer.getUniqueId());
+            sendPassengerPacket(viewer);
+        }
+
+        if (this.bukkitEntity instanceof Player self && NameTags.getInstance().getConfig().getBoolean("show-self", false)) {
+            this.passenger.removeViewer(self.getUniqueId());
+            this.passenger.addViewer(self.getUniqueId());
+            sendPassengerPacket(self);
+        }
+    }
+
     public void sendPassengerPacket(Player target) {
         PacketEvents.getAPI()
             .getPlayerManager()

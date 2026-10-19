@@ -14,6 +14,7 @@ val pluginName = findProperty("plugin_name")
 
 repositories {
     maven("https://maven.pvphub.me/releases")
+    maven("https://maven.pvphub.me/tofaa")
     maven("https://repo.viaversion.com")
     maven("https://repo.codemc.org/repository/maven-public/") {
         name = "codemc"
@@ -56,6 +57,9 @@ tasks {
     shadowJar {
         archiveFileName = "${rootProject.name}-${version}.jar"
         archiveClassifier = null
+        // Project classes are added before dependencies; keep the first copy so our
+        // me.tofaa.entitylib.spigot.SpigotEntityIdProvider replaces EntityLib's (Paper 26.x fix).
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
         mergeServiceFiles()
         manifest {

@@ -14,7 +14,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Stream;
 
 public class NameTagsCommand implements CommandExecutor, TabCompleter {
@@ -96,22 +95,13 @@ public class NameTagsCommand implements CommandExecutor, TabCompleter {
                 tag.destroy();
             }
 
+            plugin.getEntityManager().removeLastSentPassengersCache(player.getEntityId());
+
             final NameTagEntity newTag = plugin.getEntityManager().getOrCreateNameTagEntity(player);
-
-            // Add existing viewers
-            if (tag != null) {
-                for (final UUID viewer : tag.getPassenger().getViewers()) {
-                    newTag.getPassenger().addViewer(viewer);
-
-                    // Send passenger packet
-                    Player playerViewer = Bukkit.getPlayer(viewer);
-                    if (playerViewer != null) {
-                        newTag.sendPassengerPacket(playerViewer);
-                    }
-                }
-            }
-
             newTag.updateVisibility();
+            // Use the server's tracker rather than the old tag's viewer list: if the old tag was
+            // missing (or had lost its viewers) the new one would otherwise be sent to nobody.
+            newTag.resendToTrackers();
         }
     }
 
