@@ -1,6 +1,7 @@
 package com.mattmx.nametags.event;
 
 import com.mattmx.nametags.entity.NameTagEntity;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
@@ -18,6 +19,7 @@ public class NameTagEntityPreSpawnEvent extends Event {
     private final @NotNull NameTagEntity nameTag;
 
     public NameTagEntityPreSpawnEvent(@NotNull NameTagEntity nameTag) {
+        super(!Bukkit.isPrimaryThread());
         this.nameTag = nameTag;
     }
 
