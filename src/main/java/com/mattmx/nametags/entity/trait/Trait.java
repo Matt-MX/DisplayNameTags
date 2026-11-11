@@ -5,15 +5,18 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class Trait {
-    private @Nullable NameTagEntity nameTag;
+    private volatile @Nullable NameTagEntity nameTag;
 
     public void setNameTag(@NotNull NameTagEntity tag) {
         this.nameTag = tag;
     }
 
     public @NotNull NameTagEntity getTag() {
-        assert nameTag != null;
-        return nameTag;
+        NameTagEntity tag = nameTag;
+        if (tag == null) {
+            throw new IllegalStateException("Trait used before it was added to a tag");
+        }
+        return tag;
     }
 
     public void onEnable() {

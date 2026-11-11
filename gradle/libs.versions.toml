@@ -1,19 +1,18 @@
 [versions]
-shadow = "9.4.0"
-runPaper = "2.3.1"
+shadow = "9.6.1"
+runPaper = "3.1.0"
 
 paper = "1.21.11-R0.1-SNAPSHOT"
 
-placeholderapi = "2.11.6"
-packetevents = "2.11.2"
+placeholderapi = "2.12.3"
+packetevents = "2.14.0"
 tab = "5.5.0"
-skinsrestorer = "15.6.4"
-caffeine = "3.2.3"
-entitylib = "3.0.3-SNAPSHOT"
+skinsrestorer = "15.11.0"
+floodgate = "2.2.5-SNAPSHOT"
 bstats = "3.2.1"
-floodgate = "2.2.4-SNAPSHOT"
+fastutil = "8.5.19"
 
-junit-jupiter = "5.13.0"
+junit-jupiter = "6.1.3"
 
 [libraries]
 paper = { module = "io.papermc.paper:paper-api", version.ref = "paper" }
@@ -22,12 +21,12 @@ placeholderapi = { module = "me.clip:placeholderapi", version.ref = "placeholder
 packetevents = { module = "com.github.retrooper:packetevents-spigot", version.ref = "packetevents" }
 tab = { module = "com.github.NEZNAMY:TAB-API", version.ref = "tab" }
 skinsrestorer = { module = "net.skinsrestorer:skinsrestorer-api", version.ref = "skinsrestorer" }
-caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version.ref = "caffeine" }
-entitylib = { group = "io.github.tofaa2", name = "spigot", version.ref = "entitylib" }
-bstats = { group = "org.bstats", name = "bstats-bukkit", version.ref = "bstats" }
 floodgate = { module = "org.geysermc.floodgate:api", version.ref = "floodgate" }
+bstats = { module = "org.bstats:bstats-bukkit", version.ref = "bstats" }
+fastutil = { module = "it.unimi.dsi:fastutil", version.ref = "fastutil" }
 
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit-jupiter" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
 
 [plugins]
 shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }

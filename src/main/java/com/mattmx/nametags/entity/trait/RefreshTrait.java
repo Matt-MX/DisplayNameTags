@@ -8,17 +8,20 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 public class RefreshTrait extends Trait {
-    private @Nullable ScheduledTask task = null;
     private final JavaPlugin plugin;
     private final long period;
     private final TimeUnit unit;
     private final Consumer<NameTagEntity> update;
-    private boolean paused = false;
+    private final AtomicBoolean forced = new AtomicBoolean();
+    private final Object running = new Object();
+    private volatile @Nullable ScheduledTask task;
+    private volatile boolean paused;
 
-    public RefreshTrait(@NotNull JavaPlugin plugin, long period, TimeUnit unit, Consumer<NameTagEntity> update) {
+    public RefreshTrait(@NotNull JavaPlugin plugin, long period, @NotNull TimeUnit unit, @NotNull Consumer<NameTagEntity> update) {
         this.plugin = plugin;
         this.period = period;
         this.unit = unit;
@@ -27,29 +30,24 @@ public class RefreshTrait extends Trait {
 
     @Override
     public void onEnable() {
-        this.task = Bukkit.getAsyncScheduler()
-            .runAtFixedRate(plugin, (task) -> {
-
-                // Don't process if paused
-                if (!this.isPaused()) {
-
-                    // If the tag is not currently spawned in then we shouldn't process
-                    if (!getTag().getPassenger().isSpawned()) {
-                        return;
-                    }
-
-                    update.accept(getTag());
-                }
-
-            }, 0L, period, unit);
+        task = Bukkit.getAsyncScheduler().runAtFixedRate(plugin, scheduled -> run(), 0L, period, unit);
     }
 
-    public Consumer<NameTagEntity> getUpdate() {
-        return this.update;
+    public @NotNull Consumer<NameTagEntity> getUpdate() {
+        return update;
+    }
+
+    public long getPeriodMillis() {
+        return unit.toMillis(period);
     }
 
     public void forceUpdate() {
-        this.update.accept(getTag());
+        if (forced.compareAndSet(false, true)) {
+            Bukkit.getAsyncScheduler().runNow(plugin, scheduled -> {
+                forced.set(false);
+                run();
+            });
+        }
     }
 
     public void setPaused(boolean paused) {
@@ -57,31 +55,40 @@ public class RefreshTrait extends Trait {
     }
 
     public boolean isPaused() {
-        return this.paused;
+        return paused;
     }
 
     @Override
     public void onDestroy() {
-        setPaused(true);
-        if (task != null) {
-            task.cancel();
+        paused = true;
+        ScheduledTask current = task;
+        if (current != null) {
+            current.cancel();
         }
     }
 
-    public static @NotNull RefreshTrait ofMinutes(@NotNull JavaPlugin plugin, long minutes, Consumer<NameTagEntity> update) {
+    private void run() {
+        synchronized (running) {
+            if (paused || !getTag().getPassenger().isSpawned()) {
+                return;
+            }
+            update.accept(getTag());
+        }
+    }
+
+    public static @NotNull RefreshTrait ofMinutes(@NotNull JavaPlugin plugin, long minutes, @NotNull Consumer<NameTagEntity> update) {
         return new RefreshTrait(plugin, minutes, TimeUnit.MINUTES, update);
     }
 
-    public static @NotNull RefreshTrait ofSeconds(@NotNull JavaPlugin plugin, long seconds, Consumer<NameTagEntity> update) {
+    public static @NotNull RefreshTrait ofSeconds(@NotNull JavaPlugin plugin, long seconds, @NotNull Consumer<NameTagEntity> update) {
         return new RefreshTrait(plugin, seconds, TimeUnit.SECONDS, update);
     }
 
-    public static @NotNull RefreshTrait ofMillis(@NotNull JavaPlugin plugin, long millis, Consumer<NameTagEntity> update) {
+    public static @NotNull RefreshTrait ofMillis(@NotNull JavaPlugin plugin, long millis, @NotNull Consumer<NameTagEntity> update) {
         return new RefreshTrait(plugin, millis, TimeUnit.MILLISECONDS, update);
     }
 
-    public static @NotNull RefreshTrait ofTicks(@NotNull JavaPlugin plugin, long ticks, Consumer<NameTagEntity> update) {
+    public static @NotNull RefreshTrait ofTicks(@NotNull JavaPlugin plugin, long ticks, @NotNull Consumer<NameTagEntity> update) {
         return ofMillis(plugin, ticks * 50, update);
     }
-
 }

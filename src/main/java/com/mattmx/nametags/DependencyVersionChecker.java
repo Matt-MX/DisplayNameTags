@@ -14,7 +14,7 @@ public class DependencyVersionChecker {
         PEVersion currentPEVersion = api.getVersion();
         ServerVersion outdatedMCVersion = ServerVersion.V_1_21_4;
 
-        boolean isOutdated = currentPEVersion.isOlderThan(new PEVersion(2, 8, 0));
+        boolean isOutdated = currentPEVersion.isOlderThan(new PEVersion(2, 12, 0));
         boolean isUnsupported = api.getServerManager().getVersion().isNewerThan(outdatedMCVersion);
 
         if (isOutdated && isUnsupported) {

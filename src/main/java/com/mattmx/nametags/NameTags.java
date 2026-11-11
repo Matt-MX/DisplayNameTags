@@ -1,17 +1,14 @@
 package com.mattmx.nametags;
 
 import com.github.retrooper.packetevents.PacketEvents;
-import com.github.retrooper.packetevents.PacketEventsAPI;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import com.mattmx.nametags.config.ConfigDefaultsListener;
+import com.mattmx.nametags.config.Settings;
 import com.mattmx.nametags.config.TextFormatter;
+import com.mattmx.nametags.defaults.ConfigDefaultsListener;
+import com.mattmx.nametags.display.TagDisplay;
 import com.mattmx.nametags.entity.NameTagEntityManager;
 import com.mattmx.nametags.hook.NeznamyTABHook;
 import com.mattmx.nametags.hook.SkinRestorerHook;
-import com.mattmx.nametags.utils.test.TestPlaceholderExpansion;
-import me.tofaa.entitylib.APIConfig;
-import me.tofaa.entitylib.EntityLib;
-import me.tofaa.entitylib.spigot.SpigotEntityLibPlatform;
+import com.mattmx.nametags.packet.OutgoingPacketListener;
 import org.bstats.bukkit.Metrics;
 import org.bstats.charts.DrilldownPie;
 import org.bukkit.Bukkit;
@@ -26,21 +23,22 @@ import org.jetbrains.annotations.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
 public class NameTags extends JavaPlugin {
     public static final int TRANSPARENT = Color.fromARGB(0).asARGB();
     public static final char LEGACY_CHAR = (char) 167;
+    private static final int BSTATS_ID = 25409;
+
     private static @Nullable NameTags instance;
+
     private final HashMap<String, ConfigurationSection> groups = new HashMap<>();
-    private @Nullable Executor executor = null;
-    private @NotNull TextFormatter formatter = TextFormatter.MINI_MESSAGE;
-    private NameTagEntityManager entityManager;
+    private final NameTagEntityManager entityManager = new NameTagEntityManager();
+    private volatile @Nullable Settings settings;
+    private @Nullable ConfigDefaultsListener defaultsListener;
+    private @Nullable ScoreboardTeams scoreboardTeams;
     private EventsListener eventsListener;
     private OutgoingPacketListener packetListener;
     private Metrics metrics;
-    private @Nullable ConfigDefaultsListener defaultsListener = null;
 
     public static @NotNull NameTags getInstance() {
         return Objects.requireNonNull(instance, "NameTags plugin has not initialized yet! Did you forget to depend?");
@@ -49,34 +47,16 @@ public class NameTags extends JavaPlugin {
     @Override
     public void onEnable() {
         instance = this;
-
-        entityManager = new NameTagEntityManager();
-        eventsListener = new EventsListener(this);
-        packetListener = new OutgoingPacketListener(this);
-
         saveDefaultConfig();
+        reloadConfig();
 
-        metrics = new Metrics(this, 25409);
-        registerMetrics();
+        eventsListener = new EventsListener(this);
+        packetListener = new OutgoingPacketListener(entityManager);
 
-        executor = Executors.newFixedThreadPool(
-            getConfig().getInt("options.threads", 2),
-            new ThreadFactoryBuilder()
-                .setPriority(Thread.NORM_PRIORITY + 1)
-                .setNameFormat("NameTags-Processor")
-                .build()
-        );
+        metrics = new Metrics(this, BSTATS_ID);
+        metrics.addCustomChart(new DrilldownPie("serverName", () -> Map.of(Bukkit.getName(), Map.of(Bukkit.getName(), 1))));
 
-        SpigotEntityLibPlatform platform = new SpigotEntityLibPlatform(this);
-        APIConfig settings = new APIConfig(PacketEvents.getAPI()).usePlatformLogger();
-
-        EntityLib.init(platform, settings);
-
-        final PacketEventsAPI<?> packetEvents = PacketEvents.getAPI();
-
-        packetEvents.getEventManager().registerListener(packetListener);
-//        packetEvents.getEventManager().registerListener(new GlowingEffectHook());
-
+        PacketEvents.getAPI().getEventManager().registerListener(packetListener);
         NeznamyTABHook.inject(this);
         SkinRestorerHook.inject(this);
 
@@ -86,92 +66,81 @@ public class NameTags extends JavaPlugin {
         Objects.requireNonNull(Bukkit.getPluginCommand("nametags")).setExecutor(new NameTagsCommand(this));
     }
 
-    public void reload() {
-        HandlerList.unregisterAll(this);
-        reloadConfig();
-
-        Bukkit.getPluginManager().registerEvents(eventsListener, this);
-    }
-
     @Override
     public void reloadConfig() {
         super.reloadConfig();
+        Settings loaded = Settings.load(getConfig());
+        settings = loaded;
+        TagDisplay.clearFormatted();
+        getLogger().info("Using " + loaded.formatter().name() + " as text formatter.");
 
-        if (getConfig().getBoolean("disable-vanilla", true)) {
-            Bukkit.getPluginManager().registerEvents(new ScoreboardTeams(this), this);
+        if (loaded.disableVanilla() && scoreboardTeams == null) {
+            scoreboardTeams = new ScoreboardTeams(this);
+            Bukkit.getPluginManager().registerEvents(scoreboardTeams, this);
+        } else if (!loaded.disableVanilla() && scoreboardTeams != null) {
+            HandlerList.unregisterAll(scoreboardTeams);
+            scoreboardTeams = null;
         }
 
-        ConfigurationSection defaults = getConfig().getConfigurationSection("defaults");
-        if (defaults != null && defaults.getBoolean("enabled")) {
+        if (defaultsListener != null) {
+            HandlerList.unregisterAll(defaultsListener);
+            defaultsListener = null;
+        }
+        if (loaded.defaultsEnabled()) {
             getLogger().info("Using default behaviour from the config file.");
-
-            if (defaultsListener != null) {
-                HandlerList.unregisterAll(defaultsListener);
-            }
-
             defaultsListener = new ConfigDefaultsListener(this);
             Bukkit.getPluginManager().registerEvents(defaultsListener, this);
         }
 
-        String textFormatterIdentifier = getConfig().getString("formatter", "minimessage");
-        formatter = TextFormatter.getById(textFormatterIdentifier)
-            .orElse(TextFormatter.MINI_MESSAGE);
+        registerGroupPermissions();
+    }
 
-        getLogger().info("Using " + formatter.name() + " as text formatter.");
-
+    private void registerGroupPermissions() {
         for (String permissionNode : groups.keySet()) {
             Bukkit.getPluginManager().removePermission(permissionNode);
         }
         groups.clear();
-
-        ConfigurationSection groups = getConfig().getConfigurationSection("groups");
-
-        if (groups == null) return;
-
-        for (String key : groups.getKeys(false)) {
+        ConfigurationSection section = getConfig().getConfigurationSection("groups");
+        if (section == null) {
+            return;
+        }
+        for (String key : section.getKeys(false)) {
+            ConfigurationSection group = section.getConfigurationSection(key);
+            if (group == null) {
+                continue;
+            }
             String permissionNode = "nametags.groups." + key;
-            ConfigurationSection sub = groups.getConfigurationSection(key);
-
-            if (sub == null) continue;
-
-            this.groups.put(permissionNode, sub);
-
+            groups.put(permissionNode, group);
             Bukkit.getPluginManager().addPermission(new Permission(permissionNode));
         }
     }
 
-    public void registerMetrics() {
-        metrics.addCustomChart(new DrilldownPie("serverName", () -> Map.of(Bukkit.getName(), Map.of(Bukkit.getName(), 1))));
-    }
-
     @Override
     public void onDisable() {
-        metrics.shutdown();
-
-        HandlerList.unregisterAll(this.eventsListener);
-
-        PacketEvents.getAPI()
-            .getEventManager()
-            .unregisterListener(this.packetListener);
+        if (metrics != null) {
+            metrics.shutdown();
+        }
+        if (eventsListener != null) {
+            HandlerList.unregisterAll(eventsListener);
+        }
+        if (packetListener != null) {
+            PacketEvents.getAPI().getEventManager().unregisterListener(packetListener);
+        }
     }
 
-    public Executor getExecutor() {
-        if (this.executor == null) {
-            throw new RuntimeException("Executor is not available until the plugin has initialized.");
-        }
-
-        return this.executor;
+    public @NotNull Settings getSettings() {
+        return Objects.requireNonNull(settings, "NameTags has not loaded its config yet");
     }
 
     public @NotNull NameTagEntityManager getEntityManager() {
-        return this.entityManager;
+        return entityManager;
     }
 
-    public HashMap<String, ConfigurationSection> getGroups() {
+    public @NotNull HashMap<String, ConfigurationSection> getGroups() {
         return groups;
     }
 
     public @NotNull TextFormatter getFormatter() {
-        return this.formatter;
+        return getSettings().formatter();
     }
 }

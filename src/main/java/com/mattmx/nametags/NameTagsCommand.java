@@ -1,10 +1,8 @@
 package com.mattmx.nametags;
 
 import com.mattmx.nametags.entity.NameTagEntity;
-import com.mattmx.nametags.utils.BedrockUtil;
-import com.mattmx.nametags.utils.SelfVisibilityUtil;
+import com.mattmx.nametags.entity.NameTagEntityManager;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -16,7 +14,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Stream;
 
 public class NameTagsCommand implements CommandExecutor, TabCompleter {
@@ -46,6 +43,7 @@ public class NameTagsCommand implements CommandExecutor, TabCompleter {
 
         if(args.length == 0) {
             sender.sendMessage(Component.text("Invalid parameters."));
+            return true;
         }
 
         if(args[0].equalsIgnoreCase("reload")) {
@@ -62,38 +60,19 @@ public class NameTagsCommand implements CommandExecutor, TabCompleter {
         return true;
     }
 
-        private void reload() {
-        for (final Player player : Bukkit.getOnlinePlayers()) {
-            final NameTagEntity tag = plugin.getEntityManager().getNameTagEntity(player);
-
+    private void reload() {
+        NameTagEntityManager tags = plugin.getEntityManager();
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            NameTagEntity tag = tags.removeEntity(player);
             if (tag != null) {
-                tag.getTraits().destroy();
                 tag.destroy();
             }
         }
-
-        this.plugin.reloadConfig();
-
-        final var conf = plugin.getConfig();
-
-        for (final Player player : Bukkit.getOnlinePlayers()) {
-            final NameTagEntity newTag = plugin.getEntityManager().getOrCreateNameTagEntity(player);
-
-            // Add existing viewers
-            // TODO: this bad, spectator n stuff
-            for (final Player viewer : Bukkit.getOnlinePlayers()) {
-                if (
-                    viewer == player
-                    && !SelfVisibilityUtil.shouldShowSelf(viewer)
-                ) {
-                    continue;
-                }
-
-                newTag.getPassenger().addViewer(viewer.getUniqueId());
-                newTag.sendPassengerPacket(viewer);
-            }
-
-            newTag.updateVisibility();
+        plugin.reloadConfig();
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            NameTagEntity tag = tags.getOrCreateNameTagEntity(player);
+            tag.updateVisibility();
+            tags.showToTrackers(tag);
         }
     }
 

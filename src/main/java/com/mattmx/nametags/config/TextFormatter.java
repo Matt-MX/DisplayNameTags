@@ -24,10 +24,8 @@ public enum TextFormatter {
     SMART(
         "smart",
         (line) -> {
-            // First replace any legacy chars with &
             String mutableLine = convertLegacyHex(line.replace(NameTags.LEGACY_CHAR, '&'));
 
-            // Convert legacy to modern formatting
             mutableLine = convertLegacyHexToMiniMessage(mutableLine);
             mutableLine = mutableLine
                 .replace("&0", "<black>")
@@ -57,9 +55,8 @@ public enum TextFormatter {
         }
     );
 
-    // Converts legacy hex format &x&9&0&0&c&3&f -> &#900c3f modern hex format
-    // https://github.com/Matt-MX/DisplayNameTags/issues/32#issuecomment-2509403581
     private static final Pattern LEGACY_HEX_PATTERN = Pattern.compile("&x(&[0-9a-fA-F]){6}");
+    private static final Pattern LEGACY_HEX_TO_MINI_MESSAGE = Pattern.compile("&#([0-9a-fA-F]{6})");
 
     public static String convertLegacyHex(String input) {
         Matcher matcher = LEGACY_HEX_PATTERN.matcher(input);
@@ -67,10 +64,8 @@ public enum TextFormatter {
         StringBuilder result = new StringBuilder();
         while (matcher.find()) {
             String legacyHex = matcher.group();
-            // Extract hex digits from the legacy format
             String hexColor = legacyHex.replace("&x", "")
                 .replace("&", "");
-            // Replace with modern format
             String modernHex = "&#" + hexColor;
             matcher.appendReplacement(result, modernHex);
         }
@@ -79,32 +74,21 @@ public enum TextFormatter {
         return result.toString();
     }
 
-    /**
-     * Converts Minecraft legacy hex color codes (&#RRGGBB) to MiniMessage format (<#RRGGBB>).
-     *
-     * @param legacyText The input string with legacy color codes.
-     * @return The converted string in MiniMessage format.
-     */
     public static String convertLegacyHexToMiniMessage(@NotNull String legacyText) {
         if (legacyText.isEmpty()) {
             return legacyText;
         }
 
-        // Regex to match legacy hex color codes (&# followed by 6 hexadecimal characters)
-        Pattern legacyHexPattern = Pattern.compile("&#([0-9a-fA-F]{6})");
-        Matcher matcher = legacyHexPattern.matcher(legacyText);
+        Matcher matcher = LEGACY_HEX_TO_MINI_MESSAGE.matcher(legacyText);
 
         StringBuilder convertedText = new StringBuilder();
 
         while (matcher.find()) {
-            // Extract the hex color code (RRGGBB)
             String hexColor = matcher.group(1);
 
-            // Replace with MiniMessage format
             matcher.appendReplacement(convertedText, "<#" + hexColor + ">");
         }
 
-        // Append the rest of the text
         matcher.appendTail(convertedText);
 
         return convertedText.toString();

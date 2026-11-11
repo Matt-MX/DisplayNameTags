@@ -2,16 +2,12 @@ package com.mattmx.nametags.hook;
 
 import com.mattmx.nametags.NameTags;
 import com.mattmx.nametags.entity.NameTagEntity;
-import com.mattmx.nametags.utils.BedrockUtil;
-import com.mattmx.nametags.utils.SelfVisibilityUtil;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
+import com.mattmx.nametags.entity.NameTagEntityManager;
 import net.skinsrestorer.api.SkinsRestorer;
 import net.skinsrestorer.api.SkinsRestorerProvider;
 import net.skinsrestorer.api.event.SkinApplyEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 
 public class SkinRestorerHook {
@@ -41,31 +37,16 @@ public class SkinRestorerHook {
 
         if (player == null) return;
 
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                NameTags plugin = NameTags.getInstance();
-
-                plugin.getEntityManager().removeLastSentPassengersCache(player.getEntityId());
-
-                NameTagEntity entity = plugin.getEntityManager().removeEntity(player);
-
-                if (entity != null) {
-                    entity.destroy();
-                }
-
-                NameTagEntity newEntity = plugin.getEntityManager().getOrCreateNameTagEntity(player);
-                newEntity.updateVisibility();
-                newEntity.updateLocation();
-
-                if(SelfVisibilityUtil.shouldShowSelf(player)) {
-                    newEntity.getPassenger().removeViewer(newEntity.getBukkitEntity().getUniqueId());
-                    newEntity.getPassenger().addViewer(newEntity.getBukkitEntity().getUniqueId());
-                    newEntity.sendPassengerPacket(event.getPlayer(Player.class));
-
-                    player.sendMessage(Component.text("Please re-join for update your nametag!").color(NamedTextColor.GREEN));
-                }
+        Bukkit.getScheduler().runTask(NameTags.getInstance(), () -> {
+            NameTags plugin = NameTags.getInstance();
+            NameTagEntityManager tags = plugin.getEntityManager();
+            NameTagEntity previous = tags.removeEntity(player);
+            if (previous != null) {
+                previous.destroy();
             }
-        }.runTask(NameTags.getInstance());
+            NameTagEntity tag = tags.getOrCreateNameTagEntity(player);
+            tag.updateVisibility();
+            tags.showToTrackers(tag);
+        });
     }
 }
